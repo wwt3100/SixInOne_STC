@@ -1,0 +1,22 @@
+[Oo]bjects/
+[Oo][Bb][Jj]*/
+[Ll]istings/
+[Dd]ebug[Cc]onfig/
+*.si4project/
+[Jj]Link*.*
+*.uvguix.*
+*.uvoptx
+*.dbgconf
+*.[Tt][Mm][Pp]
+*.scvd
+*.[Mm][Aa][Pp]
+~$*.*
+*.lst
+*.o
+*.d
+*.htm
+*.crf
+Project Logs*/
+Project Outputs*/
+__Previews/
+History/
