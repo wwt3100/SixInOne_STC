@@ -18,10 +18,10 @@
 
 typedef struct Golbal_comInfo{
     uint8_t ModuleType;
-    uint8_t WorkStat;       //0-æœªæ¥æ²»ç–—å¤´         1-åœæ­¢    2-è¿è¡Œ
+    uint8_t WorkStat;       //0-Î´½ÓÖÎÁÆÍ·         1-Í£Ö¹    2-ÔİÍ£    3-ÔËĞĞ
 
-    uint8_t HMI_Scene;      //HMIåœºæ™¯
-    uint8_t HMI_LastScene;  //ä¿å­˜ä¸Šä¸€ä¸ªåœºæ™¯
+    uint8_t HMI_Scene;      //HMI³¡¾°
+    uint8_t HMI_LastScene;  //±£´æÉÏÒ»¸ö³¡¾°
 
     uint8_t HMIMsg;
     union HMIArg{
@@ -31,24 +31,23 @@ typedef struct Golbal_comInfo{
 }_Golbal_comInfo;
 
 typedef struct Golbal_Config{
-    uint8_t LANG;           //0-ä¸­æ–‡   1-è‹±æ–‡
+    uint8_t LANG;           //0-ÖĞÎÄ   1-Ó¢ÎÄ
 }_Golbal_Config;
 
 typedef union Golbal_Info{
     struct NormalModule{
-        uint8_t LightMode;          //0->è¿ç»­  1->è„‰å†²
-        uint8_t WorkTime;           //å·¥ä½œæ—¶é—´ç”¨åˆ†é’Ÿè¡¨ç¤º
-        uint8_t WorkSecond;         //å·¥ä½œç§’æ•°,ç”¨äºæš‚åœä¹‹åæ¢å¤
-        uint8_t RemainTime;         //å‰©ä½™æ—¶é—´,ç”¨äºæš‚åœç­‰
-        uint8_t PowerLevel;
+        uint8_t LightMode;          //0->Á¬Ğø  1->Âö³å
+        uint8_t WorkTime;           //¹¤×÷Ê±¼äÓÃ·ÖÖÓ±íÊ¾
+        uint8_t PowerLevel;         //¹â¹¦ÂÊ´óĞ¡
+        uint16_t RemainTime;         //Ê£ÓàÊ±¼ä,ÓÃÓÚÔİÍ£µÈ
+        
     }NormalModule;
     struct New4in1Module{
-        uint8_t LightMode [4][4];       //LightMode[0]&0x80==0x80 åŒæ—¶è¾“å‡º ä½4bitè¡¨ç¤ºå…‰é€‰æ‹©   else é¡ºåº [1-4]ä¸ºå‡ºå…‰é¡ºåº
-                                        //éœ€è¦é¢„å…ˆè¯»å‡ºå·¥ä½œæ¨¡å¼,æ˜¾ç¤ºåˆ°ç•Œé¢ä¸Š
+        uint8_t LightMode [4][4];       //LightMode[0]&0x80==0x80 Í¬Ê±Êä³ö µÍ4bit±íÊ¾¹âÑ¡Ôñ   else Ë³Ğò [1-4]Îª³ö¹âË³Ğò
+                                        //ĞèÒªÔ¤ÏÈ¶Á³ö¹¤×÷Ä£Ê½,ÏÔÊ¾µ½½çÃæÉÏ
         uint8_t PowerLevel[4];
-        uint8_t WorkTime  [4];
-        uint8_t RemainTime[4];
-        uint8_t WorkSecond[4];
+        uint8_t WorkTime  [4];      //ÉèÖÃµÄÊ±¼ä,µ¥Î»min
+        uint16_t RemainTime[4];     //Ê£ÓàÊ±¼ä,µ¥Î»s
     }New4in1Module;
 }_Golbal_Info;
 
@@ -73,4 +72,6 @@ extern uint8_t xdata uart2_buff[2][32];
 
 extern bit HMI_Msg_Flag;
 
+
 #endif
+

@@ -12,7 +12,9 @@ enum{
     eScene_Module_308,
     eScene_Module_Wira,
     eScene_Module_4in1,
-
+    eScene_Info,
+    eScene_Debug,
+    eScene_Error,
 };
 
 

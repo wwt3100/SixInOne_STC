@@ -51,12 +51,10 @@ sbit BEEP_IO        = P3^6;
 sbit FAN_IO         = P1^6;
 sbit KEY_LED_IO     = P3^7;
 
-sbit LightCtr_1     = P2^1;
-sbit LightCtr_2     = P2^2;
-
-sbit MainPowerCtr   = P3^3;
-
-
+sbit PowerCtr_Main       = P3^3;
+sbit PowerCtr_Light1     = P2^1;    //¿ØÖÆ48V
+sbit PowerCtr_Light2     = P2^2;
+sbit PowerCtr_Module12v  = P3^4;
 
 
 

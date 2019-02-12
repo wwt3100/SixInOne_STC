@@ -113,8 +113,8 @@ void IAP_Disable()
 
 void Delay()
 {
-    uint8_t i;
-    uint16_t d=5000;
+    uint8_t idata i;
+    uint16_t idata d=5000;
     while (d--)
     {
         i=255;

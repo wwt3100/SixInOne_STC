@@ -37,6 +37,7 @@ void Uart1_Init(void)		//115200bps@11.0592MHz
 	ET1 = 0;			//禁止定时器1中断
 	TR1 = 1;			//启动定时器1
 }
+
 void Uart2_Init(void)
 {
 	S2CON = 0x50;		//8位可变波特率
@@ -66,9 +67,9 @@ int main()
     for(;;)
     {
         Work_Process();
-        HMI_Process();
         Module_COMM();
         HMI_COMM();
+        HMI_Process();
     }
 }
 

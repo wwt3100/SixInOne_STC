@@ -11,6 +11,9 @@ void Work_Process()
 {
     switch (gComInfo.WorkStat)
     {
+        case eWS_Idle:
+            
+            break;
         case eWS_FindModule:
         {
             switch (CheckModule())
@@ -35,6 +38,9 @@ void Work_Process()
                 case eScene_Module_4in1:
                     
                     break;
+               case eScene_Error:
+                   
+                   break;
                 default:
                     break;
             }
