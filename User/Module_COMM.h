@@ -2,7 +2,7 @@
 #define __MODULE_COMM_H
 
 
-
+#include "main.h"
 
 
 

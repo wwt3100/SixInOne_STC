@@ -23,11 +23,17 @@ typedef struct Golbal_comInfo{
     uint8_t HMI_Scene;      //HMI场景
     uint8_t HMI_LastScene;  //保存上一个场景
 
+    uint8_t TimerCounter;
+
     uint8_t HMIMsg;
     union HMIArg{
         uint8_t  data8[2];
         uint16_t data16;
     }HMIArg;
+
+    uint8_t COMMProtocol_Head;
+    uint8_t COMMProtocol_Tail1;
+    uint8_t COMMProtocol_Tail2;
 }_Golbal_comInfo;
 
 typedef struct Golbal_Config{
@@ -55,22 +61,28 @@ typedef union Golbal_Info{
 
 
 
-
+void BeepEx(uint8_t time);
 
 extern _Golbal_comInfo idata gComInfo;
 extern _Golbal_Config  idata gConfig;
 extern _Golbal_Info    xdata gModuleInfo;
 
-extern bit Uart1_TXE;
-extern bit Uart2_TXE;
+extern bit Uart1_Busy;
+extern bit Uart2_Busy;
 
 extern bit Uart1_buf_sel;
+extern bit Uart1_ReviceFrame;
 extern bit Uart2_buf_sel;
+extern bit Uart2_ReviceFrame;
+
 
 extern uint8_t xdata uart1_buff[2][32];
 extern uint8_t xdata uart2_buff[2][32];
 
 extern bit HMI_Msg_Flag;
+
+extern bit SystemTime100ms;
+extern bit SystemTime1s;
 
 
 #endif

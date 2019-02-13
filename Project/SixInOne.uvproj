@@ -311,7 +311,7 @@
             <RegisterColoring>0</RegisterColoring>
             <VariablesInOrder>0</VariablesInOrder>
             <IntegerPromotion>1</IntegerPromotion>
-            <uAregs>0</uAregs>
+            <uAregs>1</uAregs>
             <UseInterruptVector>1</UseInterruptVector>
             <Fuzzy>3</Fuzzy>
             <Optimize>8</Optimize>
@@ -410,6 +410,11 @@
               <FileName>HMI_COMM.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\HMI_COMM.c</FilePath>
+            </File>
+            <File>
+              <FileName>HMI_LL.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\HMI_LL.c</FilePath>
             </File>
           </Files>
         </Group>

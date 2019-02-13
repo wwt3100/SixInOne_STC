@@ -6,13 +6,20 @@
 
 #include "STC_EEPROM.h"
 
-bit Uart1_TXE=1;
-bit Uart2_TXE=1;
+bit Uart1_Busy=0;
+bit Uart2_Busy=0;
 
 bit Uart1_buf_sel=0;
 bit Uart2_buf_sel=0;
+bit Uart1_ReviceFrame;
+bit Uart2_ReviceFrame;
+
 
 bit HMI_Msg_Flag=0;
+
+bit SystemTime100ms=0;
+bit SystemTime1s=0;
+
 
 uint8_t xdata uart1_buff[2][32];
 uint8_t xdata uart2_buff[2][32];
@@ -21,6 +28,32 @@ _Golbal_comInfo idata gComInfo={0};
 _Golbal_Config  idata gConfig={0};
 _Golbal_Info    xdata gModuleInfo={0};
 
+uint8_t idata BeepTime=0;
+void BeepEx(uint8_t time)
+{
+    BeepTime=time;
+    CR=1;
+    BEEP_IO=0;
+}
+
+void IOPort_Init(void)
+{
+/* 7      6         5         4      3     2     1     0     Reset Value
+   -   LVD_P4.6  ALE_P4.5  NA_P4.4   -     -     -     -	    x000,xxxx	*/
+	P4SW |=	0x70;	 		//P4.6,P4.5,P4.4配置为I/O口使用
+
+    P1M1 |= 0x00; // 0000 0000
+    P1M0 |= 0x20; // 0010 0000
+
+	P3M1 |=	0x00;			// 0000 0000  
+	P3M0 |=	0x40;			// 0100 0000 
+
+	P0M1 |=	0x08;	 		// 0000 1000
+	P0M0 |=	0x27;	 		// 0010 0111
+
+	P2M1 |=	0x00;			// 0000 0000  
+	P2M0 |=	0x01;			// 0000 0001 
+}
 
 void Uart1_Init(void)		//115200bps@11.0592MHz
 {
@@ -36,6 +69,9 @@ void Uart1_Init(void)		//115200bps@11.0592MHz
 //	TH1 = 0xDC;			//设定定时器重装值
 	ET1 = 0;			//禁止定时器1中断
 	TR1 = 1;			//启动定时器1
+    PS = 1;			//串口中断优先级低位
+    IPH &= ~0x10;	//串口中断优先级高位
+    ES = 1;
 }
 
 void Uart2_Init(void)
@@ -50,13 +86,43 @@ void Uart2_Init(void)
 	AUXR &= ~0x02;		//内部RAM使能
 }
 
+void PCA_Init(void)
+{
+//	AUXR1 |= 0X40;
+	CMOD |= 0x80;	  	//PCA在空闲模式下不计数；PCA=fosc/12计数模式；
+	CR = 0;		  		//停止PCA计数；
+	CF = 0;		  		//清PCA溢出中断请求标志位；
+	CCF0 = 0;		  	//清模块0中断请求标志位；
+	CL = 0;
+	CH = 0;
+	CCAP0H = 0xB4;  	//0xB403为50MS，0x4801h为20MS，0x23FAh为10MS，0x11FDH为5MS,0X08FE为2.5ms，0x0399h为1MS；
+	CCAP0L = 0x03;  	//0x01CCH为500us,0x005cH为100US；0x002e为50US； 0x00c8为200个计数脉冲
+	CCAPM0 = 0x49;  	//设置PCA模块0为16位软件定时器；ECCF0=1允许PCA模块0中断； //11.0592Mhz是0x07
+				  		//当[CH，CL]==[CCAP0H，CCAP0L]时，产生中断请求，CCF0=1，请求中断
+//	CR = 1;				//启动PCA计数	
+}
+
+void Timer0Init(void)		//50毫秒@11.0592MHz自动重载
+{
+	TMOD &= 0xF0;		//设置定时器模式
+	TMOD |= 0x01;		//设置定时器模式
+	TL0 = 0x00;		//设置定时初值
+	TH0 = 0x4C;		//设置定时初值
+	TF0 = 0;		//清除TF0标志
+    ET0 = 1;        //enable timer0 interrupt
+    TR0 = 1;		//定时器0开始计时
+}
 
 void Init()
 {
     KEY_LED_IO=ENABLE;
     FAN_IO=DISABLE;
+    IOPort_Init();
     Uart1_Init();
     Uart2_Init();
+    PCA_Init();
+    Timer0Init();
+    EA=1;
 }
 
 
@@ -64,9 +130,20 @@ int main()
 {
     gConfig.LANG=Byte_Read(0);
     Init();
+    BeepEx(6);  //响300ms
+//    for(;;)
+//    {
+//        if(SystemTime1s==1)
+//        {
+//            SystemTime1s=0;
+//            while (Uart1_Busy);
+//            Uart1_Busy=1;
+//            SBUF=0xAA;
+//        }
+//    }
     for(;;)
     {
-        Work_Process();
+        //Work_Process();
         Module_COMM();
         HMI_COMM();
         HMI_Process();

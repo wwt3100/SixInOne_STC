@@ -1,9 +1,12 @@
 #ifndef __HMI_COMM_H
 #define __HMI_COMM_H
 
+#include "HMI_LL.h"
+
 enum{
-    eMsg_HMI_Shakehand=0x19,
-    eMsg_KeyDown=0x20,
+    eMsg_NULL=0,
+    eMsg_HMI_Shakehand,
+    eMsg_KeyDown,
     eMsg_KeyLongPush,
     eMsg_keyUp,
 };
@@ -11,6 +14,9 @@ enum{
 
 void HMI_COMM(void);
 
+
+//User functions
+void HMI_SendShakehand();
 
 
 

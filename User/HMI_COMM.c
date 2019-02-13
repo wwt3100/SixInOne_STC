@@ -2,23 +2,25 @@
 #include "HMIProcess.h"
 #include "main.h"
 
-
 void HMI_COMM()
 {
     static uint8_t LongPushTime=0;
-    uint8_t *pbuf=uart1_buff[!Uart1_buf_sel];
-    if ((pbuf[0]&0x80)==0x80)
+    
+    if (Uart1_ReviceFrame==0)
     {
         return;
     }
     else
     {
-        uint8_t data_size=pbuf[0]&0x7f;
+        uint8_t *pbuf=uart1_buff[!Uart1_buf_sel];
+        uint8_t data_size=pbuf[0]<=32?pbuf[0]:32;   //×öÅÐ¶Ï·ÀÖ¹¶ÑÕ»Òç³ö
         uint8_t HMI_Cmd=pbuf[1];
+        Uart1_ReviceFrame=0;
         switch (HMI_Cmd)
         {
             case 0:
-                
+                gComInfo.HMIMsg=eMsg_HMI_Shakehand;
+                gComInfo.HMIArg.data8[0]=pbuf[12];
                 break;
             case 0x79:
             {
@@ -47,8 +49,13 @@ void HMI_COMM()
                 break;
         
         }
-        memset(pbuf,0,32);
+        memset(pbuf,0,data_size);
     }
+}
+
+void HMI_SendShakehand()
+{
+
 }
 
 
