@@ -11,40 +11,18 @@ void Work_Process()
 {
     switch (gComInfo.WorkStat)
     {
-        case eWS_Idle:
+        case eWS_Idle:  //do nothing
+            break;
+        case eWS_CheckModuleStep1:
+        {
+
+        }
+            break;
+        case eWS_CheckTempSensor:
             
             break;
-        case eWS_FindModule:
-        {
-            switch (CheckModule())
-            {
-                case eScene_Module_308:
-                    break;
-                case eScene_Module_IU:
-                    
-                    break;
-                case eScene_Module_650:
-                    break;
-                
-                case eScene_Module_633:
-                    
-                    break;
-                case eScene_Module_UVA1:
-                    
-                    break;
-                case eScene_Module_Wira:
-                    
-                    break;
-                case eScene_Module_4in1:
-                    
-                    break;
-               case eScene_Error:
-                   
-                   break;
-                default:
-                    break;
-            }
-        }
+        case eWS_CheckModuleStep2:
+            
             break;
         case eWS_Wait:
             

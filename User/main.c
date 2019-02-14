@@ -3,6 +3,8 @@
 #include "HMIProcess.h"
 #include "Module_COMM.h"
 #include "HMI_COMM.h"
+#include <stdarg.h>
+
 
 #include "STC_EEPROM.h"
 
@@ -18,11 +20,11 @@ bit Uart2_ReviceFrame;
 bit HMI_Msg_Flag=0;
 
 bit SystemTime100ms=0;
-bit SystemTime1s=0;
+bit SystemTime1s=1;
+bit Heardbeat1s=1;
 
-
-uint8_t xdata uart1_buff[2][32];
-uint8_t xdata uart2_buff[2][32];
+uint8_t idata uart1_buff[18];
+uint8_t xdata uart2_buff[32];
 
 _Golbal_comInfo idata gComInfo={0};
 _Golbal_Config  idata gConfig={0};
@@ -32,8 +34,9 @@ uint8_t idata BeepTime=0;
 void BeepEx(uint8_t time)
 {
     BeepTime=time;
-    CR=1;
     BEEP_IO=0;
+    CR=1;
+    //LOG_E("BeepOn");
 }
 
 void IOPort_Init(void)
@@ -76,7 +79,7 @@ void Uart1_Init(void)		//115200bps@11.0592MHz
 
 void Uart2_Init(void)
 {
-	S2CON = 0x50;		//8位可变波特率
+	S2CON = 0x50;		//8位 可变波特率
 	AUXR &= 0xF7;		//波特率不倍速
 	AUXR |= 0x04;  		//独立波特率发生器时钟为Fosc,BRTx12=1,1T工作模式
 //	BRT = 0xFD;	        //设置波特率为115200
@@ -125,28 +128,72 @@ void Init()
     EA=1;
 }
 
+void LOG_E(void*str,...)
+{
+    uint8_t i=0;
+    char xdata buf[32]={0};
+    va_list ap;
+    va_start(ap, str);
+    vsprintf(buf, (char const*)str, ap);
+    va_end(ap);
+    AUXR1 |= 0x10;  //串口IO切到P4
+    while (buf[i])
+    {
+        while(Uart2_Busy);
+        Uart2_Busy=1;
+        S2BUF=buf[i];
+        i++;
+    }
+    while(Uart2_Busy);  //等待最后一个byte发送完成
+    AUXR1 &= 0xEF;  //串口IO复原
+}
+
+void Save_Config()
+{
+    uint8_t c;
+    Sector_Erase(0);    //必须擦扇区,否则写不进
+    
+    IAP_CONTR = 0x83;         //打开 IAP 功能, 设置Flash 操作等待时间
+    IAP_CMD = 0x02;                 //IAP/ISP/EEPROM 字节编程命令
+    IAP_ADDRH = 0;    //设置目标单元地址的高8 位地址
+    IAP_ADDRL = 0;
+    EA=0;
+    for(IAP_ADDRL=0;IAP_ADDRL<sizeof(_Golbal_Config);IAP_ADDRL++)
+    {
+        c=*(((char *)&gConfig)+IAP_ADDRL);
+        IAP_DATA = c ;                  //要编程的数据先送进IAP_DATA 寄存器
+        IAP_TRIG = 0x5A;   //先送 5Ah,再送A5h 到ISP/IAP 触发寄存器,每次都需如此
+        IAP_TRIG = 0xA5;   //送完A5h 后，ISP/IAP 命令立即被触发起动
+        _nop_();
+        _nop_();
+    }
+    EA=1;
+    IAP_Disable();
+    //LOG_E("SysLang:%02X",(uint16_t)Byte_Read(0));
+}
 
 int main()
 {
     gConfig.LANG=Byte_Read(0);
+    if (gConfig.LANG>1)
+    {
+        gConfig.LANG=0;
+    }
     Init();
-    BeepEx(6);  //响300ms
-//    for(;;)
-//    {
-//        if(SystemTime1s==1)
-//        {
-//            SystemTime1s=0;
-//            while (Uart1_Busy);
-//            Uart1_Busy=1;
-//            SBUF=0xAA;
-//        }
-//    }
+    //LOG_E("System Boot \t SysLang:%02X",(uint16_t)Byte_Read(0));//,0x30+gConfig.LANG);
+    BeepEx(0);  //响50ms
     for(;;)
     {
-        //Work_Process();
+        Work_Process();
         Module_COMM();
         HMI_COMM();
         HMI_Process();
+        if (Heardbeat1s==1)
+        {
+            Heardbeat1s=0;
+            KEY_LED_IO=DISABLE;
+            //CR=1;
+        }
     }
 }
 

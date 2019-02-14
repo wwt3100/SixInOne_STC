@@ -3,7 +3,8 @@
 //HMI 通信
 void UART1_INT(void) interrupt 4 using 1
 {
-    static uint8_t head=0,tail=0;
+    static uint8_t head=0;
+    static uint32_t tail=0;
     static uint8_t data_size;
     uint8_t rx_data;
 	if(TI==1)   //发送完1byte
@@ -22,56 +23,14 @@ void UART1_INT(void) interrupt 4 using 1
         else
         {
             data_size++;
-            uart1_buff[Uart1_buf_sel][data_size]=rx_data;
-            if(tail<4)
+            uart1_buff[data_size]=rx_data;
+            if(data_size>5 &&
+            uart1_buff[data_size]==0x3C && 
+            uart1_buff[data_size-1]==0xC3 && 
+            uart1_buff[data_size-2]==0x33 && 
+            uart1_buff[data_size-3]==0xCC)      //0xCC33C33C
             {
-                switch (tail)
-                {
-                    case 0:
-                        if(rx_data==0xCC)
-                        {
-                            tail++;
-                        }
-                        break;
-                    case 1:
-                        if(rx_data==0x33)
-                        {
-                            tail++;
-                        }
-                        else
-                        {
-                            tail=0;
-                        }
-                        break;
-                    case 2:
-                        if(rx_data==0xC3)
-                        {
-                            tail++;
-                        }
-                        else
-                        {
-                            tail=0;
-                        }
-                        break;
-                    case 3:
-                        if(rx_data==0x3C)
-                        {
-                            tail++;
-                        }
-                        else
-                        {
-                            tail=0;
-                        }
-                        break;
-                    default:
-                        tail=0;     //Shoud not be here
-                        break;
-                }
-            }
-            else
-            {
-                uart1_buff[Uart1_buf_sel][0]=(data_size);
-                Uart1_buf_sel=!Uart1_buf_sel;
+                uart1_buff[0]=(data_size);
                 Uart1_ReviceFrame=1;
                 head=0;
                 tail=0;
@@ -92,7 +51,7 @@ void UART2_INT(void) interrupt 8 using 2
 	if(S2CON & S2TI)
 	{
 		S2CON &= ~S2TI;		//Clear transmit interrupt flag
-		Uart2_Busy = 1;
+		Uart2_Busy = 0;
 	}
 	if(S2CON & S2RI)
 	{
@@ -105,7 +64,7 @@ void UART2_INT(void) interrupt 8 using 2
         else
         {
             data_size++;
-            uart2_buff[Uart2_buf_sel][data_size]=rx_data;
+            uart2_buff[data_size]=rx_data;
             if (tail==0)
             {
                 if (rx_data==gComInfo.COMMProtocol_Tail1)
@@ -119,6 +78,10 @@ void UART2_INT(void) interrupt 8 using 2
                 {
                     tail++;
                 }
+                else if(rx_data == gComInfo.COMMProtocol_Tail1)
+                {
+                    ; //Do nothing
+                }
                 else
                 {
                     tail=0;
@@ -126,8 +89,7 @@ void UART2_INT(void) interrupt 8 using 2
             }
             else
             {
-                uart2_buff[Uart2_buf_sel][0]=(data_size);
-                Uart2_buf_sel=!Uart2_buf_sel;
+                uart2_buff[0]=(data_size);
                 Uart2_ReviceFrame=1;
                 head=0;
                 tail=0;
@@ -161,6 +123,7 @@ void Timer0_isr() interrupt 1 using 3
 	{
 		gComInfo.TimerCounter = 0;
 		SystemTime1s = 1;		//治疗时间1s倒计时标志
+        Heardbeat1s=1;
 	}
 }
 
@@ -174,11 +137,15 @@ void Timer_PCA(void) interrupt 7 using 3		//PCA中断函数 蜂鸣器定时,50ms为单位
     CL=0;
     CH=0;
     CCF0=0;
-    --BeepTime;
     if (BeepTime==0)
     {
         BEEP_IO=1;  //关蜂鸣器
         CR=0;
     }
+    else
+    {
+        --BeepTime;
+    }
+    KEY_LED_IO=ENABLE;
 }
 

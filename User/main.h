@@ -8,7 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "define.h"
+#include "crc.h"
 
+#include "STC_EEPROM.h"
 
 #define LANG_CH     0
 #define LANG_EN     1
@@ -26,10 +28,7 @@ typedef struct Golbal_comInfo{
     uint8_t TimerCounter;
 
     uint8_t HMIMsg;
-    union HMIArg{
-        uint8_t  data8[2];
-        uint16_t data16;
-    }HMIArg;
+    uint8_t HMIArg1,HMIArg2;
 
     uint8_t COMMProtocol_Head;
     uint8_t COMMProtocol_Tail1;
@@ -59,9 +58,14 @@ typedef union Golbal_Info{
 
 
 
+void LOG_E(void*str,...);
 
 
 void BeepEx(uint8_t time);
+
+//×î¶àÐ´256byte
+void Save_Config();
+
 
 extern _Golbal_comInfo idata gComInfo;
 extern _Golbal_Config  idata gConfig;
@@ -76,14 +80,14 @@ extern bit Uart2_buf_sel;
 extern bit Uart2_ReviceFrame;
 
 
-extern uint8_t xdata uart1_buff[2][32];
-extern uint8_t xdata uart2_buff[2][32];
+extern uint8_t idata uart1_buff[18];
+extern uint8_t xdata uart2_buff[32];
 
 extern bit HMI_Msg_Flag;
 
 extern bit SystemTime100ms;
 extern bit SystemTime1s;
-
+extern bit Heardbeat1s;
 
 #endif
 

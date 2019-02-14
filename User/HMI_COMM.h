@@ -16,7 +16,7 @@ void HMI_COMM(void);
 
 
 //User functions
-void HMI_SendShakehand();
+
 
 
 

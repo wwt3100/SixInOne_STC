@@ -426,6 +426,16 @@
               <FileType>1</FileType>
               <FilePath>..\BSP\STC_EEPROM.c</FilePath>
             </File>
+            <File>
+              <FileName>crc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\crc.c</FilePath>
+            </File>
+            <File>
+              <FileName>DS18B20.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\DS18B20.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

@@ -13,31 +13,75 @@ void HMI_Process()
             {
                 SystemTime1s=0;
                 HMI_Shake_Hand();
+                //LOG_E("Send Shakehand");
             }
             if (gComInfo.HMIMsg==eMsg_HMI_Shakehand)
             {
                 gComInfo.HMIMsg=eMsg_NULL;
-                if (gComInfo.HMIArg.data8[0]==0)
+              #ifndef _DEBUG                //开机动画
+                if (gComInfo.HMIArg1==0)
                 {
                     HMI_Show_Logo();
                 }
-                else if(gComInfo.HMIArg.data8[0]==204)
+                else if(gComInfo.HMIArg1==204)
                 {
+                    BeepEx(10-1);
                     gComInfo.HMI_Scene++;
                     HMI_Goto_LocPage((gConfig.LANG*100)+1);
-                    BeepEx(10);
                 }
                 else
                 {
                     ;   //wait
                 }
+              #else                         //调试模式跳过动画
+                if (gComInfo.HMIArg1==0)
+                {
+                    BeepEx(10-1);
+                    gComInfo.HMI_Scene++;
+                    HMI_Goto_LocPage((gConfig.LANG*100)+1);
+                }
+              #endif
             }
         }
             break;
         case eScene_StartPage:
-            if (gComInfo.HMIMsg==eMsg_keyUp && gComInfo.HMIArg.data16==(uint16_t)1)
+            if (gComInfo.HMIMsg==eMsg_keyUp || gComInfo.HMIMsg==eMsg_KeyLongPush)
             {
-                BeepEx(1);
+                gComInfo.HMIMsg=eMsg_NULL;
+                if (gComInfo.HMIArg1==0)
+                {
+                    if (gComInfo.HMIArg2==1)        //界面圆按钮
+                    {
+                        if(gConfig.LANG==0)
+                        {
+                            HMI_Cut_Pic(0x9C,60,220,187,508,315,258,172);
+                        }
+                        else
+                        {
+                            HMI_Cut_Pic(0x9C,60,220,340,508,470,258,172);
+                        }
+                        gComInfo.WorkStat=eWS_CheckModuleStep1;
+                    }
+                    else if(gComInfo.HMIArg2==2)    //选择英文
+                    {
+                        gConfig.LANG=1;
+                        Save_Config();
+                    }
+                    else if(gComInfo.HMIArg2==3)    //选择中文
+                    {
+                        gConfig.LANG=0;
+                        Save_Config();
+                    }
+                    else
+                    {
+                        ;  //do nothing
+                    }
+                }
+                else
+                {
+                    ; //do nothing
+                }
+                BeepEx(0);
             }
             break;
         case eScene_Module_308:
@@ -55,8 +99,6 @@ void HMI_Process()
             
             break;
         case eScene_Module_Wira:
-            
-            break;
         case eScene_Module_4in1:
             
             break;
