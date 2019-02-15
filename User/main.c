@@ -24,7 +24,7 @@ bit SystemTime1s=1;
 bit Heardbeat1s=1;
 
 uint8_t idata uart1_buff[18];
-uint8_t xdata uart2_buff[32];
+uint8_t idata uart2_buff[18];
 
 _Golbal_comInfo idata gComInfo={0};
 _Golbal_Config  idata gConfig={0};
@@ -126,6 +126,10 @@ void Init()
     PCA_Init();
     Timer0Init();
     EA=1;
+
+    gComInfo.COMMProtocol_Head=0xAA;    //默认先试常规治疗头协议
+    gComInfo.COMMProtocol_Tail1=0xC3;
+    gComInfo.COMMProtocol_Tail2=0x3C;
 }
 
 void LOG_E(void*str,...)
@@ -136,6 +140,7 @@ void LOG_E(void*str,...)
     va_start(ap, str);
     vsprintf(buf, (char const*)str, ap);
     va_end(ap);
+    while (Uart2_Busy); //防止正常数据没发完
     AUXR1 |= 0x10;  //串口IO切到P4
     while (buf[i])
     {
@@ -184,11 +189,13 @@ int main()
     BeepEx(0);  //响50ms
     for(;;)
     {
-        Work_Process();
         Module_COMM();
         HMI_COMM();
+        
+        Work_Process();
         HMI_Process();
-        if (Heardbeat1s==1)
+        
+        if (Heardbeat1s==1) //调试用
         {
             Heardbeat1s=0;
             KEY_LED_IO=DISABLE;

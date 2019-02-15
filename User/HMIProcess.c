@@ -27,7 +27,7 @@ void HMI_Process()
                 {
                     BeepEx(10-1);
                     gComInfo.HMI_Scene++;
-                    HMI_Goto_LocPage((gConfig.LANG*100)+1);
+                    HMI_Goto_LocPage(1);
                 }
                 else
                 {
@@ -38,7 +38,7 @@ void HMI_Process()
                 {
                     BeepEx(10-1);
                     gComInfo.HMI_Scene++;
-                    HMI_Goto_LocPage((gConfig.LANG*100)+1);
+                    HMI_Goto_LocPage(1);
                 }
               #endif
             }
@@ -50,26 +50,28 @@ void HMI_Process()
                 gComInfo.HMIMsg=eMsg_NULL;
                 if (gComInfo.HMIArg1==0)
                 {
-                    if (gComInfo.HMIArg2==1)        //界面圆按钮
+                    if (gComInfo.HMIArg2==1)        //开机界面圆按钮
                     {
-                        if(gConfig.LANG==0)
+                        if(gConfig.LANG==1)
                         {
-                            HMI_Cut_Pic(0x9C,60,220,187,508,315,258,172);
+                            HMI_Cut_Pic(0x9C,60,221,186,508,315,258,272);
                         }
                         else
                         {
-                            HMI_Cut_Pic(0x9C,60,220,340,508,470,258,172);
+                            HMI_Cut_Pic(0x9C,60,221,339,508,470,258,272);
                         }
                         gComInfo.WorkStat=eWS_CheckModuleStep1;
                     }
                     else if(gComInfo.HMIArg2==2)    //选择英文
                     {
                         gConfig.LANG=1;
+                        HMI_Goto_LocPage(1);
                         Save_Config();
                     }
                     else if(gComInfo.HMIArg2==3)    //选择中文
                     {
                         gConfig.LANG=0;
+                        HMI_Goto_LocPage(1);
                         Save_Config();
                     }
                     else
@@ -83,6 +85,8 @@ void HMI_Process()
                 }
                 BeepEx(0);
             }
+            break;
+        case eScene_Wait:
             break;
         case eScene_Module_308:
             break;

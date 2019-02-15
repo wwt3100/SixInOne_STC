@@ -1,10 +1,10 @@
 #include "main.h"
+#include "WorkProcess.h"
 
 //HMI 通信
 void UART1_INT(void) interrupt 4 using 1
 {
     static uint8_t head=0;
-    static uint32_t tail=0;
     static uint8_t data_size;
     uint8_t rx_data;
 	if(TI==1)   //发送完1byte
@@ -33,7 +33,6 @@ void UART1_INT(void) interrupt 4 using 1
                 uart1_buff[0]=(data_size);
                 Uart1_ReviceFrame=1;
                 head=0;
-                tail=0;
                 data_size=0;
             }
         }
@@ -111,7 +110,7 @@ void Timer0_isr() interrupt 1 using 3
     TL0 = 0x00;		//设置定时初值    50ms
     TH0 = 0x4C;		//设置定时初值
     gComInfo.TimerCounter++;
-    if (gComInfo.WorkStat==3 && gComInfo.TimerCounter%5==0)
+    if (gComInfo.WorkStat==eWS_Working && gModuleInfo.RoutineModule.LightMode==1 && gComInfo.TimerCounter%5==0)   //4Hz 闪烁模式
     {
 
     }

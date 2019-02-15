@@ -18,6 +18,15 @@
 #define ENABLE        1
 #define DISABLE       0
 
+#define M_Type_650      (1)
+#define M_Type_633      (3)
+#define M_Type_633_1    (0x33)
+#define M_Type_IU       (0x10)  /* 正确性未知 */
+#define M_Type_UVA1     (5)
+#define M_Type_Wira     (0x43)
+#define M_Type_4in1     (0x41)
+
+
 typedef struct Golbal_comInfo{
     uint8_t ModuleType;
     uint8_t WorkStat;       //0-未接治疗头         1-停止    2-暂停    3-运行
@@ -40,13 +49,13 @@ typedef struct Golbal_Config{
 }_Golbal_Config;
 
 typedef union Golbal_Info{
-    struct NormalModule{
+    struct RoutineModule{
         uint8_t LightMode;          //0->连续  1->脉冲
         uint8_t WorkTime;           //工作时间用分钟表示
         uint8_t PowerLevel;         //光功率大小
         uint16_t RemainTime;         //剩余时间,用于暂停等
         
-    }NormalModule;
+    }RoutineModule;
     struct New4in1Module{
         uint8_t LightMode [4][4];       //LightMode[0]&0x80==0x80 同时输出 低4bit表示光选择   else 顺序 [1-4]为出光顺序
                                         //需要预先读出工作模式,显示到界面上
@@ -81,7 +90,7 @@ extern bit Uart2_ReviceFrame;
 
 
 extern uint8_t idata uart1_buff[18];
-extern uint8_t xdata uart2_buff[32];
+extern uint8_t idata uart2_buff[18];
 
 extern bit HMI_Msg_Flag;
 

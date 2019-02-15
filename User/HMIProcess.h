@@ -5,6 +5,7 @@
 enum{
     eScene_Startup=0,
     eScene_StartPage,
+    eScene_Wait,
     eScene_Module_650,
     eScene_Module_633,
     eScene_Module_UVA1,

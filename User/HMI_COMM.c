@@ -12,11 +12,11 @@ void HMI_COMM()
     }
     else
     {
-        uint8_t xdata pbuf[32];
-        uint8_t data_size;
+        uint8_t xdata pbuf[18];
+        //uint8_t data_size;
         uint8_t HMI_Cmd;
-        memcpy(pbuf,uart1_buff,32);
-        data_size=pbuf[0]<=32?pbuf[0]:32;   //做判断防止堆栈溢出
+        memcpy(pbuf,uart1_buff,18);
+        //data_size=pbuf[0]<=32?pbuf[0]:32;   //做判断防止堆栈溢出
         HMI_Cmd=pbuf[1];
         Uart1_ReviceFrame=0;
         switch (HMI_Cmd)
@@ -26,7 +26,7 @@ void HMI_COMM()
                 gComInfo.HMIArg1=pbuf[12];
                 //LOG_E("HMI Shakehand : %u\r\n",pbuf[12]);
                 break;
-            case 0x79:  //只处理按下
+            case 0x79:  //按下
             {
                 if (LongPushTime>=5)
                 {
@@ -53,9 +53,7 @@ void HMI_COMM()
                 break;
             default:
                 break;
-        
         }
-        //memset(pbuf,0,data_size);
     }
 }
 

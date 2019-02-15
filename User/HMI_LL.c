@@ -38,10 +38,16 @@ void HMI_Show_Logo(void)
 {
     LL_HMI_Send("\x9A\0",2);
 }
-void HMI_Goto_LocPage(uint8_t pic)
+void HMI_Goto_Page(uint8_t pic)
 {
     char xdata cmd[]={"\x70\x00"};
     cmd[1]=pic;
+    LL_HMI_Send(cmd,2);
+}
+void HMI_Goto_LocPage(uint8_t pic)
+{
+    char xdata cmd[]={"\x70\x00"};
+    cmd[1]=pic+gConfig.LANG*100;
     LL_HMI_Send(cmd,2);
 }
 
