@@ -322,7 +322,7 @@
             <InterruptVectorAddress>0</InterruptVectorAddress>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define></Define>
+              <Define>_DEBUG</Define>
               <Undefine></Undefine>
               <IncludePath>..\User;..\BSP</IncludePath>
             </VariousControls>

@@ -72,3 +72,44 @@ void HMI_Cut_Pic(uint8_t cmd,uint8_t PicID,uint16_t xs,uint16_t ys,uint16_t xe,u
     buf[i++]=tys&0x00ff;
     LL_HMI_Send(buf,i);
 }
+
+void HMI_Show_ErrorStr()
+{
+    if (gConfig.LANG==0)    //CHN
+    {
+        
+    }
+    else                    //EN
+    {
+        
+    }
+}
+
+//只用于常规治疗头模块
+void HMI_Show_ModuleName(const char* str)
+{
+    char xdata cmd[32]={0x98,0x00,0x8C,0x00,0xC8,0x21,0x81,0x01,0xFF,0xFF,0x00,0x1F};
+    uint8_t str_len=strlen(str);
+    if (gConfig.LANG==0)    //CHN
+    {
+        cmd[2]=0x8C;
+    }
+    else                    //EN
+    {
+        cmd[2]=0x80;
+    }
+    memcpy(cmd+13,str,str_len);
+    LL_HMI_Send(cmd,13+str_len);
+}
+
+void HMI_Show_Worktime1()       //650 633 IU 使用
+{
+}
+
+void HMI_Show_Worktime2()   //UVA1 使用同时显示能量
+{
+}
+
+void HMI_Show_Worktime3()   //308 使用
+{
+}

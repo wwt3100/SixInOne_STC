@@ -26,6 +26,9 @@ void HMI_Process(void);
 
 
 
+void HMI_Goto_Error();
+void HMI_Exit_Error();
+
 
 
 

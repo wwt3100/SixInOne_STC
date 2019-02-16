@@ -17,8 +17,14 @@ void HMI_Cut_Pic(uint8_t cmd,uint8_t PicID,uint16_t xs,uint16_t ys,uint16_t xe,u
 
 
 
+void HMI_Show_ErrorStr(void);
 
 
+
+void HMI_Show_ModuleName(const char* str);  //显示治疗模块名称
+void HMI_Show_Worktime1(void);       //650 633 IU 使用
+void HMI_Show_Worktime2(void);       //UVA1 使用同时显示能量
+void HMI_Show_Worktime3(void);       //308 使用
 
 
 

@@ -30,7 +30,7 @@ _Golbal_comInfo idata gComInfo={0};
 _Golbal_Config  idata gConfig={0};
 _Golbal_Info    xdata gModuleInfo={0};
 
-uint8_t idata BeepTime=0;
+uint8_t idata BeepTime=0;     //·äÃùÆ÷ÏìµÄÊ±¼ä
 void BeepEx(uint8_t time)
 {
     BeepTime=time;

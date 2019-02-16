@@ -7,6 +7,7 @@
 void Work_Process()
 {
     static uint8_t Count=0;
+    static bit comm_sended=0;
     switch (gComInfo.WorkStat)
     {
         case eWS_Idle:  //do nothing
@@ -14,10 +15,10 @@ void Work_Process()
         case eWS_CheckModuleStep1:
             if (SystemTime1s)
             {
-                if (++Count>5)
+                if (comm_sended)
                 {
+                    comm_sended=0;
                     gComInfo.WorkStat=eWS_CheckModuleStep2; //直接赋值效率应与自加1一致
-                    Count=0;
                     gComInfo.COMMProtocol_Head='@';     //换消息头尾
                     gComInfo.COMMProtocol_Tail1='*';
                     gComInfo.COMMProtocol_Tail2='#';
@@ -25,7 +26,7 @@ void Work_Process()
                 else
                 {
                     SystemTime1s=0;
-                    LOG_E("ModuleRoutine_Shakehand");
+                    //LOG_E("ModuleRoutine_Shakehand");
                     ModuleRoutine_Shakehand();
                 }
             }
@@ -33,10 +34,10 @@ void Work_Process()
         case eWS_CheckModuleStep2:
             if (SystemTime1s)
             {
-                if (++Count>5)
+                if (comm_sended)
                 {
+                    comm_sended=0;
                     gComInfo.WorkStat=eWS_CheckModuleStep1;
-                    Count=0;
                     gComInfo.COMMProtocol_Head=0xAA;
                     gComInfo.COMMProtocol_Tail1=0xC3;
                     gComInfo.COMMProtocol_Tail2=0x3C;
@@ -44,8 +45,13 @@ void Work_Process()
                 else
                 {
                     SystemTime1s=0;
-                    LOG_E("Module308_Shakehand");
+                    //LOG_E("Module308_Shakehand");
                     Module308_Shakehand();
+                    if(++Count>5)
+                    {
+                        gComInfo.ErrorCode=Error_NoModule;
+                        HMI_Goto_Error();
+                    }
                 }
             }
             break;

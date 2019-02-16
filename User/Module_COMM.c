@@ -49,26 +49,32 @@ void Module_COMM()
                 uint8_t cmd=pbuf[2];
                 switch (cmd)
                 {
-                    case 0x01:
+                    case 0x01:      //握手回复治疗头类型
                         gComInfo.ModuleType=pbuf[3];
                         gComInfo.WorkStat=eWS_Standby;
                         LOG_E("Module Type: %02X",(uint16_t)gComInfo.ModuleType);
+                        
                         switch (gComInfo.ModuleType)
                         {
                             case M_Type_650:
+                                gModuleInfo.RoutineModule.WorkTime=10;  //默认10分钟
                                 gComInfo.HMI_Scene=eScene_Module_650;
                                 HMI_Goto_LocPage(2);
+                                HMI_Show_ModuleName("Derma-650");
                                 break;
                             case M_Type_633:
                             case M_Type_633_1:
+                                gModuleInfo.RoutineModule.WorkTime=10;
                                 gComInfo.HMI_Scene=eScene_Module_633;
                                 HMI_Goto_LocPage(3);
+                                HMI_Show_ModuleName("Derma-633");
                                 break;
-//                            case M_Type_IU:
-//                                
-//                                break;
+                          //case M_Type_IU:     //IU是另外协议,在此不会收到
                             case M_Type_UVA1:
-                                
+                                gModuleInfo.RoutineModule.WorkTime=10;
+                                gComInfo.HMI_Scene=eScene_Module_UVA1;
+                                HMI_Goto_LocPage(4);
+                                HMI_Show_ModuleName("Derma-UVA1");
                                 break;
                             case M_Type_Wira:
                                 
@@ -80,10 +86,18 @@ void Module_COMM()
                                 break;
                         }
                         break;
-                    case 0x03:
+                    case 0x03:      //光1光功率
                         
                         break;
+                    case 0x04:      //光2光功率
+                        break;
+                    default:
+                        break;
                 }
+                
+            }
+            else if(pbuf[1]==0x22)      //光1使用时间
+            {
                 
             }
             else

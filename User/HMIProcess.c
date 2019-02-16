@@ -94,10 +94,36 @@ void HMI_Process()
             
             break;
         case eScene_Module_650:
-            break;
-        
         case eScene_Module_633:
-            
+            if (gComInfo.HMIMsg==eMsg_keyUp)
+            {
+                if (gComInfo.HMIArg1==0x01)
+                {
+                    switch (gComInfo.HMIArg2)
+                    {
+                        case 0x01:      //时间 加
+                            
+                            break;
+                        case 0x02:      //时间 减
+                            break;
+                        case 0x03:      //系统信息按钮(进入密码页)
+                            
+                            break;
+                        case 0x04:      //开始/暂停
+                            break;
+                        case 0x05:      //停止
+                            
+                            break;
+                    }
+                }
+            }
+            else if(gComInfo.HMIMsg==eMsg_KeyLongPush)
+            {
+            }
+            else
+            {
+                ;//do nothing
+            }
             break;
         case eScene_Module_UVA1:
             
@@ -107,11 +133,49 @@ void HMI_Process()
             
             break;
         case eScene_Error:
-           {}
+            //只处理密码错误按键事件
+            if (gComInfo.ErrorCode==Error_PasswordError && 
+                gComInfo.HMIMsg ==eMsg_keyUp && 
+                gComInfo.HMIArg1== 2 &&
+                gComInfo.HMIArg2== 1 )
+            {
+                gComInfo.ErrorCode=0;
+                HMI_Exit_Error();
+            }
            break;
         default:
            break;
     }
+
+}
+
+void HMI_Goto_Error()
+{
+    if (gComInfo.ErrorCode==0)
+    {
+        return;
+    }
+    else
+    {
+        gComInfo.HMI_LastScene=gComInfo.HMI_Scene;
+        gComInfo.HMI_Scene=eScene_Error;
+        if (gComInfo.ErrorCode==Error_NoModule)
+        {
+            HMI_Goto_LocPage(35);
+        }
+        else if(gComInfo.ErrorCode==Error_PasswordError)
+        {
+            HMI_Goto_LocPage(36);
+        }
+        else
+        {
+            HMI_Goto_Page(37);
+            HMI_Show_ErrorStr();
+        }
+    }
+}
+void HMI_Exit_Error()
+{
 
 }
 

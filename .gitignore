@@ -4,7 +4,7 @@
 [Dd]ebug[Cc]onfig/
 *.si4project/
 [Jj]Link*.*
-*.uvguix.*
+*.uvgui*.*
 *.uvoptx
 *.dbgconf
 *.[Tt][Mm][Pp]

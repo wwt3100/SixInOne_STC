@@ -26,10 +26,15 @@
 #define M_Type_Wira     (0x43)
 #define M_Type_4in1     (0x41)
 
+#define Error_NoModule          (1)
+#define Error_PasswordError     (2)
+
 
 typedef struct Golbal_comInfo{
     uint8_t ModuleType;
     uint8_t WorkStat;       //0-未接治疗头         1-停止    2-暂停    3-运行
+
+    uint8_t ErrorCode;
 
     uint8_t HMI_Scene;      //HMI场景
     uint8_t HMI_LastScene;  //保存上一个场景
