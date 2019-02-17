@@ -1,6 +1,20 @@
 #include "HMI_LL.h"
 
-
+void LL_HMI_SendEnd()
+{
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=0xCC;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=0x33;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=0xC3;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=0x3C;
+}
 void LL_HMI_Send(const void* str,uint8_t str_len)
 {
     uint8_t i;
@@ -15,18 +29,7 @@ void LL_HMI_Send(const void* str,uint8_t str_len)
         SBUF=*ptr;
         ptr++;
     }
-    while (Uart1_Busy);
-    Uart1_Busy=1;
-    SBUF=0xCC;
-    while (Uart1_Busy);
-    Uart1_Busy=1;
-    SBUF=0x33;
-    while (Uart1_Busy);
-    Uart1_Busy=1;
-    SBUF=0xC3;
-    while (Uart1_Busy);
-    Uart1_Busy=1;
-    SBUF=0x3C;
+    LL_HMI_SendEnd();
 }
 
 void HMI_Shake_Hand(void) 
@@ -50,10 +53,9 @@ void HMI_Goto_LocPage(uint8_t pic)
     cmd[1]=pic+gConfig.LANG*100;
     LL_HMI_Send(cmd,2);
 }
-
-void HMI_Cut_Pic(uint8_t cmd,uint8_t PicID,uint16_t xs,uint16_t ys,uint16_t xe,uint16_t ye,uint16_t txs,uint16_t tys)
+void HMI_Cut_Pic(uint8_t cmd,uint8_t PicID,uint16_t xs,uint16_t ys,uint16_t xe,uint16_t ye)
 {
-    uint8_t xdata buf[20]={0};
+    uint8_t xdata buf[16]={0};
     uint8_t i=0;
     buf[i++]=cmd;
     buf[i++]=PicID>>8;
@@ -66,10 +68,32 @@ void HMI_Cut_Pic(uint8_t cmd,uint8_t PicID,uint16_t xs,uint16_t ys,uint16_t xe,u
     buf[i++]=xe&0x00ff;
     buf[i++]=ye>>8;
     buf[i++]=ye&0x00ff;
-    buf[i++]=txs>>8;
-    buf[i++]=txs&0x00ff;
-    buf[i++]=tys>>8;
-    buf[i++]=tys&0x00ff;
+    buf[i++]=xs>>8;
+    buf[i++]=xs&0x00ff;
+    buf[i++]=ys>>8;
+    buf[i++]=ys&0x00ff;
+    LL_HMI_Send(buf,i);
+}
+
+void HMI_Cut_PicEx(uint8_t cmd,uint8_t PicID,uint16_t xs,uint16_t ys,uint16_t xe,uint16_t ye,uint16_t x,uint16_t y)
+{
+    uint8_t xdata buf[16]={0};
+    uint8_t i=0;
+    buf[i++]=cmd;
+    buf[i++]=PicID>>8;
+    buf[i++]=PicID&0x00ff;
+    buf[i++]=xs>>8;
+    buf[i++]=xs&0x00ff;
+    buf[i++]=ys>>8;
+    buf[i++]=ys&0x00ff;
+    buf[i++]=xe>>8;
+    buf[i++]=xe&0x00ff;
+    buf[i++]=ye>>8;
+    buf[i++]=ye&0x00ff;
+    buf[i++]=x>>8;
+    buf[i++]=x&0x00ff;
+    buf[i++]=y>>8;
+    buf[i++]=y&0x00ff;
     LL_HMI_Send(buf,i);
 }
 
@@ -104,6 +128,30 @@ void HMI_Show_ModuleName(const char* str)
 
 void HMI_Show_Worktime1()       //650 633 IU 使用
 {
+    char code cmd[]={0xAA,0x98,0x02,0x62,0x01,0x0E,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
+    uint8_t i=0,str_len = 13;
+    const uint8_t *ptr=cmd;
+    for (i = 0; i < str_len; i++)
+    {
+        while (Uart1_Busy);
+        Uart1_Busy=1;
+        SBUF=*ptr;
+        ptr++;
+    }
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    if(gModuleInfo.RoutineModule.WorkTime/10==0)
+    {
+        SBUF=' ';
+    }
+    else
+    {
+        SBUF=gModuleInfo.RoutineModule.WorkTime/10+'0';
+    }
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=gModuleInfo.RoutineModule.WorkTime%10+'0';
+    LL_HMI_SendEnd();
 }
 
 void HMI_Show_Worktime2()   //UVA1 使用同时显示能量

@@ -59,7 +59,6 @@ void Work_Process()
             
             break;
         case eWS_Working:
-            
             break;
         
         default:

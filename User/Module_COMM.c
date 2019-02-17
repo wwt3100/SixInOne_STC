@@ -61,6 +61,7 @@ void Module_COMM()
                                 gComInfo.HMI_Scene=eScene_Module_650;
                                 HMI_Goto_LocPage(2);
                                 HMI_Show_ModuleName("Derma-650");
+                                HMI_Show_Worktime1();
                                 break;
                             case M_Type_633:
                             case M_Type_633_1:
@@ -68,6 +69,7 @@ void Module_COMM()
                                 gComInfo.HMI_Scene=eScene_Module_633;
                                 HMI_Goto_LocPage(3);
                                 HMI_Show_ModuleName("Derma-633");
+                                HMI_Show_Worktime1();
                                 break;
                           //case M_Type_IU:     //IU是另外协议,在此不会收到
                             case M_Type_UVA1:
@@ -75,6 +77,7 @@ void Module_COMM()
                                 gComInfo.HMI_Scene=eScene_Module_UVA1;
                                 HMI_Goto_LocPage(4);
                                 HMI_Show_ModuleName("Derma-UVA1");
+                                HMI_Show_Worktime1();
                                 break;
                             case M_Type_Wira:
                                 

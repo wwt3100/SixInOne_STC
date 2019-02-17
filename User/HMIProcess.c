@@ -54,11 +54,11 @@ void HMI_Process()
                     {
                         if(gConfig.LANG==1)
                         {
-                            HMI_Cut_Pic(0x9C,60,221,186,508,315,258,272);
+                            HMI_Cut_PicEx(0x9C,60,221,186,508,315,258,272);
                         }
                         else
                         {
-                            HMI_Cut_Pic(0x9C,60,221,339,508,470,258,272);
+                            HMI_Cut_PicEx(0x9C,60,221,339,508,470,258,272);
                         }
                         gComInfo.WorkStat=eWS_CheckModuleStep1;
                     }
@@ -95,34 +95,110 @@ void HMI_Process()
             break;
         case eScene_Module_650:
         case eScene_Module_633:
-            if (gComInfo.HMIMsg==eMsg_keyUp)
+            if (gComInfo.WorkStat==eWS_Working)
             {
-                if (gComInfo.HMIArg1==0x01)
+                if (gComInfo.HMIMsg==eMsg_keyUp && gComInfo.HMIArg1==0x01)
                 {
-                    switch (gComInfo.HMIArg2)
+                    if (gComInfo.HMIArg2==0x04)     //暂停
                     {
-                        case 0x01:      //时间 加
-                            
-                            break;
-                        case 0x02:      //时间 减
-                            break;
-                        case 0x03:      //系统信息按钮(进入密码页)
-                            
-                            break;
-                        case 0x04:      //开始/暂停
-                            break;
-                        case 0x05:      //停止
-                            
-                            break;
+                        BeepEx(0);
+                    }
+                    else if(gComInfo.HMIArg2==0x05) //停止
+                    {
+                        BeepEx(0);
+                    }
+                    else
+                    {
+                        ;//do nothing
                     }
                 }
+                gComInfo.HMIMsg=eMsg_NULL;
             }
-            else if(gComInfo.HMIMsg==eMsg_KeyLongPush)
+            else    //其他工作状态
             {
-            }
-            else
-            {
-                ;//do nothing
+                if (gComInfo.HMIMsg==eMsg_keyUp)
+                {
+                    gComInfo.HMIMsg=eMsg_NULL;
+                    if (gComInfo.HMIArg1==0x01)
+                    {
+                        switch (gComInfo.HMIArg2)
+                        {
+                            case 0x01:      //时间 加
+                                if (gModuleInfo.RoutineModule.WorkTime<99)
+                                {
+                                    gModuleInfo.RoutineModule.WorkTime++;
+                                }
+                                else
+                                {
+                                    gModuleInfo.RoutineModule.WorkTime=1;
+                                }
+                                HMI_Show_Worktime1();
+                                break;
+                            case 0x02:      //时间 减
+                                if (gModuleInfo.RoutineModule.WorkTime>1)
+                                {
+                                    gModuleInfo.RoutineModule.WorkTime--;
+                                }
+                                else
+                                {
+                                    gModuleInfo.RoutineModule.WorkTime=99;
+                                }
+                                HMI_Show_Worktime1();
+                                break;
+                            case 0x03:      //系统信息按钮(进入密码页)
+                                
+                                break;
+                            case 0x04:      //开始 
+                                gModuleInfo.RoutineModule.RemainTime=gModuleInfo.RoutineModule.WorkTime*60;
+                                break;
+                            case 0x05:      //停止
+                                
+                                break;
+                            case 0x06:      //模式切换
+                                break;
+                            default:
+                                break;
+                        }
+                        BeepEx(0);
+                    }
+                }
+                else if(gComInfo.HMIMsg==eMsg_KeyLongPush)
+                {
+                    gComInfo.HMIMsg=eMsg_NULL;
+                    if (gComInfo.HMIArg1==0x01)
+                    {
+                        if (gComInfo.HMIArg2 == 0x01)
+                        {
+                            if (gModuleInfo.RoutineModule.WorkTime<99)
+                            {
+                                gModuleInfo.RoutineModule.WorkTime++;
+                            }
+                            else
+                            {
+                                gModuleInfo.RoutineModule.WorkTime=1;
+                            }
+                            HMI_Show_Worktime1();
+                            BeepEx(0);
+                        }
+                        else if(gComInfo.HMIArg2 == 0x02)
+                        {
+                            if (gModuleInfo.RoutineModule.WorkTime>1)
+                            {
+                                gModuleInfo.RoutineModule.WorkTime--;
+                            }
+                            else
+                            {
+                                gModuleInfo.RoutineModule.WorkTime=99;
+                            }
+                            HMI_Show_Worktime1();
+                            BeepEx(0);
+                        }
+                    }
+                }
+                else
+                {
+                    ;//do nothing
+                }
             }
             break;
         case eScene_Module_UVA1:
