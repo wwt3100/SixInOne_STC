@@ -19,6 +19,9 @@ bit Uart2_ReviceFrame;
 
 bit HMI_Msg_Flag=0;
 
+bit Fire_Flag=0;
+
+
 bit SystemTime100ms=0;
 bit SystemTime1s=1;
 bit Heardbeat1s=1;

@@ -1,5 +1,6 @@
 #include "main.h"
 #include "WorkProcess.h"
+#include "HMIProcess.h"
 
 //HMI 通信
 void UART1_INT(void) interrupt 4 using 1
@@ -99,8 +100,8 @@ void UART2_INT(void) interrupt 8 using 2
 }
 
 /*******************************************************/
-/*               Timer0中断              			   */
-/*			     定时中断一次	                   */
+/*               Timer0中断                              */
+/*			     定时中断一次	                               */
 /*******************************************************/
 
 extern uint8_t idata BeepTime;
@@ -110,9 +111,22 @@ void Timer0_isr() interrupt 1 using 3
     TL0 = 0x00;		//设置定时初值    50ms
     TH0 = 0x4C;		//设置定时初值
     gComInfo.TimerCounter++;
-    if (gComInfo.WorkStat==eWS_Working && gModuleInfo.RoutineModule.LightMode==1 && gComInfo.TimerCounter%5==0)   //4Hz 闪烁模式
+    if (Fire_Flag==1 && gComInfo.WorkStat==eWS_Working && gModuleInfo.RoutineModule.LightMode==1 && gComInfo.TimerCounter%5==0)   //4Hz 闪烁模式
     {
-
+        switch (gComInfo.HMI_Scene)
+        {
+            case eScene_Module_650:
+                PowerCtr_Module12v=~PowerCtr_Module12v;
+                FAN_IO=~FAN_IO;         //线接错了?
+                break;
+            case eScene_Module_633:
+            case eScene_Module_IU:
+            case eScene_Module_UVA1:
+                
+                break;
+            default:
+                break;
+        }
     }
     if(gComInfo.TimerCounter % 2 == 0)
 	{
@@ -127,8 +141,8 @@ void Timer0_isr() interrupt 1 using 3
 }
 
 /*******************************************************/
-/*               PCA中断              			   */
-/*			     定时中断一次	                   */
+/*               PCA中断                                 */
+/*			     定时中断一次	                               */
 /*******************************************************/
 
 void Timer_PCA(void) interrupt 7 using 3		//PCA中断函数 蜂鸣器定时,50ms为单位

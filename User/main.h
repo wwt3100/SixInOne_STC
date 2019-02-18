@@ -57,9 +57,10 @@ typedef union Golbal_Info{
     struct RoutineModule{
         uint8_t LightMode;          //0->连续  1->脉冲
         uint8_t WorkTime;           //工作时间用分钟表示
-        uint8_t PowerLevel;         //光功率大小
+        uint16_t PowerLevel;         //光功率大小
         uint16_t RemainTime;         //剩余时间,用于暂停等
-        
+        uint32_t UsedTime;          //已经使用时间
+        uint32_t UsedCount;         //已经使用次数
     }RoutineModule;
     struct New4in1Module{
         uint8_t LightMode [4][4];       //LightMode[0]&0x80==0x80 同时输出 低4bit表示光选择   else 顺序 [1-4]为出光顺序
@@ -98,6 +99,8 @@ extern uint8_t idata uart1_buff[18];
 extern uint8_t idata uart2_buff[18];
 
 extern bit HMI_Msg_Flag;
+
+extern bit Fire_Flag;
 
 extern bit SystemTime100ms;
 extern bit SystemTime1s;

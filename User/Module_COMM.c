@@ -52,24 +52,32 @@ void Module_COMM()
                     case 0x01:      //握手回复治疗头类型
                         gComInfo.ModuleType=pbuf[3];
                         gComInfo.WorkStat=eWS_Standby;
-                        LOG_E("Module Type: %02X",(uint16_t)gComInfo.ModuleType);
+                        //LOG_E("Module Type: %02X",(uint16_t)gComInfo.ModuleType);
                         
                         switch (gComInfo.ModuleType)
                         {
                             case M_Type_650:
                                 gModuleInfo.RoutineModule.WorkTime=10;  //默认10分钟
+                                gModuleInfo.RoutineModule.PowerLevel=1800;   //治疗头没回复能量大小
                                 gComInfo.HMI_Scene=eScene_Module_650;
                                 HMI_Goto_LocPage(2);
                                 HMI_Show_ModuleName("Derma-650");
+                                HMI_Show_WorkMode();
                                 HMI_Show_Worktime1();
+                                ModuleRoutine_GetUsedTime();
+                                HMI_Show_Power();
                                 break;
                             case M_Type_633:
                             case M_Type_633_1:
                                 gModuleInfo.RoutineModule.WorkTime=10;
+                                gModuleInfo.RoutineModule.PowerLevel=150;   //633治疗头没回复能量大小
                                 gComInfo.HMI_Scene=eScene_Module_633;
                                 HMI_Goto_LocPage(3);
                                 HMI_Show_ModuleName("Derma-633");
+                                HMI_Show_WorkMode();
                                 HMI_Show_Worktime1();
+                                ModuleRoutine_GetUsedTime();
+                                HMI_Show_Power();
                                 break;
                           //case M_Type_IU:     //IU是另外协议,在此不会收到
                             case M_Type_UVA1:
@@ -78,6 +86,7 @@ void Module_COMM()
                                 HMI_Goto_LocPage(4);
                                 HMI_Show_ModuleName("Derma-UVA1");
                                 HMI_Show_Worktime1();
+                                ModuleRoutine_GetUsedTime();
                                 break;
                             case M_Type_Wira:
                                 
@@ -90,7 +99,20 @@ void Module_COMM()
                         }
                         break;
                     case 0x03:      //光1光功率
-                        
+                        LOG_E("Get PowerLevel %u",(uint16_t)pbuf[3]);
+                        switch (gComInfo.ModuleType)
+                        {
+                            case M_Type_650:    //1800mw
+                                gModuleInfo.RoutineModule.PowerLevel=pbuf[3]*10;
+                                break;
+                            case M_Type_633:
+                            case M_Type_633_1:
+                                gModuleInfo.RoutineModule.PowerLevel=pbuf[3];
+                                break;
+                            default:
+                                break;
+                        }
+                        HMI_Show_Power();
                         break;
                     case 0x04:      //光2光功率
                         break;
@@ -126,5 +148,8 @@ void Module308_Shakehand()
     LL_Module_Send("1*11&5&9",8);
 }
 
-
+void ModuleRoutine_GetUsedTime()
+{
+    LL_Module_Send("\x39\x25\x01", 3);
+}
 

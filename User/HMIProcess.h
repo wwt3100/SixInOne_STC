@@ -1,7 +1,7 @@
 #ifndef __HMI_PROCESS_H
 #define __HMI_PROCESS_H
 
-
+//³éÏó"³¡¾°"
 enum{
     eScene_Startup=0,
     eScene_StartPage,
@@ -16,6 +16,7 @@ enum{
     eScene_Info,
     eScene_Debug,
     eScene_Error,
+    eScene_Password,
 };
 
 
@@ -25,7 +26,7 @@ enum{
 void HMI_Process(void);
 
 
-
+void HMI_Scene_Recovery();
 void HMI_Goto_Error();
 void HMI_Exit_Error();
 

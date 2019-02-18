@@ -1,0 +1,74 @@
+1.握手
+主机：aa 39 21 00 c3 3c
+从机：aa 21 01 03 c3 3c,03是治疗头型号
+      aa 21 03 PW c3 3c,PW是光功率，光1
+      aa 21 04 PW c3 3c,PW是光功率，光2
+
+2.读取光1使用时间和次数
+主机：aa 39 25 01 c3 3c
+从机：aa 22 时间 次数 c3 3c
+时间：30 30 30 30 30 30 30
+次数：30 30 30 30 30
+
+3.读取光2使用时间和次数
+主机：aa 39 25 02 c3 3c
+从机：aa 23 时间 次数 c3 3c
+时间：30 30 30 30 30 30 30	99999h60min
+次数：30 30 30 30 30
+
+4.使用时间和次数清零
+主机：aa 39 ee 00 c3 3c
+
+5.读取标定日期
+主机：aa 39 22 00 c3 3c
+从机：
+aa 21 05 year c3 3c
+aa 21 05 month c3 3c
+aa 21 05 day c3 3c
+
+6.保存光1治疗时间
+aa 39 26 00 c3 3c
+
+7.保存光2治疗时间
+aa 39 27 00 c3 3c
+
+8.读取DA值和反馈电压
+主机：aa 39 40 00 c3 3c
+从机：aa 21 0b da值 反馈电压 c3 3c
+红蓝光：aa 21 0c da值 反馈电压 c3 3c
+        aa 21 0d da值 反馈电压 c3 3c
+590+830:aa 21 0b 590_da值 830_da值 590反馈电压 830反馈电压 c3 3c
+
+9.保存DA值和反馈电压
+主机：aa 39 41 da值 反馈电压 c3 3c
+590+830:aa 39 41 590_da值 830_da值 590反馈电压 830反馈电压 c3 3c
+ACNE头增加：
+aa 39 42 da值 反馈电压 c3 3c
+aa 39 43 da值 反馈电压 c3 3c
+
+10.开启光1 能量输出
+aa 39 30 01 pw c3 3c (pw:光功率)
+
+11.开启光2 能量输出
+aa 39 30 02 pw c3 3c
+
+11.停止PWM输出
+aa 39 30 00 00 c3 3c
+
+12.调试输出
+aa 39 31 light duty c3 3c
+light:01--Red，02--Blue
+duty:0~100占空比值
+
+13.保存占空比
+aa 39 32 L1_Maxduty L1_Midduty L1_Minduty L2_Maxduty L2_Midduty L2_Minduty c3 3c
+
+14.读取占空比
+主机：aa 39 33 00 c3 3c
+从机：
+aa 21 08 L1_Maxduty L1_Midduty L1_Minduty L2_Maxduty L2_Midduty L2_Minduty c3 3c
+590+830---aa 21 08 L1_Maxduty L1_Midduty c3 3c
+other---a 21 08 L1_Maxduty c3 3c
+
+
+
