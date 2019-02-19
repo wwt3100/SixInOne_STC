@@ -366,13 +366,13 @@ void HMI_Scene_Recovery()
             ModuleRoutine_GetUsedTime();
             HMI_Show_Power();
             break;
-        case M_Type_IU:     
+        case eScene_Module_IU:     
             gComInfo.HMI_Scene=eScene_Module_IU;
             HMI_Goto_LocPage(6);
             HMI_Show_ModuleName("Derma-IU");
             HMI_Show_Worktime1();
             break;
-        case M_Type_UVA1:
+        case eScene_Module_UVA1:
             gComInfo.HMI_Scene=eScene_Module_UVA1;
             HMI_Goto_LocPage(4);
             HMI_Show_ModuleName("Derma-UVA1");

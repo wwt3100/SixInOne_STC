@@ -11,6 +11,7 @@
 #include "crc.h"
 
 #include "STC_EEPROM.h"
+#include "DS18B20.h"
 
 #define LANG_CH     0
 #define LANG_EN     1
@@ -18,22 +19,28 @@
 #define ENABLE        1
 #define DISABLE       0
 
+#define POWER_ON      0
+#define POWER_OFF     1
+
 #define M_Type_650      (1)
 #define M_Type_633      (3)
 #define M_Type_633_1    (0x33)
 #define M_Type_IU       (0x10)  /* 正确性未知 */
-#define M_Type_UVA1     (5)
+#define M_Type_UVA1     (4)
 #define M_Type_Wira     (0x43)
 #define M_Type_4in1     (0x41)
 
 #define Error_NoModule          (1)
 #define Error_PasswordError     (2)
+#define Error_TempSenerError    (3)
 
 
 typedef struct Golbal_comInfo{
     uint8_t ModuleType;
     uint8_t WorkStat;       //0-未接治疗头         1-停止    2-暂停    3-运行
-
+    
+    uint8_t Count;          //计数用
+    uint8_t TempCount;      //温度错误计数
     uint8_t ErrorCode;
 
     uint8_t HMI_Scene;      //HMI场景
@@ -57,6 +64,7 @@ typedef union Golbal_Info{
     struct RoutineModule{
         uint8_t LightMode;          //0->连续  1->脉冲
         uint8_t WorkTime;           //工作时间用分钟表示
+        uint8_t Temp;               //治疗头温度,只有正值
         uint16_t PowerLevel;         //光功率大小
         uint16_t RemainTime;         //剩余时间,用于暂停等
         uint32_t UsedTime;          //已经使用时间
@@ -80,7 +88,7 @@ void BeepEx(uint8_t time);
 
 //最多写256byte
 void Save_Config();
-
+void SPI_Send(uint16_t dat);    //控制48V电源
 
 extern _Golbal_comInfo idata gComInfo;
 extern _Golbal_Config  idata gConfig;

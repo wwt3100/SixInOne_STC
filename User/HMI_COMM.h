@@ -29,6 +29,7 @@ void HMI_Show_Worktime3(void);       //308 使用
 void HMI_Show_Power();       //显示光功率 650 633 
 void HMI_Show_RemainTime(); //显示剩余时间
 
+void HMI_Show_Temp();       //显示温度
 
 
 

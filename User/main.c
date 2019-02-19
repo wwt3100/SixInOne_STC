@@ -119,6 +119,30 @@ void Timer0Init(void)		//50毫秒@11.0592MHz自动重载
     TR0 = 1;		//定时器0开始计时
 }
 
+void SPI_Send(uint16_t dat)
+{
+	uint8_t i;
+	DA_CS=0;
+	DA_SCK=0;
+	DA_LDAC=1;
+	for(i=16;i>0;i--)
+	{
+		dat<<=1;
+		DA_SDA = CY;
+		_nop_();
+		DA_SCK=1;	  //数据在时钟SCK的上升沿送入器件
+		_nop_();
+		DA_SCK=0;
+	}
+	DA_CS=1;
+	_nop_();
+	_nop_();
+	DA_LDAC=0;
+	_nop_();
+	_nop_();
+	DA_LDAC=1;
+}
+
 void Init()
 {
     KEY_LED_IO=ENABLE;

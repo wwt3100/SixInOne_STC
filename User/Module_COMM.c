@@ -51,12 +51,13 @@ void Module_COMM()
                 {
                     case 0x01:      //握手回复治疗头类型
                         gComInfo.ModuleType=pbuf[3];
-                        gComInfo.WorkStat=eWS_Standby;
-                        //LOG_E("Module Type: %02X",(uint16_t)gComInfo.ModuleType);
+                        LOG_E("Module Type: %02X",(uint16_t)gComInfo.ModuleType);
                         
                         switch (gComInfo.ModuleType)
                         {
                             case M_Type_650:
+                                gComInfo.WorkStat=eWS_Standby;
+                                DS18B20_StartCovert();
                                 gModuleInfo.RoutineModule.WorkTime=10;  //默认10分钟
                                 gModuleInfo.RoutineModule.PowerLevel=1800;   //治疗头没回复能量大小
                                 gComInfo.HMI_Scene=eScene_Module_650;
@@ -69,6 +70,8 @@ void Module_COMM()
                                 break;
                             case M_Type_633:
                             case M_Type_633_1:
+                                gComInfo.WorkStat=eWS_Standby;
+                                DS18B20_StartCovert();
                                 gModuleInfo.RoutineModule.WorkTime=10;
                                 gModuleInfo.RoutineModule.PowerLevel=150;   //633治疗头没回复能量大小
                                 gComInfo.HMI_Scene=eScene_Module_633;
@@ -81,18 +84,21 @@ void Module_COMM()
                                 break;
                           //case M_Type_IU:     //IU是另外协议,在此不会收到
                             case M_Type_UVA1:
+                                gComInfo.WorkStat=eWS_Standby;
+                                DS18B20_StartCovert();
                                 gModuleInfo.RoutineModule.WorkTime=10;
                                 gComInfo.HMI_Scene=eScene_Module_UVA1;
                                 HMI_Goto_LocPage(4);
                                 HMI_Show_ModuleName("Derma-UVA1");
                                 HMI_Show_Worktime1();
                                 ModuleRoutine_GetUsedTime();
+                                LOG_E("\nEnter Scene_Module_UVA1");
                                 break;
                             case M_Type_Wira:
-                                
+                                gComInfo.WorkStat=eWS_Standby;
                                 break;
                             case M_Type_4in1:
-                                
+                                gComInfo.WorkStat=eWS_Standby;
                                 break;
                             default:
                                 break;

@@ -57,7 +57,11 @@ sbit PowerCtr_Light2     = P2^2;
 sbit PowerCtr_Module12v  = P3^4;
 
 
-
+//SPI
+sbit DA_CS 				     	= P4^4;	  
+sbit DA_LDAC 			     	= P2^5;
+sbit DA_SCK					 	= P2^7;
+sbit DA_SDA					 	= P2^6;
 
 
 

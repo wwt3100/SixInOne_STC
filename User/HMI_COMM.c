@@ -116,6 +116,7 @@ void HMI_Show_WorkMode()
 
 void HMI_Show_Worktime1()       //650 633 IU 使用
 {
+    HMI_Cut_Pic(0x71,gConfig.LANG*100 + 2, 556, 145, 556+215, 145+264);     //治疗时间背景还原
     if(gModuleInfo.RoutineModule.WorkTime/10==0)
     {
         char code cmd[]={0x98,0x02,0x5A,0x01,0x0F,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
@@ -135,9 +136,9 @@ void HMI_Show_Worktime1()       //650 633 IU 使用
     while (Uart1_Busy);
     Uart1_Busy=1;
     SBUF=gModuleInfo.RoutineModule.WorkTime%10+'0';
-    while (Uart1_Busy);
-    Uart1_Busy=1;
-    SBUF=' ';           //多显示一个空格
+//    while (Uart1_Busy);
+//    Uart1_Busy=1;
+//    SBUF=' ';           //多显示一个空格
     LL_HMI_SendEnd();
 }
 
@@ -218,3 +219,18 @@ void HMI_Show_RemainTime()
     LL_HMI_SendEnd();
 }
 
+void HMI_Show_Temp()
+{
+    switch (gComInfo.HMI_Scene)     //显示部分
+    {
+        case eScene_Module_650:
+        case eScene_Module_633:
+        case eScene_Module_IU:
+        case eScene_Module_UVA1:
+            HMI_Cut_Pic(0x71,gConfig.LANG*100 + 16, 618, 411, 618+139, 411+74);     //按钮切暂停
+            HMI_Show_RemainTime();
+            break;
+        default:
+            break;
+    }
+}

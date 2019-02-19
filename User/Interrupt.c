@@ -117,9 +117,11 @@ void Timer0_isr() interrupt 1 using 3
         {
             case eScene_Module_650:
                 PowerCtr_Module12v=~PowerCtr_Module12v;
-                FAN_IO=~FAN_IO;         //线接错了?
+                //FAN_IO=~FAN_IO;         //线接错了?
                 break;
             case eScene_Module_633:
+                PowerCtr_Light1=~PowerCtr_Light1;
+                break;
             case eScene_Module_IU:
             case eScene_Module_UVA1:
                 
