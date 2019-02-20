@@ -92,7 +92,6 @@ void Work_Process()
                 {
                     case eScene_Module_650:
                     case eScene_Module_633:
-                    case eScene_Module_UVA1:
                     {
                         uint8_t ret=DS18B20_GetTemp(&temp);
                         if(ret==1)  //DS18B20不在
@@ -115,16 +114,20 @@ void Work_Process()
                             else
                             {
                                 temp=(temp+5)/10;     //四舍五入取整
+                                if (temp>99)
+                                {
+                                    temp=99;        //最高显示99度
+                                }
                             }
                             if (temp/10==0)
                             {
-                                while (Uart1_Busy);     //s十位
+                                while (Uart1_Busy);     //十位
                                 Uart1_Busy=1;
                                 SBUF=' ';
                             }
                             else
                             {
-                                while (Uart1_Busy);     //s十位
+                                while (Uart1_Busy);     //十位
                                 Uart1_Busy=1;
                                 SBUF=temp/10+'0';
                             }
@@ -134,6 +137,10 @@ void Work_Process()
                             LL_HMI_SendEnd();
                         }
                     }
+                        break;
+                    case eScene_Module_UVA1:
+                        gComInfo.TempCount++;
+                        Module_GetTemp();
                         break;
                     default:
                         break;
@@ -178,13 +185,17 @@ void WP_Start()
             PowerCtr_Module12v=POWER_ON;
             break;
         case eScene_Module_633:
-            SPI_Send(30310);
+            SPI_Send(30310);        //2V
             PowerCtr_Light1=POWER_ON; 
             PowerCtr_Main=POWER_ON;   
             break;
-        case eScene_Module_IU:
         case eScene_Module_UVA1:
-            
+            SPI_Send(0x7FFF);        //5V
+            PowerCtr_Main=POWER_ON;
+            Delay10ms();
+            Module_Send_PWM(1,80);
+            break;
+        case eScene_Module_IU:
             break;
         default:
             break;
@@ -207,9 +218,12 @@ void WP_Stop(uint8_t stop_type)
             PowerCtr_Light1=POWER_OFF;  //off
             PowerCtr_Main=POWER_OFF;    //off
             break;
-        case eScene_Module_IU:
         case eScene_Module_UVA1:
-            
+            Module_Send_PWM(1,0);
+            PowerCtr_Main=POWER_OFF;    //off
+            SPI_Send(0x7000);           //DAC 0V
+            break;
+        case eScene_Module_IU:
             break;
         default:
             break;
@@ -219,12 +233,24 @@ void WP_Stop(uint8_t stop_type)
         case eScene_Module_650:
         case eScene_Module_633:
         case eScene_Module_IU:
-        case eScene_Module_UVA1:
             HMI_Cut_Pic(0x71,gConfig.LANG*100 + 2, 618, 411, 618+139, 411+74);      //按钮切开始
             if (stop_type==1)
             {
                 HMI_Cut_Pic(0x71,gConfig.LANG*100 + 2, 556, 145, 556+215, 145+264);     //切回时间显示
                 HMI_Show_Worktime1();
+                gComInfo.WorkStat=eWS_Standby;
+            }
+            else    //暂停
+            {
+                
+            }
+            break;
+        case eScene_Module_UVA1:
+            HMI_Cut_Pic(0x71,gConfig.LANG*100 + 2, 618, 411, 618+139, 411+74);      //按钮切开始
+            if (stop_type==1)
+            {
+                HMI_Cut_Pic(0x71,gConfig.LANG*100 + 4, 556, 145, 556+215, 145+264);     //切回时间显示
+                HMI_Show_Worktime2();
                 gComInfo.WorkStat=eWS_Standby;
             }
             else    //暂停

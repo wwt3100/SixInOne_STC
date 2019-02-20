@@ -26,6 +26,9 @@ void Module308_Shakehand(void);
 
 
 
+//四合一 威伐光 UVA1
+void Module_GetTemp();
+void Module_Send_PWM(uint8_t light_sel,uint8_t duty);
 
 
 

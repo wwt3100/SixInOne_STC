@@ -47,6 +47,7 @@ typedef struct Golbal_comInfo{
     uint8_t HMI_LastScene;  //保存上一个场景
 
     uint8_t TimerCounter;
+    uint8_t TimerCounter2;
 
     uint8_t HMIMsg;
     uint8_t HMIArg1,HMIArg2;
@@ -80,6 +81,7 @@ typedef union Golbal_Info{
 }_Golbal_Info;
 
 
+void Delay10ms();		//@11.0592MHz
 
 void LOG_E(void*str,...);
 

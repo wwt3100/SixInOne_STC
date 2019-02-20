@@ -90,7 +90,7 @@ void Module_COMM()
                                 gComInfo.HMI_Scene=eScene_Module_UVA1;
                                 HMI_Goto_LocPage(4);
                                 HMI_Show_ModuleName("Derma-UVA1");
-                                HMI_Show_Worktime1();
+                                HMI_Show_Worktime2();
                                 ModuleRoutine_GetUsedTime();
                                 LOG_E("\nEnter Scene_Module_UVA1");
                                 break;
@@ -131,6 +131,48 @@ void Module_COMM()
             {
                 
             }
+            else if(pbuf[1]==0x20)
+            {
+                switch (gComInfo.HMI_Scene)
+                {
+                    case eScene_Module_UVA1:
+                    {
+                        uint8_t temp=pbuf[2];
+                        gComInfo.TempCount=0;
+                        HMI_Cut_Pic(0x71,gConfig.LANG*100 + 2, 13, 415, 13+81, 415+36); //恢复温度背景
+                        LL_HMI_Send("\x98\x00\x37\x01\x9F\x21\x81\x03\x00\x1F\x00\x1F",12);
+                        if (temp<0)
+                        {
+                            temp=0;
+                        }
+                        else
+                        {
+                            temp=(temp+5)/10;     //四舍五入取整
+                            if (temp>99)
+                            {
+                                temp=99;        //最高显示99度
+                            }
+                        }
+                        if (temp/10==0)
+                        {
+                            while (Uart1_Busy);     //十位
+                            Uart1_Busy=1;
+                            SBUF=' ';
+                        }
+                        else
+                        {
+                            while (Uart1_Busy);     //十位
+                            Uart1_Busy=1;
+                            SBUF=temp/10+'0';
+                        }
+                        while (Uart1_Busy);     //温度个位
+                        Uart1_Busy=1;
+                        SBUF=temp%10+'0';
+                        LL_HMI_SendEnd();
+                    }
+                        break;
+                }
+            }
             else
             {
                 ;   //do nothing
@@ -159,3 +201,15 @@ void ModuleRoutine_GetUsedTime()
     LL_Module_Send("\x39\x25\x01", 3);
 }
 
+void Module_GetTemp()
+{
+    LL_Module_Send("\x39\x20\x01", 3);
+}
+
+void Module_Send_PWM(uint8_t light_sel,uint8_t duty)
+{
+    uint8_t xdata cmd[]={"\x39\x31\x0\x0"};
+    cmd[2]=light_sel;
+    cmd[3]=duty;
+    LL_Module_Send(cmd,4);
+}

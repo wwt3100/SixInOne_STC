@@ -59,14 +59,24 @@ void HMI_COMM()
 
 void HMI_Show_ErrorStr()
 {
+    char code cmd[]={0x98,0x1,0x4b,0x01,0xe,0x23,0x81,0x03,0x00,0x1F,0x00,0x1F};
+    LL_HMI_Send(cmd, 12);
     if (gConfig.LANG==0)    //CHN
     {
-        
+        char xdata str[]={"错误   "};
+        str[5]=gComInfo.ErrorCode/10+'0';
+        str[6]=gComInfo.ErrorCode%10+'0';
+        LL_HMI_Send_Pure(str, 7);
     }
     else                    //EN
     {
-        
+        char xdata str[]={"Error   "};
+        str[6]=gComInfo.ErrorCode/10+'0';
+        str[7]=gComInfo.ErrorCode%10+'0';
+        LL_HMI_Send_Pure(str, 8);
     }
+    LL_HMI_SendEnd();
+    
 }
 
 //只用于常规治疗头模块
@@ -144,6 +154,62 @@ void HMI_Show_Worktime1()       //650 633 IU 使用
 
 void HMI_Show_Worktime2()   //UVA1 使用同时显示能量
 {
+    uint8_t power=gModuleInfo.RoutineModule.WorkTime*5,t;
+    HMI_Cut_Pic(0x71,gConfig.LANG*100 + 4, 556, 145, 556+215, 145+264);     //治疗时间背景还原
+    if(gModuleInfo.RoutineModule.WorkTime/10==0)
+    {
+        char code cmd[]={0x98,0x02,0x8C,0x01,0x19,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
+        LL_HMI_Send(cmd,12);
+        while (Uart1_Busy);
+        Uart1_Busy=1;
+        SBUF=' ';
+    }
+    else
+    {
+        char code cmd[]={0x98,0x02,0x94,0x01,0x19,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
+        LL_HMI_Send(cmd,12);
+        while (Uart1_Busy);
+        Uart1_Busy=1;
+        SBUF=gModuleInfo.RoutineModule.WorkTime/10+'0';
+    }
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=gModuleInfo.RoutineModule.WorkTime%10+'0';
+    LL_HMI_SendEnd();
+    
+    t=power%100;
+    if (power/100==0)
+    {
+        
+        if (t/10==0)
+        {
+            char code cmd[]={0x98,0x02,0x9c,0x00,0xf1,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
+            LL_HMI_Send(cmd,12);
+        }
+        else
+        {
+            char code cmd[]={0x98,0x02,0x94,0x00,0xf1,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
+            LL_HMI_Send(cmd,12);
+            while (Uart1_Busy);
+            Uart1_Busy=1;
+            SBUF=t/10+'0';
+        }
+    }
+    else
+    {
+        char code cmd[]={0x98,0x02,0x8B,0x00,0xf1,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
+        LL_HMI_Send(cmd,12);
+        while (Uart1_Busy);
+        Uart1_Busy=1;
+        SBUF=power/100+'0';
+        while (Uart1_Busy);
+        Uart1_Busy=1;
+        SBUF=t/10+'0';
+    }
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=t%10+'0';
+    LL_HMI_SendEnd();
 }
 
 void HMI_Show_Worktime3()   //308 使用同时显示能量

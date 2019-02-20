@@ -33,6 +33,23 @@ _Golbal_comInfo idata gComInfo={0};
 _Golbal_Config  idata gConfig={0};
 _Golbal_Info    xdata gModuleInfo={0};
 
+
+void Delay10ms()		//@11.0592MHz
+{
+	unsigned char i, j;
+
+	_nop_();
+	_nop_();
+	i = 108;
+	j = 144;
+	do
+	{
+		while (--j);
+	} while (--i);
+}
+
+
+
 uint8_t idata BeepTime=0;     //·äÃùÆ÷ÏìµÄÊ±¼ä
 void BeepEx(uint8_t time)
 {

@@ -111,11 +111,13 @@ void HMI_Process()
                     {
                         if(Fire_Flag==1)    
                         {
-                            gModuleInfo.RoutineModule.RemainTime--;
+                            gComInfo.TimerCounter2=gComInfo.TimerCounter;   //保存定时器计数
                             WP_Stop(0);     //暂停
                         }
                         else
                         {
+                            SystemTime1s=0;
+                            gComInfo.TimerCounter=gComInfo.TimerCounter2;   //恢复计数
                             WP_Start();     //开始
                         }
                         BeepEx(0);
@@ -145,7 +147,7 @@ void HMI_Process()
                             case 0x01:      //时间 加
                                 if (gComInfo.HMI_Scene==eScene_Module_UVA1)
                                 {
-                                    if (gModuleInfo.RoutineModule.WorkTime<30)
+                                    if (gModuleInfo.RoutineModule.WorkTime<50)  //TODO:改回30
                                     {
                                         gModuleInfo.RoutineModule.WorkTime++;
                                     }
@@ -177,8 +179,9 @@ void HMI_Process()
                                     }
                                     else
                                     {
-                                        gModuleInfo.RoutineModule.WorkTime=30;
+                                        gModuleInfo.RoutineModule.WorkTime=50;  //TODO:改回30
                                     }
+                                    HMI_Show_Worktime2();
                                 }
                                 else
                                 {
@@ -190,8 +193,9 @@ void HMI_Process()
                                     {
                                         gModuleInfo.RoutineModule.WorkTime=99;
                                     }
+                                    HMI_Show_Worktime1();
                                 }
-                                HMI_Show_Worktime1();
+                                
                                 break;
                             case 0x03:      //系统信息按钮(进入密码页)
                                 HMI_Goto_LocPage(17);
@@ -406,6 +410,7 @@ void HMI_Goto_Error()
         }
         else
         {
+            gComInfo.WorkStat=eWS_Idle;
             HMI_Goto_Page(37);
             HMI_Show_ErrorStr();
         }

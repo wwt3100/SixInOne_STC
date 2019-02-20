@@ -122,10 +122,6 @@ void Timer0_isr() interrupt 1 using 3
             case eScene_Module_633:
                 PowerCtr_Light1=~PowerCtr_Light1;
                 break;
-            case eScene_Module_IU:
-            case eScene_Module_UVA1:
-                
-                break;
             default:
                 break;
         }
