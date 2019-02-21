@@ -147,7 +147,7 @@ void HMI_Process()
                             case 0x01:      //时间 加
                                 if (gComInfo.HMI_Scene==eScene_Module_UVA1)
                                 {
-                                    if (gModuleInfo.RoutineModule.WorkTime<50)  //TODO:改回30
+                                    if (gModuleInfo.RoutineModule.WorkTime<30)  //TODO:改回30
                                     {
                                         gModuleInfo.RoutineModule.WorkTime++;
                                     }
@@ -179,7 +179,7 @@ void HMI_Process()
                                     }
                                     else
                                     {
-                                        gModuleInfo.RoutineModule.WorkTime=50;  //TODO:改回30
+                                        gModuleInfo.RoutineModule.WorkTime=30;  //TODO:改回30
                                     }
                                     HMI_Show_Worktime2();
                                 }

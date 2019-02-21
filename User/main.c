@@ -26,6 +26,9 @@ bit SystemTime100ms=0;
 bit SystemTime1s=1;
 bit Heardbeat1s=1;
 
+bit ADConvertDone;
+
+
 uint8_t idata uart1_buff[18];
 uint8_t idata uart2_buff[18];
 

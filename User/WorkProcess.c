@@ -84,6 +84,10 @@ void Work_Process()
                         break;
                 }
             }
+            if (SystemTime100ms==1 && Fire_Flag==1)
+            {
+                $end$
+            }
         case eWS_Standby:
             if(SystemTime1s==1)
             {
@@ -147,7 +151,7 @@ void Work_Process()
                 }
                 if (Fire_Flag==0)      //吹到低于45度再关风扇
                 {
-                    if(gComInfo.Count++>10 && temp<4500)    //关闭之后继续吹30秒再关
+                    if(gComInfo.Count++>10 && temp<4500)    //关闭之后继续吹10秒再关
                     {
                         FAN_IO=DISABLE;
                     }
@@ -190,7 +194,8 @@ void WP_Start()
             PowerCtr_Main=POWER_ON;   
             break;
         case eScene_Module_UVA1:
-            SPI_Send(0x7FFF);        //5V
+            //SPI_Send(0x7FFF);        //5V
+            SPI_Send(0x7E66);        //4.5V
             PowerCtr_Main=POWER_ON;
             Delay10ms();
             Module_Send_PWM(1,80);
@@ -217,6 +222,7 @@ void WP_Stop(uint8_t stop_type)
             
             PowerCtr_Light1=POWER_OFF;  //off
             PowerCtr_Main=POWER_OFF;    //off
+            SPI_Send(0x7000);           //DAC 0V
             break;
         case eScene_Module_UVA1:
             Module_Send_PWM(1,0);

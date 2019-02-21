@@ -68,6 +68,9 @@ typedef union Golbal_Info{
         uint8_t Temp;               //治疗头温度,只有正值
         uint16_t PowerLevel;         //光功率大小
         uint16_t RemainTime;         //剩余时间,用于暂停等
+
+        uint16_t FeedbackVolt;      //电源反馈电压值          电流?
+        
         uint32_t UsedTime;          //已经使用时间
         uint32_t UsedCount;         //已经使用次数
     }RoutineModule;
@@ -115,6 +118,8 @@ extern bit Fire_Flag;
 extern bit SystemTime100ms;
 extern bit SystemTime1s;
 extern bit Heardbeat1s;
+
+extern bit ADConvertDone;
 
 #endif
 

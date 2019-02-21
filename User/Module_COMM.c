@@ -92,7 +92,6 @@ void Module_COMM()
                                 HMI_Show_ModuleName("Derma-UVA1");
                                 HMI_Show_Worktime2();
                                 ModuleRoutine_GetUsedTime();
-                                LOG_E("\nEnter Scene_Module_UVA1");
                                 break;
                             case M_Type_Wira:
                                 gComInfo.WorkStat=eWS_Standby;
@@ -136,40 +135,45 @@ void Module_COMM()
                 switch (gComInfo.HMI_Scene)
                 {
                     case eScene_Module_UVA1:
-                    {
-                        uint8_t temp=pbuf[2];
-                        gComInfo.TempCount=0;
-                        HMI_Cut_Pic(0x71,gConfig.LANG*100 + 2, 13, 415, 13+81, 415+36); //恢复温度背景
-                        LL_HMI_Send("\x98\x00\x37\x01\x9F\x21\x81\x03\x00\x1F\x00\x1F",12);
-                        if (temp<0)
+                        if (pbuf[2]==0)     //读到数据且正确
                         {
-                            temp=0;
-                        }
-                        else
-                        {
-                            temp=(temp+5)/10;     //四舍五入取整
-                            if (temp>99)
+                            int8_t temp=pbuf[3];
+                            gComInfo.TempCount=0;
+                            HMI_Cut_Pic(0x71,gConfig.LANG*100 + 2, 13, 415, 13+81, 415+36); //恢复温度背景
+                            LL_HMI_Send("\x98\x00\x37\x01\x9F\x21\x81\x03\x00\x1F\x00\x1F",12);
+                            if (temp<0)     //>128
                             {
-                                temp=99;        //最高显示99度
+                                temp=0;
                             }
-                        }
-                        if (temp/10==0)
-                        {
-                            while (Uart1_Busy);     //十位
+                            else
+                            {
+                                temp=(temp+5)/10;     //四舍五入取整
+                                if (temp>99)
+                                {
+                                    temp=99;        //最高显示99度
+                                }
+                            }
+                            if (temp/10==0)
+                            {
+                                while (Uart1_Busy);     //十位
+                                Uart1_Busy=1;
+                                SBUF=' ';
+                            }
+                            else
+                            {
+                                while (Uart1_Busy);     //十位
+                                Uart1_Busy=1;
+                                SBUF=temp/10+'0';
+                            }
+                            while (Uart1_Busy);     //温度个位
                             Uart1_Busy=1;
-                            SBUF=' ';
+                            SBUF=temp%10+'0';
+                            LL_HMI_SendEnd();
                         }
                         else
                         {
-                            while (Uart1_Busy);     //十位
-                            Uart1_Busy=1;
-                            SBUF=temp/10+'0';
+                            ;//do nothing
                         }
-                        while (Uart1_Busy);     //温度个位
-                        Uart1_Busy=1;
-                        SBUF=temp%10+'0';
-                        LL_HMI_SendEnd();
-                    }
                         break;
                 }
             }

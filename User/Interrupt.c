@@ -117,7 +117,6 @@ void Timer0_isr() interrupt 1 using 3
         {
             case eScene_Module_650:
                 PowerCtr_Module12v=~PowerCtr_Module12v;
-                //FAN_IO=~FAN_IO;         //线接错了?
                 break;
             case eScene_Module_633:
                 PowerCtr_Light1=~PowerCtr_Light1;
@@ -159,4 +158,14 @@ void Timer_PCA(void) interrupt 7 using 3		//PCA中断函数 蜂鸣器定时,50ms为单位
     }
     KEY_LED_IO=ENABLE;
 }
+
+void ADC_ISR(void) interrupt 5 
+{
+    uint16_t ADC_Value=0;
+    ADC_CONTR &= ~ADC_FLAG;         						//Clear ADC interrupt flag
+    ADC_Value=(ADC_RES<<2)|ADC_RESL;
+    gComInfo.FeedbackVolt=(ADC_Value *1000L *5L) >>10;
+    ADConvertDone=1;
+}
+
 
