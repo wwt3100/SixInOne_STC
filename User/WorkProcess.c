@@ -70,9 +70,9 @@ void Work_Process()
                     case eScene_Module_633:
                     case eScene_Module_IU:
                     case eScene_Module_UVA1:
-                        if (gModuleInfo.RoutineModule.RemainTime>0)
+                        if (gInfo.ModuleInfo.RoutineModule.RemainTime>0)
                         {
-                            gModuleInfo.RoutineModule.RemainTime--;
+                            gInfo.ModuleInfo.RoutineModule.RemainTime--;
                             HMI_Show_RemainTime();
                         }
                         else
@@ -86,7 +86,8 @@ void Work_Process()
             }
             if (SystemTime100ms==1 && Fire_Flag==1)
             {
-                $end$
+                SystemTime100ms=0;
+                //TODO: ÂýÆô¶¯
             }
         case eWS_Standby:
             if(SystemTime1s==1)

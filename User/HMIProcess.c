@@ -147,25 +147,25 @@ void HMI_Process()
                             case 0x01:      //时间 加
                                 if (gComInfo.HMI_Scene==eScene_Module_UVA1)
                                 {
-                                    if (gModuleInfo.RoutineModule.WorkTime<30)  //TODO:改回30
+                                    if (gInfo.ModuleInfo.RoutineModule.WorkTime<30)  //TODO:改回30
                                     {
-                                        gModuleInfo.RoutineModule.WorkTime++;
+                                        gInfo.ModuleInfo.RoutineModule.WorkTime++;
                                     }
                                     else
                                     {
-                                        gModuleInfo.RoutineModule.WorkTime=1;
+                                        gInfo.ModuleInfo.RoutineModule.WorkTime=1;
                                     }
                                     HMI_Show_Worktime2();
                                 }
                                 else
                                 {
-                                    if (gModuleInfo.RoutineModule.WorkTime<99)
+                                    if (gInfo.ModuleInfo.RoutineModule.WorkTime<99)
                                     {
-                                        gModuleInfo.RoutineModule.WorkTime++;
+                                        gInfo.ModuleInfo.RoutineModule.WorkTime++;
                                     }
                                     else
                                     {
-                                        gModuleInfo.RoutineModule.WorkTime=1;
+                                        gInfo.ModuleInfo.RoutineModule.WorkTime=1;
                                     }
                                     HMI_Show_Worktime1();
                                 }
@@ -173,25 +173,25 @@ void HMI_Process()
                             case 0x02:      //时间 减
                                 if (gComInfo.HMI_Scene==eScene_Module_UVA1)
                                 {
-                                    if (gModuleInfo.RoutineModule.WorkTime>1)
+                                    if (gInfo.ModuleInfo.RoutineModule.WorkTime>1)
                                     {
-                                        gModuleInfo.RoutineModule.WorkTime--;
+                                        gInfo.ModuleInfo.RoutineModule.WorkTime--;
                                     }
                                     else
                                     {
-                                        gModuleInfo.RoutineModule.WorkTime=30;  //TODO:改回30
+                                        gInfo.ModuleInfo.RoutineModule.WorkTime=30;  //TODO:改回30
                                     }
                                     HMI_Show_Worktime2();
                                 }
                                 else
                                 {
-                                    if (gModuleInfo.RoutineModule.WorkTime>1)
+                                    if (gInfo.ModuleInfo.RoutineModule.WorkTime>1)
                                     {
-                                        gModuleInfo.RoutineModule.WorkTime--;
+                                        gInfo.ModuleInfo.RoutineModule.WorkTime--;
                                     }
                                     else
                                     {
-                                        gModuleInfo.RoutineModule.WorkTime=99;
+                                        gInfo.ModuleInfo.RoutineModule.WorkTime=99;
                                     }
                                     HMI_Show_Worktime1();
                                 }
@@ -203,7 +203,7 @@ void HMI_Process()
                                 gComInfo.HMI_Scene=eScene_Password;
                                 break;
                             case 0x04:      //开始 
-                                gModuleInfo.RoutineModule.RemainTime=gModuleInfo.RoutineModule.WorkTime*60;
+                                gInfo.ModuleInfo.RoutineModule.RemainTime=gInfo.ModuleInfo.RoutineModule.WorkTime*60;
                                 WP_Start();
                                 break;
                             case 0x05:      //停止        //非运行状态不做处理
@@ -212,13 +212,13 @@ void HMI_Process()
                             case 0x06:      //模式切换
                                 if (gComInfo.HMI_Scene!=eScene_Module_UVA1 && gComInfo.HMI_Scene!=eScene_Module_IU)
                                 {
-                                    if(gModuleInfo.RoutineModule.LightMode==0)
+                                    if(gInfo.ModuleInfo.RoutineModule.LightMode==0)
                                     {
-                                        gModuleInfo.RoutineModule.LightMode=1;
+                                        gInfo.ModuleInfo.RoutineModule.LightMode=1;
                                     }
                                     else
                                     {
-                                        gModuleInfo.RoutineModule.LightMode=0;
+                                        gInfo.ModuleInfo.RoutineModule.LightMode=0;
                                     }
                                     HMI_Show_WorkMode();
                                 }
@@ -242,25 +242,25 @@ void HMI_Process()
                         {
                             if (gComInfo.HMI_Scene==eScene_Module_UVA1)
                             {
-                                if (gModuleInfo.RoutineModule.WorkTime<30)
+                                if (gInfo.ModuleInfo.RoutineModule.WorkTime<30)
                                 {
-                                    gModuleInfo.RoutineModule.WorkTime++;
+                                    gInfo.ModuleInfo.RoutineModule.WorkTime++;
                                 }
                                 else
                                 {
-                                    gModuleInfo.RoutineModule.WorkTime=1;
+                                    gInfo.ModuleInfo.RoutineModule.WorkTime=1;
                                 }
                                 HMI_Show_Worktime2();
                             }
                             else
                             {
-                                if (gModuleInfo.RoutineModule.WorkTime<99)
+                                if (gInfo.ModuleInfo.RoutineModule.WorkTime<99)
                                 {
-                                    gModuleInfo.RoutineModule.WorkTime++;
+                                    gInfo.ModuleInfo.RoutineModule.WorkTime++;
                                 }
                                 else
                                 {
-                                    gModuleInfo.RoutineModule.WorkTime=1;
+                                    gInfo.ModuleInfo.RoutineModule.WorkTime=1;
                                 }
                                 HMI_Show_Worktime1();
                             }
@@ -270,25 +270,25 @@ void HMI_Process()
                         {
                             if (gComInfo.HMI_Scene==eScene_Module_UVA1)
                             {
-                                if (gModuleInfo.RoutineModule.WorkTime>1)
+                                if (gInfo.ModuleInfo.RoutineModule.WorkTime>1)
                                 {
-                                    gModuleInfo.RoutineModule.WorkTime--;
+                                    gInfo.ModuleInfo.RoutineModule.WorkTime--;
                                 }
                                 else
                                 {
-                                    gModuleInfo.RoutineModule.WorkTime=30;
+                                    gInfo.ModuleInfo.RoutineModule.WorkTime=30;
                                 }
                                 HMI_Show_Worktime2();
                             }
                             else
                             {
-                                if (gModuleInfo.RoutineModule.WorkTime>1)
+                                if (gInfo.ModuleInfo.RoutineModule.WorkTime>1)
                                 {
-                                    gModuleInfo.RoutineModule.WorkTime--;
+                                    gInfo.ModuleInfo.RoutineModule.WorkTime--;
                                 }
                                 else
                                 {
-                                    gModuleInfo.RoutineModule.WorkTime=99;
+                                    gInfo.ModuleInfo.RoutineModule.WorkTime=99;
                                 }
                                 HMI_Show_Worktime1();
                             }
@@ -317,7 +317,6 @@ void HMI_Process()
         case eScene_Password:
             if (gComInfo.HMIMsg == eMsg_keyUp && gComInfo.HMIArg1==2)
             {
-                gComInfo.HMIMsg = eMsg_NULL;
                 BeepEx(0);
                 switch (gComInfo.HMIArg2)
                 {
@@ -328,17 +327,86 @@ void HMI_Process()
                         HMI_Scene_Recovery();
                         break;
                     case 0xF1:      //回车
-                        
+                        gInfo.Password[gInfo.PasswordLen]=0;
+                        if ((gInfo.DebugOpen&OPEN_DBG_Calib)             && strcmp(gInfo.Password,"666888")==0)     //进入调试模式
+                        {
+                            HMI_Goto_Page(62);
+                        }
+                        else if((gInfo.DebugOpen&OPEN_DBG_ClearUsedtime) && strcmp(gInfo.Password,"803803")==0) //清治疗头时间
+                        {
+                            ;
+                        }
+                        else if((gInfo.DebugOpen&OPEN_DBG_Config)        && strcmp(gInfo.Password,"308308")==0) //进入设置
+                        {
+                            ;
+                        }
+                        else    //密码错误
+                        {
+                            HMI_Goto_LocPage(36);
+                        }
+                        gInfo.PasswordLen=0;    //清密码
                         break;
                     case 0xF2:      //密码删除
-                        
+                        if (gInfo.PasswordLen!=0)
+                        {
+                            gInfo.PasswordLen--;
+                            HMI_Show_Password();
+                        }
+                        else
+                        {
+                            HMI_Scene_Recovery();   //密码为空,再按则退出
+                        }
                         break;
                     case '0':
-                        
+                    case '1': 
+                    case '2':
+                    case '3':
+                    case '4':
+                    case '5':
+                    case '6':
+                    case '7':
+                    case '8':
+                    case '9':
+                        if (gInfo.PasswordLen<8)
+                        {
+                            gInfo.Password[gInfo.PasswordLen]=gComInfo.HMIArg2;
+                            gInfo.PasswordLen++;
+                            HMI_Show_Password();
+                        }
                         break;
                     default:
                         break;
                 }
+            }
+            else if(gComInfo.HMIMsg == eMsg_KeyLongPush && gComInfo.HMIArg1==2 && gComInfo.HMIArg2==0xF2)
+            {
+                if(gInfo.PasswordLen!=0)
+                {
+                    BeepEx(0);
+                    gInfo.PasswordLen=0;    //长按清空
+                    HMI_Show_Password();
+                }
+            }
+            else
+            {
+                ;//do nothing
+            }
+            gComInfo.HMIMsg = eMsg_NULL;    //统一清触摸指令
+            break;
+        case eScene_Debug:
+            switch (gComInfo.ModuleType)    //该处根据治疗头类型来判断应解析执行的指令
+            {
+                case M_Type_633:  
+                case M_Type_633_1:
+                case M_Type_IU:   
+                case M_Type_UVA1: 
+                    break;
+                case M_Type_Wira: 
+                case M_Type_4in1: 
+                    break;
+                //case M_Type_650:  //不需调试界面
+                default:
+                    break;
             }
             break;
         default:
@@ -402,6 +470,7 @@ void HMI_Goto_Error()
         gComInfo.HMI_Scene=eScene_Error;
         if (gComInfo.ErrorCode==Error_NoModule)
         {
+            gInfo.DebugOpen=0;      //拔头之后清授权
             HMI_Goto_LocPage(35);
         }
         else if(gComInfo.ErrorCode==Error_PasswordError)
@@ -420,4 +489,5 @@ void HMI_Exit_Error()
 {
     ErrorBeepTime=0;
 }
+
 

@@ -4,6 +4,13 @@
 #include "main.h"
 
 
+#define HMI_COLOR_BLACK 0x0
+#define HMI_COLOR_WHITE 0xFFFF
+#define HMI_COLOR_RED   0xF800
+#define HMI_COLOR_BLUE  0x001F
+#define HMI_COLOR_GREEN 0x07E0
+
+
 void LL_HMI_Send(const void* str,uint8_t str_len);
 void LL_HMI_Send_Pure(const void* str,uint8_t str_len); //²»´ø0xAAÍ·
 void LL_HMI_SendEnd(void);

@@ -52,14 +52,15 @@ void Module_COMM()
                     case 0x01:      //握手回复治疗头类型
                         gComInfo.ModuleType=pbuf[3];
                         LOG_E("Module Type: %02X",(uint16_t)gComInfo.ModuleType);
-                        
+                        SystemTime1s=0;
+                        gInfo.DebugOpen=OPEN_DBG_Calib|OPEN_DBG_ClearUsedtime|OPEN_DBG_Config;  //给治疗头授权
                         switch (gComInfo.ModuleType)
                         {
                             case M_Type_650:
                                 gComInfo.WorkStat=eWS_Standby;
                                 DS18B20_StartCovert();
-                                gModuleInfo.RoutineModule.WorkTime=10;  //默认10分钟
-                                gModuleInfo.RoutineModule.PowerLevel=1800;   //治疗头没回复能量大小
+                                gInfo.ModuleInfo.RoutineModule.WorkTime=10;  //默认10分钟
+                                gInfo.ModuleInfo.RoutineModule.PowerLevel=1800;   //治疗头没回复能量大小
                                 gComInfo.HMI_Scene=eScene_Module_650;
                                 HMI_Goto_LocPage(2);
                                 HMI_Show_ModuleName("Derma-650");
@@ -72,8 +73,8 @@ void Module_COMM()
                             case M_Type_633_1:
                                 gComInfo.WorkStat=eWS_Standby;
                                 DS18B20_StartCovert();
-                                gModuleInfo.RoutineModule.WorkTime=10;
-                                gModuleInfo.RoutineModule.PowerLevel=150;   //633治疗头没回复能量大小
+                                gInfo.ModuleInfo.RoutineModule.WorkTime=10;
+                                gInfo.ModuleInfo.RoutineModule.PowerLevel=150;   //633治疗头没回复能量大小
                                 gComInfo.HMI_Scene=eScene_Module_633;
                                 HMI_Goto_LocPage(3);
                                 HMI_Show_ModuleName("Derma-633");
@@ -85,8 +86,7 @@ void Module_COMM()
                           //case M_Type_IU:     //IU是另外协议,在此不会收到
                             case M_Type_UVA1:
                                 gComInfo.WorkStat=eWS_Standby;
-                                DS18B20_StartCovert();
-                                gModuleInfo.RoutineModule.WorkTime=10;
+                                gInfo.ModuleInfo.RoutineModule.WorkTime=10;
                                 gComInfo.HMI_Scene=eScene_Module_UVA1;
                                 HMI_Goto_LocPage(4);
                                 HMI_Show_ModuleName("Derma-UVA1");
@@ -108,11 +108,11 @@ void Module_COMM()
                         switch (gComInfo.ModuleType)
                         {
                             case M_Type_650:    //1800mw
-                                gModuleInfo.RoutineModule.PowerLevel=pbuf[3]*10;
+                                gInfo.ModuleInfo.RoutineModule.PowerLevel=pbuf[3]*10;
                                 break;
                             case M_Type_633:
                             case M_Type_633_1:
-                                gModuleInfo.RoutineModule.PowerLevel=pbuf[3];
+                                gInfo.ModuleInfo.RoutineModule.PowerLevel=pbuf[3];
                                 break;
                             default:
                                 break;

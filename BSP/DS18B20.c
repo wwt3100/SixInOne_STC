@@ -85,14 +85,14 @@ uint8_t DS18B20_GetTemp(int16_t *temp)
     if (DS18B20_Reset())
     {
         DS18B20_Write_Byte(0xcc);	// skip rom
-        DS18B20_Write_Byte(0x44);	// convert
-        DS18B20_Reset();
-        DS18B20_Write_Byte(0xcc);	// skip rom
         DS18B20_Write_Byte(0xbe);	// read temp	    
     	for(i=0;i<9;i++)
         {
             t_data[i]=DS18B20_Read_Byte();
-        }  
+        }
+        DS18B20_Reset();
+        DS18B20_Write_Byte(0xcc);	// skip rom
+        DS18B20_Write_Byte(0x44);	// convert
         if(calculate_CRC8(t_data,9)==0)
         {
             TL=t_data[0];

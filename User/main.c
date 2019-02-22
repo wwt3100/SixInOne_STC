@@ -34,7 +34,7 @@ uint8_t idata uart2_buff[18];
 
 _Golbal_comInfo idata gComInfo={0};
 _Golbal_Config  idata gConfig={0};
-_Golbal_Info    xdata gModuleInfo={0};
+_Golbal_Info    xdata gInfo={0};
 
 
 void Delay10ms()		//@11.0592MHz
