@@ -42,6 +42,21 @@ void LL_HMI_Send_Pure(const void* str,uint8_t str_len)
         ptr++;
     }
 }
+void LL_HMI_SendXY(uint16_t x,uint16_t y)
+{
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=x>>8;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=(uint8_t)x;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=y>>8;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=(uint8_t)y;
+}
 
 
 void HMI_Shake_Hand(void) 

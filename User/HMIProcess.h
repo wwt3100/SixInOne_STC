@@ -14,9 +14,11 @@ enum{
     eScene_Module_Wira,
     eScene_Module_4in1,
     eScene_Info,
-    eScene_Debug,
     eScene_Error,
     eScene_Password,
+    eScene_Debug,       //433 IU
+    eScene_DebugUVA1,   //UVA1
+    eScene_DebugNew,    //Wira 4in1
 };
 
 

@@ -28,6 +28,14 @@ bit Heardbeat1s=1;
 
 bit ADConvertDone;
 
+//通信重发
+bit Resend_getUsedtime;
+bit Resend_getCalibData;
+
+//调试相关位
+bit Dbg_Flag_DAC5V;
+bit Dbg_Flag_MainPower;
+
 
 uint8_t idata uart1_buff[18];
 uint8_t idata uart2_buff[18];

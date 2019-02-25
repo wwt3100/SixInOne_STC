@@ -29,18 +29,24 @@ void HMI_Show_Worktime3(void);       //308 使用
 void HMI_Show_Power(void);       //显示光功率 650 633 
 void HMI_Show_RemainTime(void); //显示剩余时间
 
-void HMI_Show_Temp(void);       //显示温度
+void HMI_Show_Temp(int16_t temp);       //显示温度
 void HMI_Show_Password(void);       //密码输入页显示密码
 
 
 
 
+//调试界面
+void HMI_DGB_Show_DAval();
 
 
 
 
 
 
+//Wira 4in1
+void HMI_New_Add(uint8_t sel);
+void HMI_New_Dec(uint8_t sel);
+void HMI_New_Sel(uint8_t sel);
 
 
 

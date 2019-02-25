@@ -54,7 +54,7 @@ void Work_Process()
                     {
                         gComInfo.Count=0;
                         gComInfo.ErrorCode=Error_NoModule;
-                        HMI_Goto_Error();
+                        //HMI_Goto_Error();
                         LOG_E("Error_NoModule");
                     }
                 }
@@ -86,7 +86,6 @@ void Work_Process()
             }
             if (SystemTime100ms==1 && Fire_Flag==1)
             {
-                SystemTime100ms=0;
                 //TODO: 慢启动
             }
         case eWS_Standby:
@@ -110,42 +109,26 @@ void Work_Process()
                         else
                         {
                             gComInfo.TempCount=0;
-                            HMI_Cut_Pic(0x71,gConfig.LANG*100 + 2, 13, 415, 13+81, 415+36); //恢复温度背景
-                            LL_HMI_Send("\x98\x00\x37\x01\x9F\x21\x81\x03\x00\x1F\x00\x1F",12);
-                            if (temp<0)
-                            {
-                                temp=0;
-                            }
-                            else
-                            {
-                                temp=(temp+5)/10;     //四舍五入取整
-                                if (temp>99)
-                                {
-                                    temp=99;        //最高显示99度
-                                }
-                            }
-                            if (temp/10==0)
-                            {
-                                while (Uart1_Busy);     //十位
-                                Uart1_Busy=1;
-                                SBUF=' ';
-                            }
-                            else
-                            {
-                                while (Uart1_Busy);     //十位
-                                Uart1_Busy=1;
-                                SBUF=temp/10+'0';
-                            }
-                            while (Uart1_Busy);     //温度个位
-                            Uart1_Busy=1;
-                            SBUF=temp%10+'0';
-                            LL_HMI_SendEnd();
+                            HMI_Show_Temp(temp);
                         }
+                        
                     }
                         break;
                     case eScene_Module_UVA1:
                         gComInfo.TempCount++;
                         Module_GetTemp();
+                        if (Resend_getUsedtime)
+                        {
+                            ModuleRoutine_GetUsedTime();
+                        }
+                        break;
+                    case eScene_Debug:
+                    {
+                        if(DS18B20_GetTemp(&temp)==0)
+                        {
+                            HMI_Show_Temp(temp);
+                        }
+                    }
                         break;
                     default:
                         break;
@@ -163,6 +146,22 @@ void Work_Process()
                     HMI_Goto_Error();
                 }
             }
+            if (SystemTime100ms==1)     //重发
+            {
+                SystemTime100ms=0;
+                if (Resend_getUsedtime)
+                {
+                    ModuleRoutine_GetUsedTime();
+                }
+                if (Resend_getCalibData)
+                {
+                    ModuleRoutine_GetCalibData();
+                }
+                if (ADConvertDone)          //读回Vfb
+                {
+                    ADConvertDone=0;
+                }
+            }
             break;
         default:
             break;
@@ -171,6 +170,18 @@ void Work_Process()
 
 void WP_Start()
 {
+    switch (gComInfo.HMI_Scene)     //准备
+    {
+        case eScene_Module_633:
+        case eScene_Module_UVA1:
+            if (gInfo.ModuleInfo.RoutineModule.DAC_Cail==0)  //没有DA值直接返回
+            {
+                return ;
+            }
+            break;
+        default:
+            break;
+    }
     FAN_IO=ENABLE;
     switch (gComInfo.HMI_Scene)     //显示部分
     {
@@ -181,6 +192,13 @@ void WP_Start()
             HMI_Cut_Pic(0x71,gConfig.LANG*100 + 16, 618, 411, 618+139, 411+74);     //按钮切暂停
             HMI_Show_RemainTime();
             break;
+        case eScene_Debug:
+            HMI_Cut_Pic(0x71,63, 655, 247, 655+123, 247+78);     //按钮切暂停
+            break;
+        case eScene_Module_Wira:
+        case eScene_Module_4in1:
+            HMI_Cut_Pic(0x71,gConfig.LANG*100 + 46, 652, 504, 652+112, 504+72);     //按钮切暂停
+            break;
         default:
             break;
     }
@@ -190,7 +208,9 @@ void WP_Start()
             PowerCtr_Module12v=POWER_ON;
             break;
         case eScene_Module_633:
-            SPI_Send(30310);        //2V
+            //SPI_Send(30310);        //2V
+            SPI_Send(gInfo.ModuleInfo.RoutineModule.DAC_Cail);
+            //SPI_Send(0x700|3440);   //4.2
             PowerCtr_Light1=POWER_ON; 
             PowerCtr_Main=POWER_ON;   
             break;
@@ -203,6 +223,21 @@ void WP_Start()
             break;
         case eScene_Module_IU:
             break;
+        case eScene_Debug:
+            switch (gComInfo.ModuleType)
+            {
+                case M_Type_633:
+                case M_Type_633_1:
+                {
+                    uint16_t dac=(float)gInfo.Debug.dac/0.01220703125;
+                    SPI_Send(dac|0x7000);
+                    PowerCtr_Light1=POWER_ON;  
+                    //LOG_E("DAC val:%X",dac|0x7000);
+                }
+                    break;
+                default:
+                    break;
+            }
         default:
             break;
     }
@@ -220,7 +255,6 @@ void WP_Stop(uint8_t stop_type)
             PowerCtr_Module12v=POWER_OFF;
             break;
         case eScene_Module_633:
-            
             PowerCtr_Light1=POWER_OFF;  //off
             PowerCtr_Main=POWER_OFF;    //off
             SPI_Send(0x7000);           //DAC 0V
@@ -232,8 +266,53 @@ void WP_Stop(uint8_t stop_type)
             break;
         case eScene_Module_IU:
             break;
+        case eScene_Debug:
+            switch (gComInfo.ModuleType)
+            {
+                case M_Type_633:
+                case M_Type_633_1:
+                    SPI_Send(0x7000);           //DAC 0V
+                    PowerCtr_Light1=POWER_OFF; 
+                    break;
+                default:
+                    break;
+            }
+            break;
         default:
             break;
+    }
+    if (stop_type==1)       //停止保存,暂停不保存
+    {
+        switch (gComInfo.HMI_Scene)     //保存使用时间
+        {
+            case eScene_Module_650:
+            case eScene_Module_633:    
+            case eScene_Module_UVA1:            
+                {
+                    uint8_t xdata cmd[]={"\x39\x26\x00"};
+                    int8_t usedtime=gInfo.ModuleInfo.RoutineModule.WorkTime-
+                        (gInfo.ModuleInfo.RoutineModule.RemainTime)/60;  
+                    if (((gInfo.ModuleInfo.RoutineModule.RemainTime)%60)>45)    //15秒以内不计分钟
+                    {
+                        usedtime--;
+                    }
+                    if(usedtime>0)
+                    {
+                        //LOG_E("Save usedtime :%umin",(uint16_t)usedtime);
+                        Resend_getUsedtime=1;
+                        cmd[2]=usedtime;
+                        LL_Module_Send(cmd,3);
+                    }
+                    //15秒以内不计时
+                    
+                }
+                break;
+            case eScene_Module_IU: 
+                break;
+            case eScene_Module_308:
+            default:
+                break;
+        }
     }
     switch (gComInfo.HMI_Scene)     //显示部分
     {
@@ -249,7 +328,7 @@ void WP_Stop(uint8_t stop_type)
             }
             else    //暂停
             {
-                
+                ;// do nothing
             }
             break;
         case eScene_Module_UVA1:
@@ -262,12 +341,23 @@ void WP_Stop(uint8_t stop_type)
             }
             else    //暂停
             {
-                
+                ;// do nothing
             }
+            break;
+        case eScene_Debug:
+            HMI_Cut_Pic(0x71,62, 655, 247, 655+123, 247+78);     //按钮切暂停
+            gComInfo.WorkStat=eWS_Standby;
+            break;
+        case eScene_Module_Wira:
+        case eScene_Module_4in1:
+            HMI_Cut_Pic(0x71,gConfig.LANG*100 + 45, 652, 504, 652+112, 504+72);     //按钮切暂停
+            gComInfo.WorkStat=eWS_Standby;
+            FAN_IO=DISABLE;
             break;
         default:
             break;
     }
+    
     
     //FAN_IO=DISABLE;   //根据温度情况自动关闭
 }

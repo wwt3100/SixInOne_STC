@@ -289,7 +289,7 @@ void HMI_Show_RemainTime()
     LL_HMI_SendEnd();
 }
 
-void HMI_Show_Temp()
+void HMI_Show_Temp(int16_t temp)
 {
     switch (gComInfo.HMI_Scene)     //显示部分
     {
@@ -297,12 +297,43 @@ void HMI_Show_Temp()
         case eScene_Module_633:
         case eScene_Module_IU:
         case eScene_Module_UVA1:
-            HMI_Cut_Pic(0x71,gConfig.LANG*100 + 16, 618, 411, 618+139, 411+74);     //按钮切暂停
-            HMI_Show_RemainTime();
+            HMI_Cut_Pic(0x71,gConfig.LANG*100 + 2, 13, 415, 13+81, 415+36); //恢复温度背景
+            LL_HMI_Send("\x98\x00\x37\x01\x9F\x21\x81\x03\x00\x1F\x00\x1F",12);
             break;
+        case eScene_Debug:
+            HMI_Cut_Pic(0x71,62, 517, 22, 517+88, 22+51); //恢复温度背景
+            LL_HMI_Send("\x98\x02\x20\x00\x20\x21\x81\x03\x00\x1F\x00\x1F",12);
         default:
             break;
     }
+    if (temp<0)
+    {
+        temp=0;
+    }
+    else
+    {
+        temp=(temp+5)/10;     //四舍五入取整
+        if (temp>99)
+        {
+            temp=99;        //最高显示99度
+        }
+    }
+    if (temp/10==0)
+    {
+        while (Uart1_Busy);     //十位
+        Uart1_Busy=1;
+        SBUF=' ';
+    }
+    else
+    {
+        while (Uart1_Busy);     //十位
+        Uart1_Busy=1;
+        SBUF=temp/10+'0';
+    }
+    while (Uart1_Busy);     //温度个位
+    Uart1_Busy=1;
+    SBUF=temp%10+'0';
+    LL_HMI_SendEnd();
 }
 
 
@@ -320,7 +351,7 @@ void HMI_Show_Password()
         LL_HMI_Send(cmd,3);
         LL_HMI_Send_Pure("\x0\x9B\x0\x81\x7\x0\x1f\x0\x1f",9);
         //#undef  _DEBUG
-        #ifdef _DEBUG   //调试模式显示字符
+        #if defined(_DEBUG) && 0   /*调试模式显示字符*/
         gInfo.Password[gInfo.PasswordLen]=0;
         LL_HMI_Send_Pure(gInfo.Password,gInfo.PasswordLen);
         #else           //非调试显示*
@@ -331,5 +362,40 @@ void HMI_Show_Password()
         #endif
         LL_HMI_SendEnd();
     }
+}
+
+void HMI_DGB_Show_DAval()
+{
+    HMI_Cut_Pic(0x71,62, 109, 396, 109+106, 396+61);  //DA背景恢复
+    LL_HMI_Send("\x98",1);
+    LL_HMI_SendXY(134, 411);
+    LL_HMI_Send_Pure("\x21\x81\x03\x00\x1F\x00\x1F",7);
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=gInfo.Debug.dac/10+'0';
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF='.';
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF=gInfo.Debug.dac%10+'0';
+    LL_HMI_SendEnd();
+    if (Fire_Flag)      //运行时实时可以改电压
+    {
+        uint16_t dac=(float)gInfo.Debug.dac/0.01220703125;
+        SPI_Send(dac|0x7000);
+    }
+}
+
+
+void HMI_New_Add(uint8_t sel)
+{
+}
+void HMI_New_Dec(uint8_t sel)
+{
+}
+
+void HMI_New_Sel(uint8_t sel)
+{
 }
 

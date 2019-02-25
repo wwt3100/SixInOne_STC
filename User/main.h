@@ -25,7 +25,8 @@
 #define M_Type_650      (1)
 #define M_Type_633      (3)
 #define M_Type_633_1    (0x33)
-#define M_Type_IU       (0x10)  /* 正确性未知 */
+#define M_Type_IU       (0x10)  /* 正确性未知 */
+#define M_Type_308      (0x0B)
 #define M_Type_UVA1     (4)
 #define M_Type_Wira     (0x43)
 #define M_Type_4in1     (0x41)
@@ -38,6 +39,7 @@
 #define OPEN_DBG_ClearUsedtime      (0x40)
 #define OPEN_DBG_Config             (0x20)
 
+#define PAGE_PASSWORD_ERROR     (36)
 
 typedef struct Golbal_comInfo{
     uint8_t ModuleType;
@@ -74,11 +76,16 @@ typedef struct Golbal_Info{
             uint8_t WorkTime;           //工作时间用分钟表示
             uint8_t Temp;               //治疗头温度,只有正值
             uint16_t PowerLevel;         //光功率大小
-            uint16_t RemainTime;         //剩余时间,用于暂停等       
+            uint16_t RemainTime;         //剩余时间,用于暂停等  
+
+            uint16_t DAC_Val;           //当前DAC
+            uint16_t DAC_Cail;          //校准DAC
+            
             uint32_t UsedTime;          //已经使用时间
             uint32_t UsedCount;         //已经使用次数
         }RoutineModule;
         struct New4in1Module{
+            uint8_t ConfigSel;          //设置选择
             uint8_t LightMode [4][4];       //LightMode[0]&0x80==0x80 同时输出 低4bit表示光选择   else 顺序 [1-4]为出光顺序
                                             //需要预先读出工作模式,显示到界面上
             uint8_t PowerLevel[4];
@@ -89,6 +96,9 @@ typedef struct Golbal_Info{
     uint8_t DebugOpen;      //该治疗头能接受的密码,位控制,暂定最多8种
     char    Password[9];    //8字节+结尾0
     uint8_t PasswordLen;
+    struct Debug{
+        uint8_t dac; //0-50
+    }Debug;
 }_Golbal_Info;
 
 void Delay10ms();		//@11.0592MHz
@@ -122,6 +132,13 @@ extern bit SystemTime1s;
 extern bit Heardbeat1s;
 
 extern bit ADConvertDone;
+
+extern bit Resend_getUsedtime;
+extern bit Resend_getCalibData;
+
+extern bit Dbg_Flag_DAC5V;
+extern bit Dbg_Flag_MainPower;
+
 
 #endif
 

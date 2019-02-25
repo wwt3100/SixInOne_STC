@@ -13,6 +13,7 @@
 
 void LL_HMI_Send(const void* str,uint8_t str_len);
 void LL_HMI_Send_Pure(const void* str,uint8_t str_len); //²»´ø0xAAÍ·
+void LL_HMI_SendXY(uint16_t x,uint16_t y);
 void LL_HMI_SendEnd(void);
 //
 void HMI_Shake_Hand(void);
