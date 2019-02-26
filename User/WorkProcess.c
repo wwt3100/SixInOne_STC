@@ -56,6 +56,10 @@ void Work_Process()
                         gComInfo.ErrorCode=Error_NoModule;
                         //HMI_Goto_Error();
                         LOG_E("Error_NoModule");
+                        if (gComInfo.HMI_Scene==eScene_Wait)
+                        {
+                            HMI_Scene_Recovery();
+                        }
                     }
                 }
             }
@@ -117,10 +121,6 @@ void Work_Process()
                     case eScene_Module_UVA1:
                         gComInfo.TempCount++;
                         Module_GetTemp();
-                        if (Resend_getUsedtime)
-                        {
-                            ModuleRoutine_GetUsedTime();
-                        }
                         break;
                     case eScene_Debug:
                     {
@@ -173,7 +173,7 @@ void WP_Start()
     switch (gComInfo.HMI_Scene)     //准备
     {
         case eScene_Module_633:
-        case eScene_Module_UVA1:
+        //case eScene_Module_UVA1:      //TODO: 暂不判断UVA1校准值
             if (gInfo.ModuleInfo.RoutineModule.DAC_Cail==0)  //没有DA值直接返回
             {
                 return ;
@@ -223,6 +223,15 @@ void WP_Start()
             break;
         case eScene_Module_IU:
             break;
+        case eScene_Module_Wira:
+            SPI_Send(0x7E66);        //4.5V
+            PowerCtr_Main=POWER_ON;
+            PowerCtr_Light1=POWER_ON; 
+            Delay10ms();
+            LL_Module_Send("\x39\x31\xff\x63",4);
+            break;
+        case eScene_Module_4in1:
+            break;
         case eScene_Debug:
             switch (gComInfo.ModuleType)
             {
@@ -265,6 +274,14 @@ void WP_Stop(uint8_t stop_type)
             SPI_Send(0x7000);           //DAC 0V
             break;
         case eScene_Module_IU:
+            break;
+        case eScene_Module_Wira:
+            LL_Module_Send("\x39\x31\xff\x0",4);
+            PowerCtr_Light1=POWER_OFF;  //off
+            PowerCtr_Main=POWER_OFF;    //off
+            SPI_Send(0x7000);           //DAC 0V
+            break;
+        case eScene_Module_4in1:
             break;
         case eScene_Debug:
             switch (gComInfo.ModuleType)

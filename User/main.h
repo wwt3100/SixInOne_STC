@@ -72,7 +72,7 @@ typedef struct Golbal_Config{
 typedef struct Golbal_Info{
     union ModuleInfo{
         struct RoutineModule{
-            uint8_t LightMode;          //0->连续  1->脉冲
+            uint8_t LightMode;          //0->连续   1->脉冲
             uint8_t WorkTime;           //工作时间用分钟表示
             uint8_t Temp;               //治疗头温度,只有正值
             uint16_t PowerLevel;         //光功率大小
@@ -86,10 +86,11 @@ typedef struct Golbal_Info{
         }RoutineModule;
         struct New4in1Module{
             uint8_t ConfigSel;          //设置选择
-            uint8_t LightMode [4][4];       //LightMode[0]&0x80==0x80 同时输出 低4bit表示光选择   else 顺序 [1-4]为出光顺序
+            //uint8_t LightMode;          //0->顺序 1->同步
+            uint8_t LightStep [5][9];       //出光步骤
                                             //需要预先读出工作模式,显示到界面上
             uint8_t PowerLevel[4];
-            uint8_t WorkTime  [4];      //设置的时间,单位min
+            uint8_t WorkTime[4];      //设置的时间,单位min
             uint16_t RemainTime[4];     //剩余时间,单位s
         }New4in1Module;
     }ModuleInfo;

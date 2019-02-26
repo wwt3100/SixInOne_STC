@@ -44,8 +44,8 @@ void HMI_DGB_Show_DAval();
 
 
 //Wira 4in1
-void HMI_New_Add(uint8_t sel);
-void HMI_New_Dec(uint8_t sel);
+void HMI_New_Add();
+void HMI_New_Dec();
 void HMI_New_Sel(uint8_t sel);
 
 

@@ -320,8 +320,12 @@ void HMI_Process()
                         switch (gComInfo.HMIArg2)
                         {
                             case 0x01:      //暂停
+                                BeepEx(0);
+                                WP_Stop(0);
                                 break;
                             case 0x02:      //停止
+                                BeepEx(0);
+                                WP_Stop(1);
                                 break;
                             default:
                                 break;
@@ -329,12 +333,51 @@ void HMI_Process()
                     }
                 }
             }
-            else
+            else    //workstat not in eWS_Working
             {
                 if (gComInfo.HMIMsg == eMsg_keyUp)
                 {
                     if (gComInfo.HMIArg1==0x08)
                     {
+                        switch (gComInfo.HMIArg2)       //Beep  比if效率高
+                        {
+                            case 0x01:      //开始/暂停
+                            case 0x02:      
+                            case 0x03:
+                            case 0x4:       //选择的按钮
+                            case 0x5:
+                            case 0x6:
+                            case 0x7:
+                            case 0x8:
+                            case 0x9:
+                            case 0xA:
+                            case 0xB:
+                            case 0xC:
+                            case 0xD:
+                            case 0xE:
+                            case 0xF:
+                            case 0x10:
+                            case 0x11:
+                            case 0x12:
+                            case 0x13:
+                            case 0x14:
+                            case 0x15:
+                            case 0x16:
+                            case 0x17:
+                            case 0x18:
+                            case 0x19:
+                            case 0x1A:
+                            case 0x1B:
+                            case 0x1C:
+                            case 0x1D:
+                            case 0x1E:
+                            case 0x1F:
+                            case 0x20:
+                            case 0x21:
+                                BeepEx(0);
+                            default:
+                                break;
+                        }
                         switch (gComInfo.HMIArg2)
                         {
                             case 0x4:       //选择的按钮
@@ -355,7 +398,19 @@ void HMI_Process()
                             case 0x13:
                                 HMI_New_Sel(gComInfo.HMIArg2);
                                 break;
+                            case 0x14:
+                                HMI_New_Add();
+                                break;
+                            case 0x15:
+                                HMI_New_Dec();
+                                break;
                             case 0x01:      //开始/暂停
+                                WP_Start();
+                                break;
+                            case 0x02:      //停止
+                                WP_Stop(1);
+                                break;
+                            case 0x03:      //模式切换
                             default:
                                 break;
                         }
@@ -367,15 +422,22 @@ void HMI_Process()
                     {
                         if (gComInfo.HMIArg2==0x14)
                         {
-                            HMI_New_Add(gInfo.ModuleInfo.New4in1Module.ConfigSel);
+                            BeepEx(0);
+                            HMI_New_Add();
                         }
                         else if(gComInfo.HMIArg2==0x15)
                         {
-                            HMI_New_Dec(gInfo.ModuleInfo.New4in1Module.ConfigSel);
+                            BeepEx(0);
+                            HMI_New_Dec();
+                        }
+                        else
+                        {
+                            ;//do nothing
                         }
                     }
                 }
             }
+            gComInfo.HMIMsg=eMsg_NULL;
             break;
         case eScene_Error:      //密码错误在密码场景来处理
             if (ErrorBeepTime<3 && SystemTime100ms==1)
@@ -747,7 +809,7 @@ void HMI_Scene_Recovery()
             HMI_Goto_LocPage(4);
             HMI_Show_ModuleName("Derma-UVA1");
             HMI_Show_Worktime1();
-            ModuleRoutine_GetUsedTime();
+            //ModuleRoutine_GetUsedTime();      //TODO: 暂不读使用时间
             HMI_Show_Power();
             ModuleRoutine_GetCalibData();
             break;
@@ -755,11 +817,12 @@ void HMI_Scene_Recovery()
             gComInfo.HMI_Scene=eScene_Module_Wira;
             HMI_Goto_LocPage(45);       //TODO: 现测试先进专家模式
             HMI_Cut_PicEx(0x71,61,0,11,399,96,0,0);     //显示名称
+            break;
         case eScene_Module_4in1:
-            gComInfo.HMI_Scene=eScene_Module_Wira;
+            gComInfo.HMI_Scene=eScene_Module_4in1;
             HMI_Goto_LocPage(45);       //TODO: 现测试先进专家模式
             HMI_Cut_PicEx(0x71,61,0,111,399,196,0,0);     //显示名称
-
+            break;
         case eScene_Error:
             HMI_Goto_Error();
             break;

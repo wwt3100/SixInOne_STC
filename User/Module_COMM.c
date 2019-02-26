@@ -51,7 +51,7 @@ void Module_COMM()
                 {
                     case 0x01:      //握手回复治疗头类型
                         gComInfo.ModuleType=pbuf[3];
-                        //LOG_E("Module Type: %02X",(uint16_t)gComInfo.ModuleType);
+                        LOG_E("Module Type: %02X",(uint16_t)gComInfo.ModuleType);
                         gComInfo.TimerCounter=0;
                         SystemTime1s=0;
                         gInfo.DebugOpen=OPEN_DBG_Calib|OPEN_DBG_ClearUsedtime|OPEN_DBG_Config;  //给治疗头授权 
