@@ -119,7 +119,8 @@ void Work_Process()
                     }
                         break;
                     case eScene_Module_UVA1:
-                        gComInfo.TempCount++;
+                    case eScene_Module_Wira:
+                        //gComInfo.TempCount++;     //TODO:暂不开报警
                         Module_GetTemp();
                         break;
                     case eScene_Debug:
@@ -224,13 +225,70 @@ void WP_Start()
         case eScene_Module_IU:
             break;
         case eScene_Module_Wira:
-            SPI_Send(0x7E66);        //4.5V
+        {
+            uint8_t xdata m_cmd[]={"\x39\x31\x1\x5"};
+            m_cmd[3]=gInfo.ModuleInfo.New4in1Module.PowerLevel[0];
+            LL_Module_Send(m_cmd,4);
+            if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x01)
+            {
+                m_cmd[2]=1;
+                LL_Module_Send(m_cmd,4);     //再打开
+            }
+            if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x02)
+            {
+                m_cmd[2]=2;
+                LL_Module_Send(m_cmd,4);     //再打开
+            }
+            if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x04)
+            {
+                m_cmd[2]=3;
+                LL_Module_Send(m_cmd,4);     //再打开
+            }
+            if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x08)
+            {
+                m_cmd[2]=4;
+                LL_Module_Send(m_cmd,4);     //再打开
+            }
             PowerCtr_Main=POWER_ON;
             PowerCtr_Light1=POWER_ON; 
             Delay10ms();
-            LL_Module_Send("\x39\x31\xff\x63",4);
+            SPI_Send(0x7FFF);        //5V
+        }
             break;
         case eScene_Module_4in1:
+        {
+            uint8_t xdata m_cmd[]={"\x39\x31\xff\x1\x5"};
+            LL_Module_Send("\x39\x31\xff\xff\x0",5);    //先关闭
+            if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x01)
+            {
+                m_cmd[3]=1;
+                m_cmd[4]=gInfo.ModuleInfo.New4in1Module.PowerLevel[0];
+                LL_Module_Send(m_cmd,5);     //再打开
+            }
+            if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x02)
+            {
+                m_cmd[3]=2;
+                m_cmd[4]=gInfo.ModuleInfo.New4in1Module.PowerLevel[0];
+                LL_Module_Send(m_cmd,5);     //再打开
+            }
+            if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x04)
+            {
+                m_cmd[3]=3;
+                m_cmd[4]=gInfo.ModuleInfo.New4in1Module.PowerLevel[0];
+                LL_Module_Send(m_cmd,5);     //再打开
+            }
+            if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x08)
+            {
+                m_cmd[3]=4;
+                m_cmd[4]=gInfo.ModuleInfo.New4in1Module.PowerLevel[0];
+                LL_Module_Send(m_cmd,5);     //再打开
+            }
+            
+            Delay10ms();
+            SPI_Send(0x7FFF);        //5V
+            PowerCtr_Main=POWER_ON;
+            PowerCtr_Light1=POWER_ON; 
+        }
             break;
         case eScene_Debug:
             switch (gComInfo.ModuleType)
@@ -282,6 +340,10 @@ void WP_Stop(uint8_t stop_type)
             SPI_Send(0x7000);           //DAC 0V
             break;
         case eScene_Module_4in1:
+            LL_Module_Send("\x39\x31\xff\xff\x0",5);
+            PowerCtr_Light1=POWER_OFF;  //off
+            PowerCtr_Main=POWER_OFF;    //off
+            SPI_Send(0x7000);           //DAC 0V
             break;
         case eScene_Debug:
             switch (gComInfo.ModuleType)

@@ -380,14 +380,58 @@ void HMI_Process()
                         }
                         switch (gComInfo.HMIArg2)
                         {
-                            case 0x4:       //选择的按钮
+                            case 0x4:       //选择工步
+
+                                break;
                             case 0x5:
+
+                                break;
                             case 0x6:
+
+                                break;
                             case 0x7:
-                            case 0x8:
+
+                                break;
+                            case 0x8:       //选择光
+                                if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x01)
+                                {
+                                    HMI_New_Show_Light(gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0xFE);
+                                }
+                                else
+                                {
+                                    HMI_New_Show_Light(gInfo.ModuleInfo.New4in1Module.ConfigSelLight|0x01);
+                                }
+                                break;
                             case 0x9:
+                                if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x02)
+                                {
+                                    HMI_New_Show_Light(gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0xFD);
+                                }
+                                else
+                                {
+                                    HMI_New_Show_Light(gInfo.ModuleInfo.New4in1Module.ConfigSelLight|0x02);
+                                }
+                                break;
                             case 0xA:
+                                if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x04)
+                                {
+                                    HMI_New_Show_Light(gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0xFB);
+                                }
+                                else
+                                {
+                                    HMI_New_Show_Light(gInfo.ModuleInfo.New4in1Module.ConfigSelLight|0x04);
+                                }
+                                break;
                             case 0xB:
+                                if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x08)
+                                {
+                                    HMI_New_Show_Light(gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0xF7);
+                                }
+                                else
+                                {
+                                    HMI_New_Show_Light(gInfo.ModuleInfo.New4in1Module.ConfigSelLight|0x08);
+                                }
+                                break;
                             case 0xC:
                             case 0xD:
                             case 0xE:
@@ -411,6 +455,39 @@ void HMI_Process()
                                 WP_Stop(1);
                                 break;
                             case 0x03:      //模式切换
+                                break;
+                            case 0x1D:      //设置按钮
+                                HMI_Goto_LocPage(49);
+                                break;
+                            case 0x1E:      //智能模式编辑
+                                break;
+                            case 0x1F:      //工程模式(密码)
+                                gComInfo.HMI_LastScene=gComInfo.HMI_Scene;
+                                gComInfo.HMI_Scene=eScene_Password;
+                                HMI_Goto_LocPage(17);
+                                break;
+                            case 0x20:      //使用时间
+                                HMI_Goto_Page(50);
+                                break;
+                            case 0x21:      //返回
+                                switch (gComInfo.HMI_Scene)
+                                {
+                                    case eScene_Module_WiraUsedtime:
+                                    case eScene_Module_4in1Usedtime:
+                                    case eScene_Module_WiraSetup:
+                                    case eScene_Module_4in1Setup:
+                                        HMI_Goto_LocPage(49);
+                                        break;
+                                    case eScene_Module_WiraAuto:
+                                    case eScene_Module_4in1Auto:
+                                    case eScene_Module_Wira:
+                                    case eScene_Module_4in1:
+                                        gComInfo.HMI_LastScene=gComInfo.HMI_Scene;
+                                    default:
+                                        HMI_Scene_Recovery();
+                                        break;
+                                }
+                                break;
                             default:
                                 break;
                         }
@@ -530,6 +607,10 @@ void HMI_Process()
                                     HMI_Goto_LocPage(PAGE_PASSWORD_ERROR);
                                     break;
                             }
+                        }
+                        else if((gInfo.DebugOpen&OPEN_DBG_ROOT)         && strcmp(gInfo.Password,"9973654")==0) //Root
+                        {
+                            Dbg_Admin=1;
                         }
                         else    //密码错误
                         {
@@ -777,6 +858,7 @@ void HMI_Process()
 //HMI场景还原,用于出错/设置后场景还原
 void HMI_Scene_Recovery()
 {
+    uint8_t i=0;
     switch (gComInfo.HMI_LastScene)
     {
         case eScene_Module_650:
@@ -816,12 +898,26 @@ void HMI_Scene_Recovery()
         case eScene_Module_Wira:
             gComInfo.HMI_Scene=eScene_Module_Wira;
             HMI_Goto_LocPage(45);       //TODO: 现测试先进专家模式
-            HMI_Cut_PicEx(0x71,61,0,11,399,96,0,0);     //显示名称
+            HMI_Cut_PicEx(0x71,61,0,11,399,96,0,0);     //显示名称恢复背景
+            HMI_New_Show_Light(gInfo.ModuleInfo.New4in1Module.ConfigSelLight|0x80);
+            for (i = 0xc; i <= 0x13; i++)
+            {
+                gInfo.ModuleInfo.New4in1Module.ConfigSel=i;
+                HMI_New_ShowStr(0);
+            }
+            gInfo.ModuleInfo.New4in1Module.ConfigSel=0;
             break;
         case eScene_Module_4in1:
             gComInfo.HMI_Scene=eScene_Module_4in1;
             HMI_Goto_LocPage(45);       //TODO: 现测试先进专家模式
-            HMI_Cut_PicEx(0x71,61,0,111,399,196,0,0);     //显示名称
+            HMI_Cut_PicEx(0x71,61,0,111,399,196,0,0);     //显示名称恢复背景
+            HMI_New_Show_Light(gInfo.ModuleInfo.New4in1Module.ConfigSelLight|0x80);
+            for (i = 0xc; i <= 0x13; i++)
+            {
+                gInfo.ModuleInfo.New4in1Module.ConfigSel=i;
+                HMI_New_ShowStr(0);
+            }
+            gInfo.ModuleInfo.New4in1Module.ConfigSel=0;
             break;
         case eScene_Error:
             HMI_Goto_Error();

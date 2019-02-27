@@ -36,6 +36,8 @@ bit Resend_getCalibData;
 bit Dbg_Flag_DAC5V;
 bit Dbg_Flag_MainPower;
 
+bit Dbg_Admin;      //管理员权限
+
 
 uint8_t idata uart1_buff[18];
 uint8_t idata uart2_buff[18];

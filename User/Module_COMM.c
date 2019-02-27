@@ -82,11 +82,26 @@ void Module_COMM()
                             case M_Type_Wira:
                                 gComInfo.WorkStat=eWS_Standby;
                                 gComInfo.HMI_LastScene=eScene_Module_Wira;
+                                gInfo.ModuleInfo.New4in1Module.PowerLevel[0]=100;
+                                gInfo.ModuleInfo.New4in1Module.PowerLevel[1]=100;
+                                gInfo.ModuleInfo.New4in1Module.PowerLevel[2]=100;
+                                gInfo.ModuleInfo.New4in1Module.PowerLevel[3]=100;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[0]=10;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[1]=10;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[2]=10;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[3]=10;
                                 break;
                             case M_Type_4in1:
                                 gComInfo.WorkStat=eWS_Standby;
-
                                 gComInfo.HMI_LastScene=eScene_Module_4in1;
+                                gInfo.ModuleInfo.New4in1Module.PowerLevel[0]=100;
+                                gInfo.ModuleInfo.New4in1Module.PowerLevel[1]=100;
+                                gInfo.ModuleInfo.New4in1Module.PowerLevel[2]=100;
+                                gInfo.ModuleInfo.New4in1Module.PowerLevel[3]=100;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[0]=10;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[1]=10;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[2]=10;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[3]=10;
                                 break;
                             default:
                                 break;
@@ -216,6 +231,21 @@ void Module_COMM()
                             int16_t temp=pbuf[3]*10;
                             gComInfo.TempCount=0;
                             HMI_Show_Temp(temp);
+                        }
+                        else
+                        {
+                            ;//do nothing
+                        }
+                        break;
+                    case eScene_Module_Wira:
+                        if (pbuf[2]==0)     //读到数据且正确
+                        {
+                            int16_t temp=pbuf[3]*10;
+                            gComInfo.TempCount=0;
+                            if(Dbg_Admin)
+                            {
+                                HMI_Show_Temp(temp);
+                            }
                         }
                         else
                         {

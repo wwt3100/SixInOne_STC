@@ -38,6 +38,7 @@
 #define OPEN_DBG_Calib              (0x80)
 #define OPEN_DBG_ClearUsedtime      (0x40)
 #define OPEN_DBG_Config             (0x20)
+#define OPEN_DBG_ROOT               (0x10)
 
 #define PAGE_PASSWORD_ERROR     (36)
 
@@ -86,11 +87,13 @@ typedef struct Golbal_Info{
         }RoutineModule;
         struct New4in1Module{
             uint8_t ConfigSel;          //设置选择
-            //uint8_t LightMode;          //0->顺序 1->同步
-            uint8_t LightStep [5][9];       //出光步骤
+            uint8_t ConfigSelLight;     //选择
+            uint8_t LightMode;          //选择出光模式 0专家 1-4智能
+            uint8_t LightStep [5][13];       //出光步骤
                                             //需要预先读出工作模式,显示到界面上
+                                            //[0]bit7模式 bit6-0步数,[3*n+1]光,[3*n+2]能量,[3*n+3]时间
             uint8_t PowerLevel[4];
-            uint8_t WorkTime[4];      //设置的时间,单位min
+            uint8_t WorkTime[4];        //设置的时间,单位min
             uint16_t RemainTime[4];     //剩余时间,单位s
         }New4in1Module;
     }ModuleInfo;
@@ -139,6 +142,8 @@ extern bit Resend_getCalibData;
 
 extern bit Dbg_Flag_DAC5V;
 extern bit Dbg_Flag_MainPower;
+
+extern bit Dbg_Admin;
 
 
 #endif

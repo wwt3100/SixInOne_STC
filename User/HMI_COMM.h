@@ -49,6 +49,8 @@ void HMI_New_Dec();
 void HMI_New_Sel(uint8_t sel);
 
 
+void HMI_New_ShowStr(uint8_t sel);
+void HMI_New_Show_Light(uint8_t sellight);
 
 
 
