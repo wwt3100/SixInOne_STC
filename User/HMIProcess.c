@@ -26,7 +26,7 @@ void HMI_Process()
                 if (gComInfo.HMIArg1==0)
                 {
                     HMI_Show_Logo();
-                    gComInfo.WorkStat=eWS_CheckModuleStep1;
+                    gComInfo.WorkStat=eWS_CheckModule;
                 }
                 else if(gComInfo.HMIArg1==204)
                 {
@@ -67,7 +67,7 @@ void HMI_Process()
                         }
                         gComInfo.HMI_Scene=eScene_Wait;
                         #if defined(_DEBUG)
-                        gComInfo.WorkStat=eWS_CheckModuleStep1;
+                        gComInfo.WorkStat=eWS_CheckModule;
                         #endif
                     }
                     else if(gComInfo.HMIArg2==2)    //选择英文
@@ -936,6 +936,7 @@ void HMI_Goto_Error()
     }
     else
     {
+        
         gComInfo.HMI_LastScene=gComInfo.HMI_Scene;
         gComInfo.HMI_Scene=eScene_Error;
         if (gComInfo.ErrorCode==Error_NoModule)
@@ -950,6 +951,10 @@ void HMI_Goto_Error()
         else
         {
             gComInfo.WorkStat=eWS_Idle;
+//            PowerCtr_Light2=POWER_OFF;  //off     //TODO: 为了测试,暂不关电
+//            PowerCtr_Light1=POWER_OFF;  //off
+//            PowerCtr_Main=POWER_OFF;    //off
+//            SPI_Send(0x7000);           //DAC 0V 出错断电
             HMI_Goto_Page(37);
             HMI_Show_ErrorStr();
         }

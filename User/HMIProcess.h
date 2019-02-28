@@ -11,6 +11,7 @@ enum{
     eScene_Module_UVA1,
     eScene_Module_IU,
     eScene_Module_308,
+    eScene_Module_308test,      //308∫Ï∞ﬂ≤‚ ‘
     eScene_Module_WiraAuto,
     eScene_Module_4in1Auto,
     eScene_Module_Wira,

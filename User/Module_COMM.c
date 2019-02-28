@@ -261,7 +261,44 @@ void Module_COMM()
         }
         else    //gComInfo.COMMProtocol_Head=='@'
         {
-            
+            if (pbuf[0]=='1' && pbuf[1]=='*')   //协议共同部分
+            {
+                if (pbuf[2]=='1')    //1 10 11 12 13 14 15 
+                {
+                    switch (pbuf[3])
+                    {
+                        case '&':   //光传感器错误
+                            
+                            break;
+                        case '0':   //已经点亮,开始计时
+                            
+                            break;
+                        case '1':   //308握手
+                            
+                            break;
+                        case '2':   //频率占空比           @1*12&频率数据&占空比数据*#
+                            
+                            break;
+                        case '3':   //使用时间:@1*13&小时&分钟&秒钟*# (初始状态为0)
+                            
+                            break;
+                        case '4':   //剩余时间@1*14&300&00&00*#(初始状态为300小时，00分钟，00秒钟)
+                            
+                            break;
+                        case '5':   //@1*15&0&0*# 停止计时
+                            
+                            break;
+                        case '6':   //@1*16&1&1*#--IU治疗头
+                            gComInfo.WorkStat=eWS_Standby;
+                            gComInfo.HMI_LastScene=eScene_Module_IU;
+                            break;
+                    }
+                }
+                else    //0 2 3 4 5 7 错误
+                {
+                    
+                }
+            }
         }
     }
 }
@@ -274,7 +311,7 @@ void ModuleRoutine_Shakehand()
 
 void Module308_Shakehand()
 {
-    LL_Module_Send("1*11&5&9",8);
+    LL_Module_Send("1*16&1&1",8);
 }
 
 void ModuleRoutine_GetUsedTime()

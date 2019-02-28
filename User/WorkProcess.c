@@ -6,64 +6,53 @@
 
 void Work_Process()
 {
-    static bit comm_sended=0;
-
     int16_t temp=0;
     switch (gComInfo.WorkStat)
     {
         case eWS_Idle:  //do nothing
             break;
-        case eWS_CheckModuleStep1:
+        case eWS_CheckModule:
             if (SystemTime1s)
             {
-                if (comm_sended)
+                SystemTime1s=0;
+                if (DQ==0)      //如果温度脚是低电平则是接的IU/308头
                 {
-                    comm_sended=0;
-                    gComInfo.WorkStat=eWS_CheckModuleStep2; //直接赋值效率应与自加1一致
+                    SPI_Send(0x7E66);        //4.5V
+                    PowerCtr_Main=POWER_ON;     //开总电
+                    PowerCtr_Light2=POWER_ON;   //开308电源才能通信
+                    Delay10ms();
                     gComInfo.COMMProtocol_Head='@';     //换消息头尾
                     gComInfo.COMMProtocol_Tail1='*';
                     gComInfo.COMMProtocol_Tail2='#';
+                    LOG_E("Module308_Shakehand");
+                    Module308_Shakehand();
                 }
-                else
+                else    //其他功能头
                 {
-                    SystemTime1s=0;
-                    LOG_E("ModuleRoutine_Shakehand");
-                    ModuleRoutine_Shakehand();
-                    comm_sended=1;
-                }
-            }
-            break;
-        case eWS_CheckModuleStep2:
-            if (SystemTime1s)
-            {
-                if (comm_sended)
-                {
-                    comm_sended=0;
-                    gComInfo.WorkStat=eWS_CheckModuleStep1;
+                    SPI_Send(0x7000);        //0V
+                    PowerCtr_Main=POWER_OFF;     //关总电
+                    PowerCtr_Light2=POWER_OFF;   //关mos
                     gComInfo.COMMProtocol_Head=0xAA;
                     gComInfo.COMMProtocol_Tail1=0xC3;
                     gComInfo.COMMProtocol_Tail2=0x3C;
+                    LOG_E("ModuleRoutine_Shakehand");
+                    ModuleRoutine_Shakehand();
                 }
-                else
+                
+                if(++gComInfo.Count>5)
                 {
-                    SystemTime1s=0;
-                    LOG_E("Module308_Shakehand");
-                    Module308_Shakehand();
-                    comm_sended=1;
-                    if(++gComInfo.Count>5)
+                    gComInfo.Count=0;
+                    gComInfo.ErrorCode=Error_NoModule;
+                    gComInfo.HMI_LastScene=eScene_Error;
+                    //HMI_Goto_Error();
+                    LOG_E("Error_NoModule");
+                    if (gComInfo.HMI_Scene==eScene_Wait)
                     {
-                        gComInfo.Count=0;
-                        gComInfo.ErrorCode=Error_NoModule;
-                        //HMI_Goto_Error();
-                        LOG_E("Error_NoModule");
-                        if (gComInfo.HMI_Scene==eScene_Wait)
-                        {
-                            HMI_Scene_Recovery();
-                        }
+                        HMI_Scene_Recovery();
                     }
                 }
             }
-            break; 
+            break;
         case eWS_Working:
             if(SystemTime1s==1 && Fire_Flag==1)
             {
@@ -223,31 +212,34 @@ void WP_Start()
             Module_Send_PWM(1,80);
             break;
         case eScene_Module_IU:
+            PowerCtr_Light2=POWER_ON;
             break;
         case eScene_Module_Wira:
         {
-            uint8_t xdata m_cmd[]={"\x39\x31\x1\x5"};
-            m_cmd[3]=gInfo.ModuleInfo.New4in1Module.PowerLevel[0];
-            LL_Module_Send(m_cmd,4);
+            LL_Module_Send("\x39\x31\xff\x0",4);    //先关闭
             if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x01)
             {
-                m_cmd[2]=1;
-                LL_Module_Send(m_cmd,4);     //再打开
+                uint8_t xdata m_cmd[]={"\x39\x31\x1\x5"};
+                m_cmd[3]=gInfo.ModuleInfo.New4in1Module.PowerLevel[0];
+                LL_Module_Send(m_cmd,4);     //打开
             }
             if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x02)
             {
-                m_cmd[2]=2;
-                LL_Module_Send(m_cmd,4);     //再打开
+                uint8_t xdata m_cmd[]={"\x39\x31\x2\x5"};
+                m_cmd[3]=gInfo.ModuleInfo.New4in1Module.PowerLevel[0];
+                LL_Module_Send(m_cmd,4);     //打开
             }
             if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x04)
             {
-                m_cmd[2]=3;
-                LL_Module_Send(m_cmd,4);     //再打开
+                uint8_t xdata m_cmd[]={"\x39\x31\x3\x5"};
+                m_cmd[3]=gInfo.ModuleInfo.New4in1Module.PowerLevel[0];
+                LL_Module_Send(m_cmd,4);     //打开
             }
             if (gInfo.ModuleInfo.New4in1Module.ConfigSelLight&0x08)
             {
-                m_cmd[2]=4;
-                LL_Module_Send(m_cmd,4);     //再打开
+                uint8_t xdata m_cmd[]={"\x39\x31\x4\x5"};
+                m_cmd[3]=gInfo.ModuleInfo.New4in1Module.PowerLevel[0];
+                LL_Module_Send(m_cmd,4);     //打开
             }
             PowerCtr_Main=POWER_ON;
             PowerCtr_Light1=POWER_ON; 
@@ -332,6 +324,7 @@ void WP_Stop(uint8_t stop_type)
             SPI_Send(0x7000);           //DAC 0V
             break;
         case eScene_Module_IU:
+            PowerCtr_Light2=POWER_OFF;
             break;
         case eScene_Module_Wira:
             LL_Module_Send("\x39\x31\xff\x0",4);

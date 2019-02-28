@@ -96,6 +96,11 @@ typedef struct Golbal_Info{
             uint8_t WorkTime[4];        //设置的时间,单位min
             uint16_t RemainTime[4];     //剩余时间,单位s
         }New4in1Module;
+        struct mini308Module{
+            uint8_t WorkMode;       // 0->正常模式 1->红斑测试
+            uint16_t WorkTime;      //工作时间最长140s 预留2byte
+            uint16_t RemainTime;    //剩余时间
+        }mini308Module;
     }ModuleInfo;
     uint8_t DebugOpen;      //该治疗头能接受的密码,位控制,暂定最多8种
     char    Password[9];    //8字节+结尾0
