@@ -13,8 +13,8 @@
 #include "STC_EEPROM.h"
 #include "DS18B20.h"
 
-#define LANG_CH     0
-#define LANG_EN     1
+#define LANG_ZH     0       //中文
+#define LANG_EN     1       //英文
 
 #define ENABLE        1
 #define DISABLE       0
@@ -25,7 +25,8 @@
 #define M_Type_650      (1)
 #define M_Type_633      (3)
 #define M_Type_633_1    (0x33)
-#define M_Type_IU       (0x10)  /* 正确性未知 */
+#define M_Type_IU       (0x10)  /* 正确性未知 */
+
 #define M_Type_308      (0x0B)
 #define M_Type_UVA1     (4)
 #define M_Type_Wira     (0x43)
@@ -89,11 +90,12 @@ typedef struct Golbal_Info{
             uint8_t ConfigSel;          //设置选择
             uint8_t ConfigSelLight;     //选择
             uint8_t LightMode;          //选择出光模式 0专家 1-4智能
-            uint8_t LightStep [5][13];       //出光步骤
+            uint8_t StepSel;
+            uint8_t LightStep [5][27];       //出光步骤
                                             //需要预先读出工作模式,显示到界面上
                                             //[0]bit7模式 bit6-0步数,[3*n+1]光,[3*n+2]能量,[3*n+3]时间
             uint8_t PowerLevel[4];
-            uint8_t WorkTime[4];        //设置的时间,单位min
+            uint8_t WorkTime[5];        //设置的时间,单位min             [0]同步模式时间 [1-4]顺序模式4光
             uint16_t RemainTime[4];     //剩余时间,单位s
         }New4in1Module;
         struct mini308Module{

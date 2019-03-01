@@ -64,7 +64,7 @@ void HMI_Show_ErrorStr()
 {
     char code cmd[]={0x98,0x1,0x4b,0x01,0xe,0x23,0x81,0x03,0x00,0x1F,0x00,0x1F};
     LL_HMI_Send(cmd, 12);
-    if (gConfig.LANG==0)    //CHN
+    if (gConfig.LANG==LANG_ZH)    //CHN
     {
         char xdata str[]={"´íÎó   "};
         str[5]=gComInfo.ErrorCode/10+'0';
@@ -87,7 +87,7 @@ void HMI_Show_ModuleName(const char* str)
 {
     char xdata cmd[3]={0x98,0x00,0x8C};//0x00,0xC8,0x21,0x81,0x01,0xFF,0xFF,0x00,0x1F};
     uint8_t str_len=strlen(str);
-    if (gConfig.LANG==0)    //CHN
+    if (gConfig.LANG==LANG_ZH)    //CHN
     {
         cmd[2]=148;
     }
@@ -106,7 +106,7 @@ void HMI_Show_WorkMode()
 {
     if(gInfo.ModuleInfo.RoutineModule.LightMode==0)
     {
-        if (gConfig.LANG==0)
+        if (gConfig.LANG==LANG_ZH)
         {
             HMI_Cut_Pic(0x71,2,385,485,385+173,485+67);
         }
@@ -552,7 +552,7 @@ void HMI_New_ShowStr(uint8_t sel)
     uint8_t page=sel==1?46:45;
     switch (gInfo.ModuleInfo.New4in1Module.ConfigSel)
     {
-        case 0xC:
+        case eHMICode_PowerLevel1:
             HMI_Cut_Pic(0x71,page, 35, 189, 35+145, 189+75);      //±³¾°»Ö¸´
             LL_HMI_Send("\x98",1);
             LL_HMI_SendXY(80, 215);
@@ -575,7 +575,7 @@ void HMI_New_ShowStr(uint8_t sel)
             }
             LL_HMI_SendEnd();
             break;
-        case 0xD:
+        case eHMICode_PowerLevel2:
             HMI_Cut_Pic(0x71,page, 191, 189, 191+145, 189+75);      //±³¾°»Ö¸´
             LL_HMI_Send("\x98",1);
             LL_HMI_SendXY(235, 215);
@@ -598,7 +598,7 @@ void HMI_New_ShowStr(uint8_t sel)
             }
             LL_HMI_SendEnd();
             break;
-        case 0xE:
+        case eHMICode_PowerLevel3:
             HMI_Cut_Pic(0x71,page, 349, 189, 349+145, 189+75);      //±³¾°»Ö¸´
             LL_HMI_Send("\x98",1);
             LL_HMI_SendXY(388, 215);
@@ -621,7 +621,7 @@ void HMI_New_ShowStr(uint8_t sel)
             }
             LL_HMI_SendEnd();
             break;
-        case 0xF:
+        case eHMICode_PowerLevel4:
             HMI_Cut_Pic(0x71,page, 514, 189, 514+145, 189+75);      //±³¾°»Ö¸´
             LL_HMI_Send("\x98",1);
             LL_HMI_SendXY(548, 215);
@@ -644,7 +644,63 @@ void HMI_New_ShowStr(uint8_t sel)
             }
             LL_HMI_SendEnd();
             break;
-        case 0x10:
+        case eHMICode_Worktime1:
+            HMI_Cut_Pic(0x71,page, 34, 280, 34+145, 280+75);      //±³¾°»Ö¸´
+            LL_HMI_Send("\x98",1);
+            LL_HMI_SendXY(68, 301);
+            LL_HMI_Send_Pure("\x21\x81\x03\x1C\xFF\x00\x1F",7);     //À¶×Ö
+            while (Uart1_Busy);
+            Uart1_Busy=1;
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[1]/10+'0';
+            while (Uart1_Busy);
+            Uart1_Busy=1;
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[1]%10+'0';
+            LL_HMI_Send_Pure("min",3);
+            LL_HMI_SendEnd();
+            break;
+        case eHMICode_Worktime2:
+            HMI_Cut_Pic(0x71,page, 190, 280, 190+145, 280+75);      //±³¾°»Ö¸´
+            LL_HMI_Send("\x98",1);
+            LL_HMI_SendXY(226, 301);
+            LL_HMI_Send_Pure("\x21\x81\x03\xF9\x04\x00\x1F",7);    //ºì×Ö
+            while (Uart1_Busy);
+            Uart1_Busy=1;
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[2]/10+'0';
+            while (Uart1_Busy);
+            Uart1_Busy=1;
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[2]%10+'0';
+            LL_HMI_Send_Pure("min",3);
+            LL_HMI_SendEnd();
+            break;
+        case eHMICode_Worktime3:
+            HMI_Cut_Pic(0x71,page, 344, 280, 344+145, 280+75);      //±³¾°»Ö¸´
+            LL_HMI_Send("\x98",1);
+            LL_HMI_SendXY(380, 301);
+            LL_HMI_Send_Pure("\x21\x81\x03\xD5\x00\x00\x1F",7);     //»Æ×Ö
+            while (Uart1_Busy);
+            Uart1_Busy=1;
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[3]/10+'0';
+            while (Uart1_Busy);
+            Uart1_Busy=1;
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[3]%10+'0';
+            LL_HMI_Send_Pure("min",3);
+            LL_HMI_SendEnd();
+            break;
+        case eHMICode_Worktime4:
+            HMI_Cut_Pic(0x71,page, 503, 280, 503+145, 280+75);      //±³¾°»Ö¸´
+            LL_HMI_Send("\x98",1);
+            LL_HMI_SendXY(538, 301);
+            LL_HMI_Send_Pure("\x21\x81\x03\xD3\x40\x00\x1F",7);     //³È×Ö
+            while (Uart1_Busy);
+            Uart1_Busy=1;
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[4]/10+'0';
+            while (Uart1_Busy);
+            Uart1_Busy=1;
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[4]%10+'0';
+            LL_HMI_Send_Pure("min",3);
+            LL_HMI_SendEnd();
+            break; 
+        case eHMICode_WorktimeParallel:  //Í¬²½Ä£Ê½Ê±¼ä
             HMI_Cut_Pic(0x71,page, 34, 280, 34+145, 280+75);      //±³¾°»Ö¸´
             LL_HMI_Send("\x98",1);
             LL_HMI_SendXY(68, 301);
@@ -657,58 +713,53 @@ void HMI_New_ShowStr(uint8_t sel)
             SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[0]%10+'0';
             LL_HMI_Send_Pure("min",3);
             LL_HMI_SendEnd();
-            break;
-        case 0x11:
             HMI_Cut_Pic(0x71,page, 190, 280, 190+145, 280+75);      //±³¾°»Ö¸´
             LL_HMI_Send("\x98",1);
             LL_HMI_SendXY(226, 301);
             LL_HMI_Send_Pure("\x21\x81\x03\xF9\x04\x00\x1F",7);    //ºì×Ö
             while (Uart1_Busy);
             Uart1_Busy=1;
-            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[1]/10+'0';
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[0]/10+'0';
             while (Uart1_Busy);
             Uart1_Busy=1;
-            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[1]%10+'0';
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[0]%10+'0';
             LL_HMI_Send_Pure("min",3);
             LL_HMI_SendEnd();
-            break;
-        case 0x12:
             HMI_Cut_Pic(0x71,page, 344, 280, 344+145, 280+75);      //±³¾°»Ö¸´
             LL_HMI_Send("\x98",1);
             LL_HMI_SendXY(380, 301);
             LL_HMI_Send_Pure("\x21\x81\x03\xD5\x00\x00\x1F",7);     //»Æ×Ö
             while (Uart1_Busy);
             Uart1_Busy=1;
-            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[2]/10+'0';
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[0]/10+'0';
             while (Uart1_Busy);
             Uart1_Busy=1;
-            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[2]%10+'0';
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[0]%10+'0';
             LL_HMI_Send_Pure("min",3);
             LL_HMI_SendEnd();
-            break;
-        case 0x13:
             HMI_Cut_Pic(0x71,page, 503, 280, 503+145, 280+75);      //±³¾°»Ö¸´
             LL_HMI_Send("\x98",1);
             LL_HMI_SendXY(538, 301);
             LL_HMI_Send_Pure("\x21\x81\x03\xD3\x40\x00\x1F",7);     //³È×Ö
             while (Uart1_Busy);
             Uart1_Busy=1;
-            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[3]/10+'0';
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[0]/10+'0';
             while (Uart1_Busy);
             Uart1_Busy=1;
-            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[3]%10+'0';
+            SBUF=gInfo.ModuleInfo.New4in1Module.WorkTime[0]%10+'0';
             LL_HMI_Send_Pure("min",3);
             LL_HMI_SendEnd();
-            break; 
+            break;
         default:
             break;
     }
 }
+
 void HMI_New_Add()
 {
     switch (gInfo.ModuleInfo.New4in1Module.ConfigSel)
     {
-        case 0xC:
+        case eHMICode_PowerLevel1:
             if (gInfo.ModuleInfo.New4in1Module.PowerLevel[0]>99)
             {
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[0]=0;
@@ -718,7 +769,7 @@ void HMI_New_Add()
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[0]++;
             }
             break;
-        case 0xD:
+        case eHMICode_PowerLevel2:
             if (gInfo.ModuleInfo.New4in1Module.PowerLevel[1]>99)
             {
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[1]=0;
@@ -728,7 +779,7 @@ void HMI_New_Add()
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[1]++;
             }
             break;
-        case 0xE:
+        case eHMICode_PowerLevel3:
             if (gInfo.ModuleInfo.New4in1Module.PowerLevel[2]>99)
             {
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[2]=0;
@@ -738,7 +789,7 @@ void HMI_New_Add()
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[2]++;
             }
             break;
-        case 0xF:
+        case eHMICode_PowerLevel4:
             if (gInfo.ModuleInfo.New4in1Module.PowerLevel[3]>99)
             {
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[3]=0;
@@ -748,17 +799,7 @@ void HMI_New_Add()
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[3]++;
             }
             break;
-        case 0x10:
-            if (gInfo.ModuleInfo.New4in1Module.WorkTime[0]>=99)
-            {
-                gInfo.ModuleInfo.New4in1Module.WorkTime[0]=1;
-            }
-            else
-            {
-                gInfo.ModuleInfo.New4in1Module.WorkTime[0]++;
-            }
-            break;
-        case 0x11:
+        case eHMICode_Worktime1:
             if (gInfo.ModuleInfo.New4in1Module.WorkTime[1]>=99)
             {
                 gInfo.ModuleInfo.New4in1Module.WorkTime[1]=1;
@@ -768,7 +809,7 @@ void HMI_New_Add()
                 gInfo.ModuleInfo.New4in1Module.WorkTime[1]++;
             }
             break;
-        case 0x12:
+        case eHMICode_Worktime2:
             if (gInfo.ModuleInfo.New4in1Module.WorkTime[2]>=99)
             {
                 gInfo.ModuleInfo.New4in1Module.WorkTime[2]=1;
@@ -778,7 +819,7 @@ void HMI_New_Add()
                 gInfo.ModuleInfo.New4in1Module.WorkTime[2]++;
             }
             break;
-        case 0x13:
+        case eHMICode_Worktime3:
             if (gInfo.ModuleInfo.New4in1Module.WorkTime[3]>=99)
             {
                 gInfo.ModuleInfo.New4in1Module.WorkTime[3]=1;
@@ -786,6 +827,26 @@ void HMI_New_Add()
             else
             {
                 gInfo.ModuleInfo.New4in1Module.WorkTime[3]++;
+            }
+            break;
+        case eHMICode_Worktime4:
+            if (gInfo.ModuleInfo.New4in1Module.WorkTime[4]>=99)
+            {
+                gInfo.ModuleInfo.New4in1Module.WorkTime[4]=1;
+            }
+            else
+            {
+                gInfo.ModuleInfo.New4in1Module.WorkTime[4]++;
+            }
+            break;
+        case eHMICode_WorktimeParallel:
+            if (gInfo.ModuleInfo.New4in1Module.WorkTime[0]>=99)
+            {
+                gInfo.ModuleInfo.New4in1Module.WorkTime[0]=1;
+            }
+            else
+            {
+                gInfo.ModuleInfo.New4in1Module.WorkTime[0]++;
             }
             break;
         default:
@@ -797,7 +858,7 @@ void HMI_New_Dec()
 {
     switch (gInfo.ModuleInfo.New4in1Module.ConfigSel)
     {
-        case 0xC:
+        case eHMICode_PowerLevel1:
             if (gInfo.ModuleInfo.New4in1Module.PowerLevel[0]==0)
             {
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[0]=100;
@@ -807,7 +868,7 @@ void HMI_New_Dec()
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[0]--;
             }
             break;
-        case 0xD:
+        case eHMICode_PowerLevel2:
             if (gInfo.ModuleInfo.New4in1Module.PowerLevel[1]==0)
             {
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[1]=100;
@@ -817,7 +878,7 @@ void HMI_New_Dec()
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[1]--;
             }
             break;
-        case 0xE:
+        case eHMICode_PowerLevel3:
             if (gInfo.ModuleInfo.New4in1Module.PowerLevel[2]==0)
             {
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[2]=100;
@@ -827,7 +888,7 @@ void HMI_New_Dec()
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[2]--;
             }
             break;
-        case 0xF:
+        case eHMICode_PowerLevel4:
             if (gInfo.ModuleInfo.New4in1Module.PowerLevel[3]==0)
             {
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[3]=100;
@@ -837,17 +898,7 @@ void HMI_New_Dec()
                 gInfo.ModuleInfo.New4in1Module.PowerLevel[3]--;
             }
             break;
-        case 0x10:
-            if (gInfo.ModuleInfo.New4in1Module.WorkTime[0]<=1)
-            {
-                gInfo.ModuleInfo.New4in1Module.WorkTime[0]=99;
-            }
-            else
-            {
-                gInfo.ModuleInfo.New4in1Module.WorkTime[0]--;
-            }
-            break;
-        case 0x11:
+        case eHMICode_Worktime1:
             if (gInfo.ModuleInfo.New4in1Module.WorkTime[1]<=1)
             {
                 gInfo.ModuleInfo.New4in1Module.WorkTime[1]=99;
@@ -857,7 +908,7 @@ void HMI_New_Dec()
                 gInfo.ModuleInfo.New4in1Module.WorkTime[1]--;
             }
             break;
-        case 0x12:
+        case eHMICode_Worktime2:
             if (gInfo.ModuleInfo.New4in1Module.WorkTime[2]<=1)
             {
                 gInfo.ModuleInfo.New4in1Module.WorkTime[2]=99;
@@ -867,7 +918,7 @@ void HMI_New_Dec()
                 gInfo.ModuleInfo.New4in1Module.WorkTime[2]--;
             }
             break;
-        case 0x13:
+        case eHMICode_Worktime3:
             if (gInfo.ModuleInfo.New4in1Module.WorkTime[3]<=1)
             {
                 gInfo.ModuleInfo.New4in1Module.WorkTime[3]=99;
@@ -876,6 +927,27 @@ void HMI_New_Dec()
             {
                 gInfo.ModuleInfo.New4in1Module.WorkTime[3]--;
             }
+            break;
+        case eHMICode_Worktime4:
+            if (gInfo.ModuleInfo.New4in1Module.WorkTime[4]<=1)
+            {
+                gInfo.ModuleInfo.New4in1Module.WorkTime[4]=99;
+            }
+            else
+            {
+                gInfo.ModuleInfo.New4in1Module.WorkTime[4]--;
+            }
+            break;
+        case eHMICode_WorktimeParallel:
+            if (gInfo.ModuleInfo.New4in1Module.WorkTime[0]<=1)
+            {
+                gInfo.ModuleInfo.New4in1Module.WorkTime[0]=99;
+            }
+            else
+            {
+                gInfo.ModuleInfo.New4in1Module.WorkTime[0]--;
+            }
+            break;
             break; 
         default:
             return;

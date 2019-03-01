@@ -57,7 +57,7 @@ void HMI_Process()
                 {
                     if (gComInfo.HMIArg2==1)        //开机界面圆按钮
                     {
-                        if(gConfig.LANG==1)
+                        if(gConfig.LANG==LANG_EN)
                         {
                             HMI_Cut_PicEx(0x9C,60,221,186,508,315,258,272);
                         }
@@ -72,13 +72,13 @@ void HMI_Process()
                     }
                     else if(gComInfo.HMIArg2==2)    //选择英文
                     {
-                        gConfig.LANG=1;
+                        gConfig.LANG=LANG_EN;
                         HMI_Goto_LocPage(1);
                         Save_Config();
                     }
                     else if(gComInfo.HMIArg2==3)    //选择中文
                     {
-                        gConfig.LANG=0;
+                        gConfig.LANG=LANG_ZH;
                         HMI_Goto_LocPage(1);
                         Save_Config();
                     }
@@ -448,13 +448,23 @@ void HMI_Process()
                             case 0x15:
                                 HMI_New_Dec();
                                 break;
+                            case 0x16:      // 同步/顺序模式切换
+                                if (gInfo.ModuleInfo.New4in1Module.LightStep[gInfo.ModuleInfo.New4in1Module.StepSel][0]&0x80)
+                                {
+                                    
+                                }
+                                else
+                                {
+                                    
+                                }
+                                break;
                             case 0x01:      //开始/暂停
                                 WP_Start();
                                 break;
                             case 0x02:      //停止
                                 WP_Stop(1);
                                 break;
-                            case 0x03:      //模式切换
+                            case 0x03:      //智能专家模式切换
                                 break;
                             case 0x1D:      //设置按钮
                                 HMI_Goto_LocPage(49);

@@ -236,10 +236,11 @@ void Save_Config()
 
 int main()
 {
+
     gConfig.LANG=Byte_Read(0);
     if (gConfig.LANG>1)
     {
-        gConfig.LANG=0;
+        gConfig.LANG=LANG_ZH;
     }
     Init();
     //LOG_E("System Boot \t SysLang:%02X",(uint16_t)Byte_Read(0));//,0x30+gConfig.LANG);

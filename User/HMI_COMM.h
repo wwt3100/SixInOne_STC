@@ -11,6 +11,21 @@ enum{
     eMsg_keyUp,
 };
 
+enum{
+    eHMICode_Light1=0x08,
+    eHMICode_Light2,
+    eHMICode_Light3,
+    eHMICode_Light4,
+    eHMICode_PowerLevel1 =0x0C,
+    eHMICode_PowerLevel2,
+    eHMICode_PowerLevel3,
+    eHMICode_PowerLevel4,
+    eHMICode_Worktime1   =0x10,
+    eHMICode_Worktime2,
+    eHMICode_Worktime3,
+    eHMICode_Worktime4,
+    eHMICode_WorktimeParallel=0x16,     //同时出光
+};
 
 void HMI_COMM(void);
 

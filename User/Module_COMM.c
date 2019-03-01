@@ -54,7 +54,10 @@ void Module_COMM()
                         LOG_E("Module Type: %02X",(uint16_t)gComInfo.ModuleType);
                         gComInfo.TimerCounter=0;
                         SystemTime1s=0;
-                        gInfo.DebugOpen=OPEN_DBG_Calib|OPEN_DBG_ClearUsedtime|OPEN_DBG_Config;  //给治疗头授权 
+                        gInfo.DebugOpen=OPEN_DBG_Calib|
+                                        OPEN_DBG_ClearUsedtime|
+                                        OPEN_DBG_Config|
+                                        OPEN_DBG_ROOT;  //给治疗头授权 
                         //TODO: 不同治疗头授权不一样
                         switch (gComInfo.ModuleType)    //治疗头数据初始化
                         {
@@ -86,10 +89,11 @@ void Module_COMM()
                                 gInfo.ModuleInfo.New4in1Module.PowerLevel[1]=100;
                                 gInfo.ModuleInfo.New4in1Module.PowerLevel[2]=100;
                                 gInfo.ModuleInfo.New4in1Module.PowerLevel[3]=100;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[0]=10;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[1]=10;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[2]=10;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[3]=10;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[0]=30;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[1]=30;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[2]=30;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[3]=30;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[4]=30;
                                 break;
                             case M_Type_4in1:
                                 gComInfo.WorkStat=eWS_Standby;
@@ -102,6 +106,7 @@ void Module_COMM()
                                 gInfo.ModuleInfo.New4in1Module.WorkTime[1]=10;
                                 gInfo.ModuleInfo.New4in1Module.WorkTime[2]=10;
                                 gInfo.ModuleInfo.New4in1Module.WorkTime[3]=10;
+                                gInfo.ModuleInfo.New4in1Module.WorkTime[4]=10;
                                 break;
                             default:
                                 break;
@@ -181,7 +186,7 @@ void Module_COMM()
                 if (data_size==16)
                 {
                     uint8_t code cmd[]="\x21\x81\x01\xFF\xFF\x00\x1F";
-                    if (gConfig.LANG==LANG_CH)
+                    if (gConfig.LANG==LANG_ZH)
                     {
                         HMI_Cut_Pic(0x71, 2, 133, 219, 133+99, 219+44);     //字符背景还原
                     }
@@ -191,7 +196,7 @@ void Module_COMM()
                     }
                     
                     LL_HMI_Send("\x98",1);      //时间
-                    if (gConfig.LANG==LANG_CH)
+                    if (gConfig.LANG==LANG_ZH)
                     {
                         LL_HMI_SendXY(0x8C, 0xDE);
                     }
@@ -207,7 +212,7 @@ void Module_COMM()
                     LL_HMI_SendEnd();
                     
                     LL_HMI_Send("\x98",1);  //次数
-                    if (gConfig.LANG==LANG_CH)
+                    if (gConfig.LANG==LANG_ZH)
                     {
                         LL_HMI_SendXY(0x8C, 0xF3);
                     }
