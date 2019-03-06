@@ -23,7 +23,7 @@ bit Fire_Flag=0;
 
 
 bit SystemTime100ms=0;
-bit SystemTime1s=1;
+bit SystemTime1s=0;
 bit Heardbeat1s=1;
 
 bit ADConvertDone;
@@ -46,6 +46,7 @@ _Golbal_comInfo idata gComInfo={0};
 _Golbal_Config  idata gConfig={0};
 _Golbal_Info    xdata gInfo={0};
 
+_ModuleSave xdata gModuleSave={0};
 
 void Delay10ms()		//@11.0592MHz
 {
@@ -232,6 +233,45 @@ void Save_Config()
     EA=1;
     IAP_Disable();
     //LOG_E("SysLang:%02X",(uint16_t)Byte_Read(0));
+}
+
+void Save_ModuleSomething()
+{
+    uint8_t c;
+   
+    gModuleSave.crc=calculate_CRC8(&gModuleSave, sizeof(_ModuleSave)-1);
+    #if defined(_DEBUG)
+    LOG_E("Module Save %d CRC:%02X :",(uint16_t)sizeof(_ModuleSave),(uint16_t)gModuleSave.crc);
+    for (c = 0; c < sizeof(_ModuleSave); c++)
+    {
+        LOG_E("%02X ",(uint16_t)(*(((uint8_t*)&gModuleSave)+c)));
+    }
+    LOG_E("\n");
+    #endif
+    Sector_Erase(0x0200);       //必须擦扇区,否则写不进
+    IAP_CONTR = 0x83;         //打开 IAP 功能, 设置Flash 操作等待时间
+    IAP_CMD = 0x02;                 //IAP/ISP/EEPROM 字节编程命令
+    IAP_ADDRH = 0x02;    //设置目标单元地址的高8 位地址
+    IAP_ADDRL = 0;
+    EA=0;
+    for(IAP_ADDRL=0;IAP_ADDRL<sizeof(_Golbal_Config);IAP_ADDRL++)
+    {
+        c=*(((char *)&gModuleSave)+IAP_ADDRL);
+        IAP_DATA = c ;                  //要编程的数据先送进IAP_DATA 寄存器
+        IAP_TRIG = 0x5A;   //先送 5Ah,再送A5h 到ISP/IAP 触发寄存器,每次都需如此
+        IAP_TRIG = 0xA5;   //送完A5h 后，ISP/IAP 命令立即被触发起动
+        _nop_();
+        _nop_();
+    }
+    EA=1;
+    IAP_Disable();
+    LOG_E("Read E2PROM:");
+    for (i = 0; i < sizeof(_ModuleSave); i++)
+    {
+        *((uint8_t*)&gModuleSave+i)=Byte_Read(0x0200+i);
+        LOG_E("%02X ",(uint16_t)Byte_Read(0x0200+i));
+    }
+    LOG_E("\n");
 }
 
 int main()

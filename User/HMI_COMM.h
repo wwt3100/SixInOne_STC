@@ -56,6 +56,8 @@ void HMI_DGB_Show_DAval();
 
 
 
+//IU
+void HMI_Show_IU_Usedtime();
 
 
 //Wira 4in1

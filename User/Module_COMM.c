@@ -2,8 +2,7 @@
 #include "HMI_COMM.h"
 #include "WorkProcess.h"
 #include "HMIProcess.h"
-
-
+#include "STC_EEPROM.h"
 
 void LL_Module_Send(const void* str,uint8_t str_len)
 {
@@ -25,6 +24,12 @@ void LL_Module_Send(const void* str,uint8_t str_len)
     while (Uart2_Busy);
     Uart2_Busy=1;
     S2BUF=gComInfo.COMMProtocol_Tail2;
+    if (gComInfo.COMMProtocol_Head=='@')    //如果是308头,多发'\n'
+    {
+        while (Uart2_Busy);
+        Uart2_Busy=1;
+        S2BUF='\n';
+    }
     while (Uart2_Busy);     //等待发送完
 }
 
@@ -266,11 +271,11 @@ void Module_COMM()
         }
         else    //gComInfo.COMMProtocol_Head=='@'
         {
-            if (pbuf[0]=='1' && pbuf[1]=='*')   //协议共同部分
+            if (pbuf[1]=='1' && pbuf[2]=='*')   //协议共同部分
             {
-                if (pbuf[2]=='1')    //1 10 11 12 13 14 15 
+                if (pbuf[3]=='1')    //1 10 11 12 13 14 15 
                 {
-                    switch (pbuf[3])
+                    switch (pbuf[4])
                     {
                         case '&':   //光传感器错误
                             
@@ -279,7 +284,9 @@ void Module_COMM()
                             
                             break;
                         case '1':   //308握手
-                            
+                            gComInfo.WorkStat=eWS_Standby;
+                            gComInfo.ModuleType=M_Type_308;
+                            gComInfo.HMI_LastScene=eScene_Module_308;
                             break;
                         case '2':   //频率占空比           @1*12&频率数据&占空比数据*#
                             
@@ -294,8 +301,36 @@ void Module_COMM()
                             
                             break;
                         case '6':   //@1*16&1&1*#--IU治疗头
+                        {
+                            uint8_t i=0,c;
                             gComInfo.WorkStat=eWS_Standby;
+                            gComInfo.ModuleType=M_Type_IU;
                             gComInfo.HMI_LastScene=eScene_Module_IU;
+                            gInfo.ModuleInfo.RoutineModule.WorkTime=10;
+                            LOG_E("Read E2PROM:");
+                            for (i = 0; i < sizeof(_ModuleSave); i++)
+                            {
+                                *((uint8_t*)&gModuleSave+i)=Byte_Read(0x0200+i);
+                                LOG_E("%02X ",(uint16_t)Byte_Read(0x0200+i));
+                            }
+                            LOG_E("\n");
+                            #if defined(_DEBUG) && 1
+                            LOG_E("Read Save:");
+                            for (i = 0; i < sizeof(_ModuleSave); i++)
+                            {
+                                LOG_E("%02X ",(uint16_t)*((uint8_t*)&gModuleSave+i));
+                            }
+                            LOG_E("\n");
+                            #endif
+                            if (calculate_CRC8(&gModuleSave, sizeof(_ModuleSave))!=0)   //CRC错误
+                            {
+                                memset(&gModuleSave,0x30,sizeof(_ModuleSave)-3);
+                                gModuleSave.DAC_Cail=0x7000|3850;   //4.7v 48V??
+                                Save_ModuleSomething();
+                            }
+                        }
+                            break;
+                        default:
                             break;
                     }
                 }
@@ -317,6 +352,7 @@ void ModuleRoutine_Shakehand()
 void Module308_Shakehand()
 {
     LL_Module_Send("1*16&1&1",8);
+    //LL_Module_Send("1*11&5&9",8);
 }
 
 void ModuleRoutine_GetUsedTime()

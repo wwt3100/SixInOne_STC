@@ -895,6 +895,7 @@ void HMI_Scene_Recovery()
             HMI_Goto_LocPage(6);
             HMI_Show_ModuleName("Derma-IU");
             HMI_Show_Worktime1();
+            HMI_Show_IU_Usedtime();
             break;
         case eScene_Module_UVA1:
             gComInfo.HMI_Scene=eScene_Module_UVA1;

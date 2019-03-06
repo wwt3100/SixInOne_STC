@@ -112,6 +112,14 @@ typedef struct Golbal_Info{
     }Debug;
 }_Golbal_Info;
 
+typedef struct ModuleSave{
+    uint8_t UsedTime[7];
+    uint8_t UsedCount[5];   
+    uint16_t DAC_Cail;      //DAC校准值
+    uint8_t crc;
+}_ModuleSave;
+
+
 void Delay10ms();		//@11.0592MHz
 
 void LOG_E(void*str,...);
@@ -121,11 +129,14 @@ void BeepEx(uint8_t time);
 
 //最多写256byte
 void Save_Config();
+void Save_ModuleSomething();
 void SPI_Send(uint16_t dat);    //控制48V电源
 
 extern _Golbal_comInfo idata gComInfo;
 extern _Golbal_Config  idata gConfig;
 extern _Golbal_Info    xdata gInfo;
+extern _ModuleSave xdata gModuleSave;
+
 
 extern bit Uart1_Busy;
 extern bit Uart2_Busy;

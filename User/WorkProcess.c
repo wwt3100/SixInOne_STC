@@ -26,6 +26,7 @@ void Work_Process()
                     gComInfo.COMMProtocol_Tail2='#';
                     LOG_E("Module308_Shakehand");
                     Module308_Shakehand();
+                    gComInfo.Count++;
                 }
                 else    //其他功能头
                 {
@@ -37,9 +38,10 @@ void Work_Process()
                     gComInfo.COMMProtocol_Tail2=0x3C;
                     LOG_E("ModuleRoutine_Shakehand");
                     ModuleRoutine_Shakehand();
+                    gComInfo.Count+=2;
                 }
                 
-                if(++gComInfo.Count>5)
+                if(gComInfo.Count>10)
                 {
                     gComInfo.Count=0;
                     gComInfo.ErrorCode=Error_NoModule;
@@ -212,7 +214,7 @@ void WP_Start()
             Module_Send_PWM(1,80);
             break;
         case eScene_Module_IU:
-            PowerCtr_Light2=POWER_ON;
+            PowerCtr_Light1=POWER_ON;
             break;
         case eScene_Module_Wira:
         {
@@ -324,7 +326,7 @@ void WP_Stop(uint8_t stop_type)
             SPI_Send(0x7000);           //DAC 0V
             break;
         case eScene_Module_IU:
-            PowerCtr_Light2=POWER_OFF;
+            PowerCtr_Light1=POWER_OFF;
             break;
         case eScene_Module_Wira:
             LL_Module_Send("\x39\x31\xff\x0",4);
@@ -364,7 +366,8 @@ void WP_Stop(uint8_t stop_type)
                     uint8_t xdata cmd[]={"\x39\x26\x00"};
                     int8_t usedtime=gInfo.ModuleInfo.RoutineModule.WorkTime-
                         (gInfo.ModuleInfo.RoutineModule.RemainTime)/60;  
-                    if (((gInfo.ModuleInfo.RoutineModule.RemainTime)%60)>45)    //15秒以内不计分钟
+                    if (((gInfo.ModuleInfo.RoutineModule.RemainTime)/60)==0 && 
+                        ((gInfo.ModuleInfo.RoutineModule.RemainTime)%60)>45)    //15秒以内不计分钟
                     {
                         usedtime--;
                     }
@@ -380,6 +383,64 @@ void WP_Stop(uint8_t stop_type)
                 }
                 break;
             case eScene_Module_IU: 
+                {
+                    int8_t usedtime=gInfo.ModuleInfo.RoutineModule.WorkTime-
+                        (gInfo.ModuleInfo.RoutineModule.RemainTime)/60;  
+                    if (((gInfo.ModuleInfo.RoutineModule.RemainTime)/60)==0 && 
+                        ((gInfo.ModuleInfo.RoutineModule.RemainTime)%60)>45)    //15秒以内不计分钟
+                    {
+                        usedtime--;
+                    }
+                    if(usedtime>0)
+                    {
+                        uint8_t i;
+                        for (i = 4; i > 0; i--)
+                        {
+                            gModuleSave.UsedCount[i]++;
+                            if (gModuleSave.UsedCount[i]=='9'+1)
+                            {
+                                gModuleSave.UsedCount[i]='0';
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        i=(usedtime%60);
+                        gModuleSave.UsedTime[6]+=i%10;
+                        if (gModuleSave.UsedTime[6]>'9')
+                        {
+                            gModuleSave.UsedTime[6]-=10;
+                            gModuleSave.UsedTime[5]++;
+                            if (gModuleSave.UsedTime[5]>'6')
+                            {
+                                gModuleSave.UsedTime[5]-=6;
+                                gModuleSave.UsedTime[4]++;
+                            }
+                        }
+                        gModuleSave.UsedTime[5]+=i/10;
+                        if (gModuleSave.UsedTime[5]>'6')
+                        {
+                            gModuleSave.UsedTime[5]-=6;
+                            gModuleSave.UsedTime[4]++;
+                        }
+                        gModuleSave.UsedTime[4]+=(usedtime/60);
+                        for (i = 4; i > 0; i--)
+                        {
+                            if (gModuleSave.UsedTime[i]>'9')
+                            {
+                                gModuleSave.UsedTime[i]-=10;
+                                gModuleSave.UsedTime[i-1]++;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        Save_ModuleSomething();
+                        HMI_Show_IU_Usedtime();
+                    }
+                }
                 break;
             case eScene_Module_308:
             default:

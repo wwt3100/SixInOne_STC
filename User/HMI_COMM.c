@@ -396,6 +396,49 @@ void HMI_DGB_Show_DAval()
     }
 }
 
+void HMI_Show_IU_Usedtime()
+{
+    uint8_t code cmd[]="\x21\x81\x01\xFF\xFF\x00\x1F";
+    if (gConfig.LANG==LANG_ZH)
+    {
+        HMI_Cut_Pic(0x71, 2, 133, 219, 133+99, 219+44);     //字符背景还原
+    }
+    else
+    {
+        HMI_Cut_Pic(0x71,102, 125, 220, 125+100, 220+42);     //字符背景还原
+    }
+    
+    LL_HMI_Send("\x98",1);      //时间
+    if (gConfig.LANG==LANG_ZH)
+    {
+        LL_HMI_SendXY(0x8C, 0xDE);
+    }
+    else
+    {
+        LL_HMI_SendXY(0x74, 0xDE);
+    }
+    LL_HMI_Send_Pure(cmd,7);
+    LL_HMI_Send_Pure(gModuleSave.UsedTime,5);
+    LL_HMI_Send_Pure("h",1);
+    LL_HMI_Send_Pure(gModuleSave.UsedTime+5,2);
+    LL_HMI_Send_Pure("min",3);
+    LL_HMI_SendEnd();
+    
+    LL_HMI_Send("\x98",1);  //次数
+    if (gConfig.LANG==LANG_ZH)
+    {
+        LL_HMI_SendXY(0x8C, 0xF3);
+    }
+    else
+    {
+        LL_HMI_SendXY(0x7E, 0xF1);
+    }
+    LL_HMI_Send_Pure(cmd,7);
+    LL_HMI_Send_Pure(gModuleSave.UsedCount,5);
+    LL_HMI_SendEnd();
+
+}
+
 void HMI_New_Show_Light(uint8_t sellight)
 {
     switch (gComInfo.HMI_Scene)
