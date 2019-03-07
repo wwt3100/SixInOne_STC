@@ -41,7 +41,6 @@
 #define OPEN_DBG_Config             (0x20)
 #define OPEN_DBG_ROOT               (0x10)
 
-#define PAGE_PASSWORD_ERROR     (36)
 
 typedef struct Golbal_comInfo{
     uint8_t ModuleType;
@@ -58,7 +57,7 @@ typedef struct Golbal_comInfo{
     uint8_t TimerCounter2;
 
     uint8_t HMIMsg;
-    uint8_t HMIArg1,HMIArg2;
+    uint8_t HMIArg1,HMIArg2;    //主要用作传递串口屏按钮键码
 
     uint8_t COMMProtocol_Head;
     uint8_t COMMProtocol_Tail1;
@@ -102,6 +101,9 @@ typedef struct Golbal_Info{
             uint8_t WorkMode;       // 0->正常模式 1->红斑测试
             uint16_t WorkTime;      //工作时间最长140s 预留2byte
             uint16_t RemainTime;    //剩余时间
+            uint16_t TotalTime;     //总红斑测试时间
+            uint16_t Freq;      //工作频率
+            uint16_t Duty;      //占空比
         }mini308Module;
     }ModuleInfo;
     uint8_t DebugOpen;      //该治疗头能接受的密码,位控制,暂定最多8种
@@ -151,6 +153,7 @@ extern bit Fire_Flag;
 
 extern bit SystemTime100ms;
 extern bit SystemTime1s;
+extern bit SystemTime1s_1;
 extern bit Heardbeat1s;
 
 extern bit ADConvertDone;

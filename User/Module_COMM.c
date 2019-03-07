@@ -28,9 +28,22 @@ void LL_Module_Send(const void* str,uint8_t str_len)
     {
         while (Uart2_Busy);
         Uart2_Busy=1;
-        S2BUF='\n';
+        S2BUF=0x0A;
     }
     while (Uart2_Busy);     //等待发送完
+    #if defined(_DEBUG) && 0 /*干扰正常工作流程*/
+    LOG_E("%02X ",(uint16_t)gComInfo.COMMProtocol_Head);
+    for (i = 0; i < str_len; i++)
+    {
+        LOG_E("%02X ",(uint16_t)*((uint8_t*)(str+i)));
+    }
+    LOG_E("%02X ",(uint16_t)gComInfo.COMMProtocol_Tail1);
+    LOG_E("%02X ",(uint16_t)gComInfo.COMMProtocol_Tail2);
+    if (gComInfo.COMMProtocol_Head=='@')    //如果是308头,多发'\n'
+    {
+        LOG_E("%02X ",(uint16_t)'\n');
+    }
+    #endif
 }
 
 
@@ -278,15 +291,19 @@ void Module_COMM()
                     switch (pbuf[4])
                     {
                         case '&':   //光传感器错误
-                            
+                            LOG_E("308 Error 1");
                             break;
                         case '0':   //已经点亮,开始计时
-                            
+                            Fire_Flag=1;
+                            gComInfo.WorkStat=eWS_Working;
                             break;
-                        case '1':   //308握手
+                        case '1':   //308握手 @1*11&9&5*#
+                            memset(&gInfo,0,sizeof(_Golbal_Info));  //清治疗头数据
                             gComInfo.WorkStat=eWS_Standby;
                             gComInfo.ModuleType=M_Type_308;
-                            gComInfo.HMI_LastScene=eScene_Module_308;
+                            gComInfo.HMI_Scene=eScene_Module_308Wait;       //直接切换场景等待进入
+                            gInfo.ModuleInfo.mini308Module.WorkTime=30;     //默认30秒
+                            //HMI_Scene_Recovery(); 
                             break;
                         case '2':   //频率占空比           @1*12&频率数据&占空比数据*#
                             
@@ -302,32 +319,23 @@ void Module_COMM()
                             break;
                         case '6':   //@1*16&1&1*#--IU治疗头
                         {
-                            uint8_t i=0,c;
+                            uint8_t i=0;
+                            memset(&gInfo,0,sizeof(_Golbal_Info));  //清治疗头数据
                             gComInfo.WorkStat=eWS_Standby;
                             gComInfo.ModuleType=M_Type_IU;
                             gComInfo.HMI_LastScene=eScene_Module_IU;
                             gInfo.ModuleInfo.RoutineModule.WorkTime=10;
-                            LOG_E("Read E2PROM:");
                             for (i = 0; i < sizeof(_ModuleSave); i++)
                             {
                                 *((uint8_t*)&gModuleSave+i)=Byte_Read(0x0200+i);
-                                LOG_E("%02X ",(uint16_t)Byte_Read(0x0200+i));
                             }
-                            LOG_E("\n");
-                            #if defined(_DEBUG) && 1
-                            LOG_E("Read Save:");
-                            for (i = 0; i < sizeof(_ModuleSave); i++)
-                            {
-                                LOG_E("%02X ",(uint16_t)*((uint8_t*)&gModuleSave+i));
-                            }
-                            LOG_E("\n");
-                            #endif
                             if (calculate_CRC8(&gModuleSave, sizeof(_ModuleSave))!=0)   //CRC错误
                             {
                                 memset(&gModuleSave,0x30,sizeof(_ModuleSave)-3);
                                 gModuleSave.DAC_Cail=0x7000|3850;   //4.7v 48V??
                                 Save_ModuleSomething();
                             }
+                            HMI_Scene_Recovery();
                         }
                             break;
                         default:
@@ -336,7 +344,7 @@ void Module_COMM()
                 }
                 else    //0 2 3 4 5 7 错误
                 {
-                    
+                    LOG_E("308 Error %c",pbuf[3]);
                 }
             }
         }

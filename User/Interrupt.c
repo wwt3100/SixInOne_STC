@@ -111,7 +111,7 @@ void Timer0_isr() interrupt 1 using 3
     TL0 = 0x00;		//设置定时初值    50ms
     TH0 = 0x4C;		//设置定时初值
     gComInfo.TimerCounter++;
-    if (Fire_Flag==1 && gComInfo.WorkStat==eWS_Working && gInfo.ModuleInfo.RoutineModule.LightMode==1 && gComInfo.TimerCounter%5==0)   //4Hz 闪烁模式
+    if (Fire_Flag==1 && gComInfo.WorkStat==eWS_Working && gInfo.ModuleInfo.RoutineModule.LightMode==1 && gComInfo.TimerCounter%10==0)   //2Hz 闪烁模式
     {
         switch (gComInfo.HMI_Scene)
         {
@@ -133,7 +133,11 @@ void Timer0_isr() interrupt 1 using 3
 	{
 		gComInfo.TimerCounter = 0;
 		SystemTime1s = 1;		//治疗时间1s倒计时标志
-        Heardbeat1s=1;
+		SystemTime1s_1=1;
+	}
+	else if(gComInfo.TimerCounter == 10)    //与工作秒错开500ms
+	{
+	    Heardbeat1s=1;
 	}
 }
 

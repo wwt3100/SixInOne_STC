@@ -6,9 +6,8 @@
 enum{
     eWS_Idle=0,             //
     eWS_CheckModule,
-    eWS_CheckModuleStep1,   //使用协议检测治疗头
+    eWS_CheckModule308,
     eWS_CheckTempSensor,    //根据类型检查温度传感器是否存在
-    eWS_CheckModuleStep2,   //检测308 IU 治疗头
     eWS_Standby,
     eWS_Working,
 };

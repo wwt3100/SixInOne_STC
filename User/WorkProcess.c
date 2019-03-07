@@ -55,6 +55,13 @@ void Work_Process()
                 }
             }
             break;
+        case eWS_CheckModule308:
+            if (SystemTime1s)
+            {
+                SystemTime1s=0;
+                LL_Module_Send("1*11&5&9",8);       //握手308
+            }
+            break;
         case eWS_Working:
             if(SystemTime1s==1 && Fire_Flag==1)
             {
@@ -74,6 +81,11 @@ void Work_Process()
                         {
                             WP_Stop(1);     //Timeout Stop
                         }
+                        break;
+                    case eScene_Module_308:
+                    case eScene_Module_308test:
+//                        LL_Module_Send("1*15&0&0",8);
+//                        LOG_E("Send 308 HeartBeat");
                         break;
                     default:
                         break;
@@ -105,14 +117,18 @@ void Work_Process()
                         {
                             gComInfo.TempCount=0;
                             HMI_Show_Temp(temp);
-                        }
-                        
+                        }                        
                     }
                         break;
                     case eScene_Module_UVA1:
                     case eScene_Module_Wira:
                         //gComInfo.TempCount++;     //TODO:暂不开报警
                         Module_GetTemp();
+                        break;
+                    case eScene_Module_308:
+                    case eScene_Module_308test:
+                        LL_Module_Send("1*15&0&0",8);
+                        LOG_E("Send 308 HeartBeat");
                         break;
                     case eScene_Debug:
                     {

@@ -43,9 +43,6 @@ typedef long   int32_t;
 
 
 
-
-
-
 /*  GPIO  */
 sbit BEEP_IO        = P3^6;
 sbit FAN_IO         = P1^6;

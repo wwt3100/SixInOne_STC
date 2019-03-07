@@ -6,6 +6,8 @@
 
 uint8_t ErrorBeepTime=0;
 
+uint8_t HMI_Count=0;
+
 
 void HMI_Process()
 {
@@ -23,27 +25,27 @@ void HMI_Process()
             {
                 gComInfo.HMIMsg=eMsg_NULL;
               #if !defined(_DEBUG)                //开机动画
-                if (gComInfo.HMIArg1==0)
+                if (gComInfo.HMIArg1==ePage_Startup)
                 {
                     HMI_Show_Logo();
                     gComInfo.WorkStat=eWS_CheckModule;
                 }
-                else if(gComInfo.HMIArg1==204)
+                else if(gComInfo.HMIArg1==ePage_LogoEnd)
                 {
                     BeepEx(10-1);
                     gComInfo.HMI_Scene=eScene_StartPage;
-                    HMI_Goto_LocPage(1);
+                    HMI_Goto_LocPage(ePage_Main);
                 }
                 else
                 {
                     ;   //wait
                 }
               #else                         //调试模式跳过动画
-                if (gComInfo.HMIArg1==0)
+                if (gComInfo.HMIArg1==ePage_Startup)
                 {
                     BeepEx(10-1);
                     gComInfo.HMI_Scene=eScene_StartPage;
-                    HMI_Goto_LocPage(1);
+                    HMI_Goto_LocPage(ePage_Main);
                 }
               #endif
             }
@@ -73,13 +75,13 @@ void HMI_Process()
                     else if(gComInfo.HMIArg2==2)    //选择英文
                     {
                         gConfig.LANG=LANG_EN;
-                        HMI_Goto_LocPage(1);
+                        HMI_Goto_LocPage(ePage_Main);
                         Save_Config();
                     }
                     else if(gComInfo.HMIArg2==3)    //选择中文
                     {
                         gConfig.LANG=LANG_ZH;
-                        HMI_Goto_LocPage(1);
+                        HMI_Goto_LocPage(ePage_Main);
                         Save_Config();
                     }
                     else
@@ -99,12 +101,147 @@ void HMI_Process()
             {
                 gComInfo.HMIMsg=eMsg_NULL;      //清除按键消息
             }
-            if (gComInfo.HMI_LastScene!=0)
+            if (gComInfo.HMI_LastScene != eScene_Startup)
             {
                 HMI_Scene_Recovery();
             }
             break;
-        case eScene_Module_308:
+        case eScene_Module_308Wait:
+            if (SystemTime1s_1==1)
+            {
+                SystemTime1s_1=0;
+                if(HMI_Count++>1)   //延时5秒
+                {
+                    HMI_Count=0;
+                    gComInfo.HMI_LastScene=eScene_Module_308;
+                    HMI_Scene_Recovery();
+                    //LOG_E("Goto eScene_Module_308");
+                }
+            }
+            break;
+        case eScene_Module_308:         //308从场景按键来说无差异,用于区分显示
+        case eScene_Module_308test:
+            if (gComInfo.WorkStat==eWS_Working)
+            {
+                if (gComInfo.HMIMsg==eMsg_keyUp && gComInfo.HMIArg1==eKeyCode_Group1)
+                {
+                    switch (gComInfo.HMIArg2)
+                    {
+                        case 0x31:      //开始
+                            if (Fire_Flag==0)
+                            {
+                                SystemTime1s=0;
+                                gComInfo.TimerCounter=gComInfo.TimerCounter2;   //恢复计数
+                                WP_Start();     //开始
+                                BeepEx(0);
+                            }
+                            break;
+                        case 0x32:      //暂停
+                            LL_Module_Send("1*7&0&0",7); 
+                            if (Fire_Flag==1)
+                            {
+                                gComInfo.TimerCounter2=gComInfo.TimerCounter;   //保存定时器计数
+                                WP_Stop(0);     //暂停
+                                BeepEx(0);
+                            }
+                            break;
+                        case 0x05:      //停止
+                            LL_Module_Send("1*7&0&0",7); 
+                            BeepEx(0);
+                            WP_Stop(1);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    ;//do nothing
+                }
+            }
+            else
+            {
+                if (gComInfo.HMIMsg==eMsg_keyUp && gComInfo.HMIArg1==eKeyCode_Group1)
+                {
+                    BeepEx(0);
+                    switch (gComInfo.HMIArg2)
+                    {
+                        case eKeyCodeG1_TimeAdd:
+                            break;
+                        case eKeyCodeG1_TimeDec:
+                            break;
+                        case eKeyCodeG1_SysInfo:        //进入密码输入页
+                            HMI_Goto_LocPage(ePage_PasswordInput);
+                            gComInfo.HMI_LastScene=gComInfo.HMI_Scene;
+                            gComInfo.HMI_Scene=eScene_Password;
+                            break;
+                        case eKeyCodeG1_Stop:
+                            LL_Module_Send("1*7&0&0",7); 
+                            break;
+                        case 0x31:              //开始
+                            LL_Module_Send("1*7&1&0",7); 
+                            Fire_Flag=1;
+                            gComInfo.WorkStat=eWS_Working;
+                            break;
+                        case 0x32:              //暂停
+                            LL_Module_Send("1*7&0&0",7); 
+                            break;
+                        case 0x33:              //进入红斑测试
+                            gComInfo.HMI_LastScene=eScene_Module_308test;
+                            HMI_Scene_Recovery();
+                            break;
+                        case 0x34:              //退出红斑测试
+                            gComInfo.HMI_LastScene=eScene_Module_308;
+                            HMI_Scene_Recovery();
+                            break;
+                        case 0x35:              //红斑3s
+                            
+                            break;
+                        case 0x36:              //红斑6s
+                            
+                            break;
+                        case 0x37:              //红斑9s
+                            
+                            break;
+                        case 0x38:              //红斑12s
+                            break;
+                        case 0x39:              //红斑15s
+                            break;
+                        case 0x3A:              //红斑18s
+                            break;
+                        case 0x3C:              //进入IU界面
+                            memset(&gInfo,0,sizeof(_Golbal_Info));  //清治疗头数据
+                            gComInfo.WorkStat=eWS_Standby;
+                            gComInfo.ModuleType=M_Type_IU;
+                            gComInfo.HMI_LastScene=eScene_Module_IU;
+                            gInfo.ModuleInfo.RoutineModule.WorkTime=10;
+                            HMI_Scene_Recovery();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else if(gComInfo.HMIMsg==eMsg_KeyLongPush && gComInfo.HMIArg1==eKeyCode_Group1)
+                {
+                    BeepEx(0);
+                    if (gComInfo.HMIArg2 == eKeyCodeG1_TimeAdd)
+                    {
+                        
+                    }
+                    else if(gComInfo.HMIArg2 == eKeyCodeG1_TimeDec)
+                    {
+                    }
+                    else
+                    {
+                        ;//do nothing
+                    }
+                }
+                else
+                {
+                    ;//do nothing
+                }
+            }
+            gComInfo.HMIMsg=eMsg_NULL; 
             break;
         case eScene_Module_IU:
         case eScene_Module_650:
@@ -112,9 +249,9 @@ void HMI_Process()
         case eScene_Module_UVA1:
             if (gComInfo.WorkStat==eWS_Working)
             {
-                if (gComInfo.HMIMsg==eMsg_keyUp && gComInfo.HMIArg1==0x01)
+                if (gComInfo.HMIMsg==eMsg_keyUp && gComInfo.HMIArg1==eKeyCode_Group1)
                 {
-                    if (gComInfo.HMIArg2==0x04)     
+                    if (gComInfo.HMIArg2==eKeyCodeG1_StartPause)     
                     {
                         if(Fire_Flag==1)    
                         {
@@ -130,7 +267,7 @@ void HMI_Process()
                         BeepEx(0);
                         
                     }
-                    else if(gComInfo.HMIArg2==0x05) //停止
+                    else if(gComInfo.HMIArg2==eKeyCodeG1_Stop) //停止
                     {
                         BeepEx(0);
                         WP_Stop(1);
@@ -147,7 +284,7 @@ void HMI_Process()
                 if (gComInfo.HMIMsg==eMsg_keyUp)
                 {
                     gComInfo.HMIMsg=eMsg_NULL;
-                    if (gComInfo.HMIArg1==0x01)
+                    if (gComInfo.HMIArg1==eKeyCode_Group1)
                     {
                         switch (gComInfo.HMIArg2)
                         {
@@ -205,7 +342,7 @@ void HMI_Process()
                                 
                                 break;
                             case 0x03:      //系统信息按钮(进入密码页)
-                                HMI_Goto_LocPage(17);
+                                HMI_Goto_LocPage(ePage_PasswordInput);
                                 gComInfo.HMI_LastScene=gComInfo.HMI_Scene;
                                 gComInfo.HMI_Scene=eScene_Password;
                                 break;
@@ -234,6 +371,10 @@ void HMI_Process()
                                     ;   //UVA1和IU没有模式切换
                                 }
                                 break;
+                            case 0x3B:      //切换到308模式
+                                HMI_Goto_LocPage(ePage_Loading308);    //等待界面
+                                gComInfo.WorkStat=eWS_CheckModule308;
+                                break;
                             default:
                                 break;
                         }
@@ -243,7 +384,7 @@ void HMI_Process()
                 else if(gComInfo.HMIMsg==eMsg_KeyLongPush)
                 {
                     gComInfo.HMIMsg=eMsg_NULL;
-                    if (gComInfo.HMIArg1==0x01)
+                    if (gComInfo.HMIArg1==eKeyCode_Group1)
                     {
                         if (gComInfo.HMIArg2 == 0x01)
                         {
@@ -474,7 +615,7 @@ void HMI_Process()
                             case 0x1F:      //工程模式(密码)
                                 gComInfo.HMI_LastScene=gComInfo.HMI_Scene;
                                 gComInfo.HMI_Scene=eScene_Password;
-                                HMI_Goto_LocPage(17);
+                                HMI_Goto_LocPage(ePage_PasswordInput);
                                 break;
                             case 0x20:      //使用时间
                                 HMI_Goto_Page(50);
@@ -535,7 +676,7 @@ void HMI_Process()
             }
             break;
         case eScene_Password:
-            if (gComInfo.HMIMsg == eMsg_keyUp && gComInfo.HMIArg1==2)
+            if (gComInfo.HMIMsg == eMsg_keyUp && gComInfo.HMIArg1==eKeyCode_Group2)
             {
                 BeepEx(0);
                 switch (gComInfo.HMIArg2)
@@ -570,7 +711,7 @@ void HMI_Process()
                                     break;
                                 //case M_Type_650:  //不需调试界面
                                 default:
-                                    HMI_Goto_LocPage(PAGE_PASSWORD_ERROR);
+                                    HMI_Goto_LocPage(ePage_Error_Password);
                                     break;
                             }
                         }
@@ -589,11 +730,14 @@ void HMI_Process()
                                     break;
                                 //case M_Type_650:  //不需调试界面
                                 case M_Type_IU:   
+                                    memset(&gModuleSave,0x30,12);
+                                    Save_ModuleSomething();
+                                    break;
                                 case M_Type_308:
                                     LL_Module_Send("1*14&0&0",8);
                                     break;
                                 default:
-                                    HMI_Goto_LocPage(PAGE_PASSWORD_ERROR);
+                                    HMI_Goto_LocPage(ePage_Error_Password);
                                     break;
                             };
                         }
@@ -614,7 +758,7 @@ void HMI_Process()
                                 case M_Type_650:  //不需调试界面
                                     break;
                                 default:
-                                    HMI_Goto_LocPage(PAGE_PASSWORD_ERROR);
+                                    HMI_Goto_LocPage(ePage_Error_Password);
                                     break;
                             }
                         }
@@ -624,7 +768,7 @@ void HMI_Process()
                         }
                         else    //密码错误
                         {
-                            HMI_Goto_LocPage(PAGE_PASSWORD_ERROR);
+                            HMI_Goto_LocPage(ePage_Error_Password);
                         }
                         gInfo.PasswordLen=0;    //清密码
                         break;
@@ -873,7 +1017,7 @@ void HMI_Scene_Recovery()
     {
         case eScene_Module_650:
             gComInfo.HMI_Scene=eScene_Module_650;
-            HMI_Goto_LocPage(2);
+            HMI_Goto_LocPage(ePage_Module650);
             HMI_Show_ModuleName("Derma-650");
             HMI_Show_WorkMode();
             HMI_Show_Worktime1();
@@ -882,7 +1026,7 @@ void HMI_Scene_Recovery()
             break;
         case eScene_Module_633:
             gComInfo.HMI_Scene=eScene_Module_633;
-            HMI_Goto_LocPage(3);
+            HMI_Goto_LocPage(ePage_Module633);
             HMI_Show_ModuleName("Derma-633");
             HMI_Show_WorkMode();
             HMI_Show_Worktime1();
@@ -892,14 +1036,15 @@ void HMI_Scene_Recovery()
             break;
         case eScene_Module_IU:     
             gComInfo.HMI_Scene=eScene_Module_IU;
-            HMI_Goto_LocPage(6);
+            HMI_Goto_LocPage(ePage_ModuleIU);
             HMI_Show_ModuleName("Derma-IU");
             HMI_Show_Worktime1();
             HMI_Show_IU_Usedtime();
+            HMI_Show_Temp(350);  //固定显示35度
             break;
         case eScene_Module_UVA1:
             gComInfo.HMI_Scene=eScene_Module_UVA1;
-            HMI_Goto_LocPage(4);
+            HMI_Goto_LocPage(ePage_ModuleUVA1);
             HMI_Show_ModuleName("Derma-UVA1");
             HMI_Show_Worktime1();
             //ModuleRoutine_GetUsedTime();      //TODO: 暂不读使用时间
@@ -930,12 +1075,21 @@ void HMI_Scene_Recovery()
             }
             gInfo.ModuleInfo.New4in1Module.ConfigSel=0;
             break;
+        case eScene_Module_308:
+            gComInfo.HMI_Scene=eScene_Module_308;
+            HMI_Goto_LocPage(ePage_Module308);
+            
+            break;
+        case eScene_Module_308test:
+            gComInfo.HMI_Scene=eScene_Module_308test;
+            HMI_Goto_LocPage(ePage_Module308Test);
+            break;
         case eScene_Error:
             HMI_Goto_Error();
             break;
         default:        //其他没考虑的情况一律返回开机页面
             gComInfo.HMI_Scene=eScene_StartPage;
-            HMI_Goto_LocPage(1);
+            HMI_Goto_LocPage(ePage_Main);
             break;
     }
 }

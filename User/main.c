@@ -24,6 +24,7 @@ bit Fire_Flag=0;
 
 bit SystemTime100ms=0;
 bit SystemTime1s=0;
+bit SystemTime1s_1=0;
 bit Heardbeat1s=1;
 
 bit ADConvertDone;
@@ -193,7 +194,7 @@ void Init()
 void LOG_E(void*str,...)
 {
     uint8_t i=0;
-    char xdata buf[32]={0};
+    char xdata buf[64]={0};
     va_list ap;
     va_start(ap, str);
     vsprintf(buf, (char const*)str, ap);
@@ -240,7 +241,7 @@ void Save_ModuleSomething()
     uint8_t c;
    
     gModuleSave.crc=calculate_CRC8(&gModuleSave, sizeof(_ModuleSave)-1);
-    #if defined(_DEBUG)
+    #if defined(_DEBUG) && 0
     LOG_E("Module Save %d CRC:%02X :",(uint16_t)sizeof(_ModuleSave),(uint16_t)gModuleSave.crc);
     for (c = 0; c < sizeof(_ModuleSave); c++)
     {
@@ -254,7 +255,7 @@ void Save_ModuleSomething()
     IAP_ADDRH = 0x02;    //设置目标单元地址的高8 位地址
     IAP_ADDRL = 0;
     EA=0;
-    for(IAP_ADDRL=0;IAP_ADDRL<sizeof(_Golbal_Config);IAP_ADDRL++)
+    for(IAP_ADDRL=0;IAP_ADDRL<sizeof(_ModuleSave);IAP_ADDRL++)
     {
         c=*(((char *)&gModuleSave)+IAP_ADDRL);
         IAP_DATA = c ;                  //要编程的数据先送进IAP_DATA 寄存器
@@ -265,13 +266,15 @@ void Save_ModuleSomething()
     }
     EA=1;
     IAP_Disable();
+    #if defined(_DEBUG) && 0
     LOG_E("Read E2PROM:");
-    for (i = 0; i < sizeof(_ModuleSave); i++)
+    for (c = 0; c < sizeof(_ModuleSave); c++)
     {
-        *((uint8_t*)&gModuleSave+i)=Byte_Read(0x0200+i);
-        LOG_E("%02X ",(uint16_t)Byte_Read(0x0200+i));
+        *((uint8_t*)&gModuleSave+c)=Byte_Read(0x0200+c);
+        LOG_E("%02X ",(uint16_t)Byte_Read(0x0200+c));
     }
     LOG_E("\n");
+    #endif
 }
 
 int main()
@@ -298,6 +301,10 @@ int main()
             Heardbeat1s=0;
             KEY_LED_IO=DISABLE;
             //CR=1;
+            LOG_E("Scene:%u WorkState: %u ModuleType:%X ",
+                    (uint16_t)gComInfo.HMI_Scene,
+                    (uint16_t)gComInfo.WorkStat,
+                    (uint16_t)gComInfo.ModuleType);
         }
     }
 }
