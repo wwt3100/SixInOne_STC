@@ -55,10 +55,13 @@ void Module_COMM()
     }
     else
     {
-        uint8_t xdata pbuf[18];
-        uint8_t data_size;
-        memcpy(pbuf,uart2_buff,18);
-        data_size=pbuf[0];
+        uint8_t xdata pbuf[18]={0};
+        uint8_t data_size=uart2_buff[0];
+        if (data_size>18)
+        {
+            data_size=18;
+        }
+        memcpy(pbuf+1,uart2_buff+1,data_size);
         Uart2_ReviceFrame=0;
         if (gComInfo.COMMProtocol_Head==0xAA)
         {
@@ -284,6 +287,7 @@ void Module_COMM()
         }
         else    //gComInfo.COMMProtocol_Head=='@'
         {
+            //LOG_E("%s",pbuf+1);   //打印协议
             if (pbuf[1]=='1' && pbuf[2]=='*')   //协议共同部分
             {
                 if (pbuf[3]=='1')    //1 10 11 12 13 14 15 
@@ -294,27 +298,53 @@ void Module_COMM()
                             LOG_E("308 Error 1");
                             break;
                         case '0':   //已经点亮,开始计时
-                            Fire_Flag=1;
+                            LOG_E("308 Fire Flag");
                             gComInfo.WorkStat=eWS_Working;
+                            gComInfo.TimerCounter=0;
+                            SystemTime1s=0;
+                            HMI_Show_308RemainTime();
                             break;
                         case '1':   //308握手 @1*11&9&5*#
-                            memset(&gInfo,0,sizeof(_Golbal_Info));  //清治疗头数据
-                            gComInfo.WorkStat=eWS_Standby;
-                            gComInfo.ModuleType=M_Type_308;
-                            gComInfo.HMI_Scene=eScene_Module_308Wait;       //直接切换场景等待进入
-                            gInfo.ModuleInfo.mini308Module.WorkTime=30;     //默认30秒
-                            //HMI_Scene_Recovery(); 
+                            if (gComInfo.HMI_Scene!=eScene_Info)    //如果是系统信息场景不处理
+                            {
+                                memset(&gInfo,0,sizeof(_Golbal_Info));  //清治疗头数据
+                                gComInfo.WorkStat=eWS_Standby;
+                                gComInfo.ModuleType=M_Type_308;
+                                gComInfo.HMI_Scene=eScene_Module_308Wait;       //直接切换场景等待进入
+                                gInfo.ModuleInfo.mini308Module.WorkTime=15;     //默认30秒
+                                gInfo.DebugOpen=OPEN_DBG_ClearUsedtime|
+                                        OPEN_DBG_Config|
+                                        OPEN_DBG_ROOT;  //给治疗头授权 
+                            }
                             break;
                         case '2':   //频率占空比           @1*12&频率数据&占空比数据*#
-                            
+                            gInfo.ModuleInfo.mini308Module.Freq=atoi(pbuf+6);
+                            gInfo.ModuleInfo.mini308Module.Duty=atoi(pbuf+10);
+                            LOG_E(" Freq:%d,Duty:%d",
+                                (uint16_t)gInfo.ModuleInfo.mini308Module.Freq,
+                                (uint16_t)gInfo.ModuleInfo.mini308Module.Duty);
                             break;
-                        case '3':   //使用时间:@1*13&小时&分钟&秒钟*# (初始状态为0)
-                            
+                        case '3':   //使用时间:@1*13&小时&分钟&秒钟*# 1*13&000&00&00(初始状态为0)
+                            if (gComInfo.HMI_Scene==eScene_Info)    //确认场景
+                            {
+                                pbuf[9]=':';
+                                pbuf[12]=':';
+                                LL_HMI_Send("\x98\x00\x45\x01\x66\x21\x81\x03\x00\x1F\x00\x1F",12);
+                                LL_HMI_Send_Pure(pbuf+6,9);
+                                LL_HMI_SendEnd();
+                            }
                             break;
                         case '4':   //剩余时间@1*14&300&00&00*#(初始状态为300小时，00分钟，00秒钟)
-                            
+                            if (gComInfo.HMI_Scene==eScene_Info)    //确认场景
+                            {
+                                pbuf[9]=':';
+                                pbuf[12]=':';
+                                LL_HMI_Send("\x98\x02\x49\x01\x66\x21\x81\x03\x00\x1F\x00\x1F",12);
+                                LL_HMI_Send_Pure(pbuf+6,9);
+                                LL_HMI_SendEnd();
+                            }
                             break;
-                        case '5':   //@1*15&0&0*# 停止计时
+                        case '5':   //@1*15&0&0*# 停止计时      // 没用???
                             
                             break;
                         case '6':   //@1*16&1&1*#--IU治疗头
@@ -325,6 +355,9 @@ void Module_COMM()
                             gComInfo.ModuleType=M_Type_IU;
                             gComInfo.HMI_LastScene=eScene_Module_IU;
                             gInfo.ModuleInfo.RoutineModule.WorkTime=10;
+                            gInfo.DebugOpen=OPEN_DBG_Calib|
+                                        OPEN_DBG_ClearUsedtime|
+                                        OPEN_DBG_ROOT;  //给治疗头授权 
                             for (i = 0; i < sizeof(_ModuleSave); i++)
                             {
                                 *((uint8_t*)&gModuleSave+i)=Byte_Read(0x0200+i);

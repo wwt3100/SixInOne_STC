@@ -20,7 +20,7 @@ bit Uart2_ReviceFrame;
 bit HMI_Msg_Flag=0;
 
 bit Fire_Flag=0;
-
+bit Pause_Flag=0;
 
 bit SystemTime100ms=0;
 bit SystemTime1s=0;
@@ -301,10 +301,10 @@ int main()
             Heardbeat1s=0;
             KEY_LED_IO=DISABLE;
             //CR=1;
-            LOG_E("Scene:%u WorkState: %u ModuleType:%X ",
-                    (uint16_t)gComInfo.HMI_Scene,
-                    (uint16_t)gComInfo.WorkStat,
-                    (uint16_t)gComInfo.ModuleType);
+//            LOG_E("Scene:%u WorkState: %u ModuleType:%X ",
+//                    (uint16_t)gComInfo.HMI_Scene,
+//                    (uint16_t)gComInfo.WorkStat,
+//                    (uint16_t)gComInfo.ModuleType);
         }
     }
 }

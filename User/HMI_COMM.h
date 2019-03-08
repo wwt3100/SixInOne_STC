@@ -39,7 +39,6 @@ void HMI_Show_WorkMode(void);
 void HMI_Show_ModuleName(const char* str);  //显示治疗模块名称
 void HMI_Show_Worktime1(void);       //650 633 IU 使用
 void HMI_Show_Worktime2(void);       //UVA1 使用同时显示能量
-void HMI_Show_Worktime3(void);       //308 使用
 
 void HMI_Show_Power(void);       //显示光功率 650 633 
 void HMI_Show_RemainTime(void); //显示剩余时间
@@ -58,6 +57,20 @@ void HMI_DGB_Show_DAval();
 
 //IU
 void HMI_Show_IU_Usedtime();
+
+
+//308
+void HMI_Show_308WorkTime();
+void HMI_Show_308RemainTime();
+
+//308 红斑测试
+void HMI_308Test_SelTime(uint8_t seltime);
+void HMI_308Test_AllPower();
+
+//308设置
+void HMI_308Set_Freq();
+void HMI_308Set_Duty();
+
 
 
 //Wira 4in1

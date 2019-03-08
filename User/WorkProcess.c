@@ -72,7 +72,7 @@ void Work_Process()
                     case eScene_Module_633:
                     case eScene_Module_IU:
                     case eScene_Module_UVA1:
-                        if (gInfo.ModuleInfo.RoutineModule.RemainTime>0)
+                        if (gInfo.ModuleInfo.RoutineModule.RemainTime>1)
                         {
                             gInfo.ModuleInfo.RoutineModule.RemainTime--;
                             HMI_Show_RemainTime();
@@ -82,10 +82,21 @@ void Work_Process()
                             WP_Stop(1);     //Timeout Stop
                         }
                         break;
-                    case eScene_Module_308:
                     case eScene_Module_308test:
-//                        LL_Module_Send("1*15&0&0",8);
-//                        LOG_E("Send 308 HeartBeat");
+                        gInfo.ModuleInfo.mini308Module.TotalTime++;     //红斑测试总时间
+                        HMI_308Test_AllPower();
+                    case eScene_Module_308:
+                        LL_Module_Send("1*15&0&0",8);   //308工作心跳
+                        gInfo.ModuleInfo.mini308Module.OnceWorkTime++;
+                        if(gInfo.ModuleInfo.mini308Module.RemainTime>1)
+                        {
+                            gInfo.ModuleInfo.mini308Module.RemainTime--;
+                            HMI_Show_308RemainTime();
+                        }
+                        else
+                        {
+                            WP_Stop(1);     //Timeout Stop
+                        }
                         break;
                     default:
                         break;
@@ -127,8 +138,7 @@ void Work_Process()
                         break;
                     case eScene_Module_308:
                     case eScene_Module_308test:
-                        LL_Module_Send("1*15&0&0",8);
-                        LOG_E("Send 308 HeartBeat");
+
                         break;
                     case eScene_Debug:
                     {
@@ -300,6 +310,10 @@ void WP_Start()
             PowerCtr_Light1=POWER_ON; 
         }
             break;
+        case eScene_Module_308:
+        case eScene_Module_308test:
+            LL_Module_Send("1*7&1&0",7);    //发送亮灯指令
+            break;
         case eScene_Debug:
             switch (gComInfo.ModuleType)
             {
@@ -355,6 +369,20 @@ void WP_Stop(uint8_t stop_type)
             PowerCtr_Light1=POWER_OFF;  //off
             PowerCtr_Main=POWER_OFF;    //off
             SPI_Send(0x7000);           //DAC 0V
+            break;
+        case eScene_Module_308:
+        case eScene_Module_308test:
+        {
+            uint8_t xdata save_worktime[]={"1*13&0&0&00"};
+            LL_Module_Send("1*7&0&0",7);    //308停止指令
+            save_worktime[7]=gInfo.ModuleInfo.mini308Module.OnceWorkTime/60+'0';
+            gInfo.ModuleInfo.mini308Module.OnceWorkTime=gInfo.ModuleInfo.mini308Module.OnceWorkTime%60;
+            save_worktime[9]=gInfo.ModuleInfo.mini308Module.OnceWorkTime/10+'0';
+            save_worktime[10]=gInfo.ModuleInfo.mini308Module.OnceWorkTime%10+'0';
+            LL_Module_Send(save_worktime,11);    //保存使用时间
+            gComInfo.WorkStat=eWS_Standby;
+            gInfo.ModuleInfo.mini308Module.OnceWorkTime=0;  //停止时,单次工作时长清零
+        }
             break;
         case eScene_Debug:
             switch (gComInfo.ModuleType)
@@ -502,6 +530,23 @@ void WP_Stop(uint8_t stop_type)
             HMI_Cut_Pic(0x71,gConfig.LANG*100 + 45, 652, 504, 652+112, 504+72);     //按钮切暂停
             gComInfo.WorkStat=eWS_Standby;
             FAN_IO=DISABLE;
+            break;
+        case eScene_Module_308:
+            if (Pause_Flag==1)
+            {
+                ;//do nothing
+            }
+            else
+            {
+                HMI_Cut_Pic(0x71,ePage_Module308, 162, 409, 162+464, 407+33);     //进度条背景恢复
+            }
+            break;
+        case eScene_Module_308test:
+            if (Pause_Flag==0)
+            {
+                HMI_Cut_Pic(0x71,ePage_Module308Test, 178, 399, 178+440, 399+39);     //进度条背景恢复
+            }
+            HMI_308Test_AllPower();
             break;
         default:
             break;

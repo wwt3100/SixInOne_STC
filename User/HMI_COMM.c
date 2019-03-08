@@ -216,10 +216,6 @@ void HMI_Show_Worktime2()         //UVA1 使用 同时显示能量
     LL_HMI_SendEnd();
 }
 
-void HMI_Show_Worktime3()   //308 使用 同时显示能量
-{
-}
-
 void HMI_Show_Power()       //显示光功率 650 633
 {
     uint16_t pl=gInfo.ModuleInfo.RoutineModule.PowerLevel;
@@ -437,6 +433,260 @@ void HMI_Show_IU_Usedtime()
     LL_HMI_Send_Pure(gModuleSave.UsedCount,5);
     LL_HMI_SendEnd();
 
+}
+
+void HMI_Show_308WorkTime()         //连同能量一起显示
+{
+    uint8_t page,t;
+    uint16_t power=gInfo.ModuleInfo.mini308Module.WorkTime*3;
+    uint8_t xdata time_str[3]={0x20};
+    page=ePage_Module308+gConfig.LANG*100;
+    HMI_Cut_Pic(0x71,page, 296, 208, 296+191, 208+150); //背景恢复
+    
+    //显示时间
+    LL_HMI_Send("\x98",1);
+    t=gInfo.ModuleInfo.mini308Module.WorkTime/100;
+    if (t==0)
+    {
+        t=gInfo.ModuleInfo.mini308Module.WorkTime%100;
+        if (t/10==0)    //1位
+        {
+            LL_HMI_SendXY(370,239);
+            time_str[1]='0'+t%10;
+        }
+        else            //2位
+        {
+            LL_HMI_SendXY(370-8,239);
+            time_str[1]='0'+t/10;
+            time_str[2]='0'+t%10;
+        }
+    }
+    else    //3位
+    {
+        LL_HMI_SendXY(370,239);
+        time_str[0]='0'+t;
+        t=gInfo.ModuleInfo.mini308Module.WorkTime%100;
+        time_str[1]='0'+t/10;
+        time_str[2]='0'+t%10;
+    }
+    LL_HMI_Send_Pure("\x03\x80\x05\x01\xAF\x0\x1f",7);
+    LL_HMI_Send_Pure(time_str,3);
+    LL_HMI_SendEnd();
+    
+    //显示能量
+    LL_HMI_Send("\x98",1);
+    LL_HMI_SendXY(362,295);
+    LL_HMI_Send_Pure("\x03\x80\x05\x01\xAF\x0\x1f",7);
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF='0'+power/100;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF='.';
+    power=power%100;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF='0'+power/10;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
+    SBUF='0'+power%10;
+    LL_HMI_SendEnd();
+}
+
+void HMI_Show_308RemainTime()
+{
+    uint8_t t;
+    uint16_t power;
+    uint8_t xdata time_str[4]={0x20};
+    uint8_t xdata power_str[]={"0.00J/cm2"};
+    if (gComInfo.HMI_Scene==eScene_Module_308)
+    {
+        uint16_t p;
+        HMI_Cut_Pic(0x71,ePage_Module308, 162, 409, 162+464, 407+33);     //进度条背景恢复
+        p=464/gInfo.ModuleInfo.mini308Module.WorkTime*(gInfo.ModuleInfo.mini308Module.WorkTime-gInfo.ModuleInfo.mini308Module.RemainTime);
+        HMI_Cut_Pic(0x71,ePage_Module308+1, 162, 409, 162+(p), 407+33);
+        power=(gInfo.ModuleInfo.mini308Module.WorkTime-gInfo.ModuleInfo.mini308Module.RemainTime)*3;
+        //进度条显示剩余时间
+        LL_HMI_Send("\x98",1);
+        t=gInfo.ModuleInfo.mini308Module.RemainTime/100;
+        if (t==0)
+        {
+            t=gInfo.ModuleInfo.mini308Module.RemainTime%100;
+            if (t/10==0)    //1位
+            {
+                time_str[1]='0'+t%10;
+            }
+            else            //2位
+            {
+                time_str[1]='0'+t/10;
+                time_str[2]='0'+t%10;
+            }
+        }
+        else    //3位
+        {
+            
+            time_str[0]='0'+t;
+            t=gInfo.ModuleInfo.mini308Module.RemainTime%100;
+            time_str[1]='0'+t/10;
+            time_str[2]='0'+t%10;
+        }
+        time_str[3]='s';
+        LL_HMI_SendXY(553,408);
+        LL_HMI_Send_Pure("\x21\x81\x02\x01\xAF\x0\x1f",7);
+        LL_HMI_Send_Pure(time_str,4);
+        LL_HMI_SendEnd();
+        
+        //进度条显示能量
+        power_str[0]=power/100+'0';
+        power=power%100;
+        power_str[2]=power/10+'0';
+        power_str[3]=power%10+'0';
+        LL_HMI_Send("\x98",1);
+        LL_HMI_SendXY(179,408);
+        LL_HMI_Send_Pure("\x21\x81\x02\x01\xAF\x0\x1f",7);
+        LL_HMI_Send_Pure(power_str,9);
+        LL_HMI_SendEnd();
+    }
+    else    //红斑测试
+    {
+        uint16_t p;
+        HMI_Cut_Pic(0x71,ePage_Module308Test, 178, 399, 178+440, 399+39);     //进度条背景恢复
+        p=440/gInfo.ModuleInfo.mini308Module.TestWorkTime*(gInfo.ModuleInfo.mini308Module.TestWorkTime-gInfo.ModuleInfo.mini308Module.RemainTime);
+        HMI_Cut_Pic(0x71,ePage_Module308Test+1, 178, 399, 178+p, 399+39); 
+    }
+}
+
+void HMI_308Test_SelTime(uint8_t seltime)
+{
+    uint8_t xdata power_str[4]="0.00";
+    uint8_t power=seltime*3;
+    switch (gInfo.ModuleInfo.mini308Module.TestSelTime)
+    {
+        case 3:
+            HMI_Cut_Pic(0x71,ePage_Module308Test, 82, 304, 82+108, 304+69);
+            break;
+        case 6:
+            HMI_Cut_Pic(0x71,ePage_Module308Test, 194, 304, 194+108, 304+69);
+            break;
+        case 9:
+            HMI_Cut_Pic(0x71,ePage_Module308Test, 293, 304, 293+108, 304+69);
+            break;
+        case 12:
+            HMI_Cut_Pic(0x71,ePage_Module308Test, 399, 304, 399+99, 304+69);
+            break;
+        case 15:
+            HMI_Cut_Pic(0x71,ePage_Module308Test, 504, 304, 504+105, 304+69);
+            break;
+        case 18:
+            HMI_Cut_Pic(0x71,ePage_Module308Test, 611, 304, 611+99, 304+69);
+            break;
+        default:
+            break;
+    }
+    gInfo.ModuleInfo.mini308Module.TestSelTime=seltime;
+    switch (gInfo.ModuleInfo.mini308Module.TestSelTime)
+    {
+        case 3:
+            HMI_Cut_Pic(0x71,ePage_Module308Test+1, 82, 304, 82+108, 304+69);
+            break;
+        case 6:
+            HMI_Cut_Pic(0x71,ePage_Module308Test+1, 194, 304, 194+108, 304+69);
+            break;
+        case 9:
+            HMI_Cut_Pic(0x71,ePage_Module308Test+1, 293, 304, 293+108, 304+69);
+            break;
+        case 12:
+            HMI_Cut_Pic(0x71,ePage_Module308Test+1, 399, 304, 399+99, 304+69);
+            break;
+        case 15:
+            HMI_Cut_Pic(0x71,ePage_Module308Test+1, 504, 304, 504+105, 304+69);
+            break;
+        case 18:
+            HMI_Cut_Pic(0x71,ePage_Module308Test+1, 611, 304, 611+99, 304+69);
+            break;
+        default:
+            break;
+    }
+
+    //显示当前计量
+    power_str[0]=power/100+'0';
+    power=power%100;
+    power_str[2]=power/10+'0';
+    power_str[3]=power%10+'0';
+    HMI_Cut_Pic(0x71,ePage_Module308Test+gConfig.LANG*100, 329, 179, 329+183, 179+51);
+    LL_HMI_Send("\x98",1);
+    if (gConfig.LANG==LANG_ZH)
+    {
+        LL_HMI_SendXY(397,191);
+    }
+    else
+    {
+        LL_HMI_SendXY(408,191);
+    }
+    LL_HMI_Send_Pure("\x21\x81\x02\x01\xAF\x0\x1f",7);
+    LL_HMI_Send_Pure(power_str,4);
+    LL_HMI_SendEnd();
+}
+
+void HMI_308Test_AllPower()
+{
+    uint8_t xdata power_str[4]="0.00";
+    uint8_t power=gInfo.ModuleInfo.mini308Module.TotalTime*3;
+    HMI_Cut_Pic(0x71,ePage_Module308Test+gConfig.LANG*100, 345, 229, 345+168, 229+48);
+    power_str[0]=power/100+'0';
+    power=power%100;
+    power_str[2]=power/10+'0';
+    power_str[3]=power%10+'0';
+    LL_HMI_Send("\x98",1);
+    if (gConfig.LANG==LANG_ZH)
+    {
+        LL_HMI_SendXY(397,235);
+    }
+    else
+    {
+        LL_HMI_SendXY(408,235);
+    }
+    LL_HMI_Send_Pure("\x21\x81\x02\x01\xAF\x0\x1f",7);
+    LL_HMI_Send_Pure(power_str,4);
+    LL_HMI_SendEnd();
+}
+
+void HMI_308Set_Freq()
+{
+    uint8_t f;
+    uint8_t xdata freq_str[3];
+    f=gInfo.ModuleInfo.mini308Module.Freq%100;
+    if (f!=0)
+    {
+        freq_str[0]=f+'0';
+    }
+    else
+    {
+        freq_str[0]=' ';
+    }
+    freq_str[1]=f/10+'0';
+    freq_str[2]=f%10+'0';
+    HMI_Cut_Pic(0x71,13, 398, 203, 398+95, 203+52);
+    LL_HMI_Send("\x98",1);
+    LL_HMI_SendXY(413,209);
+    LL_HMI_Send_Pure("\x03\x80\x05\x01\xAF\x0\x1f",7);
+    LL_HMI_Send_Pure(freq_str,3);
+    LL_HMI_SendEnd();
+}
+
+void HMI_308Set_Duty()
+{
+    uint8_t f;
+    uint8_t xdata duty_str[2];
+    f=gInfo.ModuleInfo.mini308Module.Duty;
+    duty_str[0]=f/10+'0';
+    duty_str[1]=f%10+'0';
+    HMI_Cut_Pic(0x71,13, 411, 336, 411+82, 336+59);
+    LL_HMI_Send("\x98",1);
+    LL_HMI_SendXY(420,347);
+    LL_HMI_Send_Pure("\x03\x80\x05\x01\xAF\x0\x1f",7);
+    LL_HMI_Send_Pure(duty_str,2);
+    LL_HMI_SendEnd();
 }
 
 void HMI_New_Show_Light(uint8_t sellight)

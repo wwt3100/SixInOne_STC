@@ -128,27 +128,24 @@ void HMI_Process()
                     switch (gComInfo.HMIArg2)
                     {
                         case 0x31:      //开始
-                            if (Fire_Flag==0)
-                            {
-                                SystemTime1s=0;
-                                gComInfo.TimerCounter=gComInfo.TimerCounter2;   //恢复计数
-                                WP_Start();     //开始
-                                BeepEx(0);
-                            }
+                            //TODO:提示已经开始
                             break;
                         case 0x32:      //暂停
-                            LL_Module_Send("1*7&0&0",7); 
-                            if (Fire_Flag==1)
-                            {
-                                gComInfo.TimerCounter2=gComInfo.TimerCounter;   //保存定时器计数
-                                WP_Stop(0);     //暂停
-                                BeepEx(0);
-                            }
+                            gComInfo.TimerCounter2=gComInfo.TimerCounter;   //保存定时器计数
+                            Pause_Flag=1;
+                            WP_Stop(0);     //暂停
+                            BeepEx(0);
                             break;
                         case 0x05:      //停止
-                            LL_Module_Send("1*7&0&0",7); 
+                            Pause_Flag=0;
                             BeepEx(0);
                             WP_Stop(1);
+                            if (gComInfo.HMI_Scene==eScene_Module_308test)
+                            {
+                                HMI_Cut_Pic(0x71,ePage_Module308Test, 178, 399, 178+440, 399+39);     //进度条背景恢复
+                                gInfo.ModuleInfo.mini308Module.TotalTime=0;
+                                HMI_308Test_AllPower();
+                            }
                             break;
                         default:
                             break;
@@ -166,48 +163,112 @@ void HMI_Process()
                     BeepEx(0);
                     switch (gComInfo.HMIArg2)
                     {
-                        case eKeyCodeG1_TimeAdd:
+                        case 0x02:      //加
+                            if (gInfo.ModuleInfo.mini308Module.WorkTime<MODULE308_MAX_WORKTIME)
+                            {
+                                gInfo.ModuleInfo.mini308Module.WorkTime++;
+                            }
+                            else
+                            {
+                                gInfo.ModuleInfo.mini308Module.WorkTime=1;
+                            }
+                            HMI_Show_308WorkTime();
+                            Pause_Flag=0;
                             break;
-                        case eKeyCodeG1_TimeDec:
+                        case 0x01:      //减
+                            if (gInfo.ModuleInfo.mini308Module.WorkTime<=1)
+                            {
+                                gInfo.ModuleInfo.mini308Module.WorkTime=MODULE308_MAX_WORKTIME;
+                            }
+                            else
+                            {
+                                gInfo.ModuleInfo.mini308Module.WorkTime--;
+                            }
+                            HMI_Show_308WorkTime();
+                            Pause_Flag=0;
                             break;
                         case eKeyCodeG1_SysInfo:        //进入密码输入页
                             HMI_Goto_LocPage(ePage_PasswordInput);
                             gComInfo.HMI_LastScene=gComInfo.HMI_Scene;
                             gComInfo.HMI_Scene=eScene_Password;
+                            Pause_Flag=0;
                             break;
                         case eKeyCodeG1_Stop:
-                            LL_Module_Send("1*7&0&0",7); 
+                            if (gComInfo.HMI_Scene==eScene_Module_308test)
+                            {
+                                HMI_Cut_Pic(0x71,ePage_Module308Test, 178, 399, 178+440, 399+39);     //进度条背景恢复
+                                gInfo.ModuleInfo.mini308Module.TotalTime=0;
+                                HMI_308Test_AllPower();
+                            }
+                            else
+                            {
+                                HMI_Cut_Pic(0x71,ePage_Module308, 162, 409, 162+464, 407+33);     //进度条背景恢复
+                            }
+                            Pause_Flag=0;
+                        case 0x32:              //暂停
+                            //TODO: 提示尚未开始
+                            //LL_Module_Send("1*7&0&0",7); 
                             break;
                         case 0x31:              //开始
-                            LL_Module_Send("1*7&1&0",7); 
-                            Fire_Flag=1;
-                            gComInfo.WorkStat=eWS_Working;
-                            break;
-                        case 0x32:              //暂停
-                            LL_Module_Send("1*7&0&0",7); 
+                            if (Pause_Flag==1)
+                            {
+                                gComInfo.TimerCounter=gComInfo.TimerCounter2;
+                                SystemTime1s=0;
+                                Pause_Flag=0;
+                            }
+                            else
+                            {
+                                if (gComInfo.HMI_Scene==eScene_Module_308)
+                                {
+                                    gInfo.ModuleInfo.mini308Module.RemainTime=gInfo.ModuleInfo.mini308Module.WorkTime;
+                                }
+                                else
+                                {
+                                    gInfo.ModuleInfo.mini308Module.RemainTime=gInfo.ModuleInfo.mini308Module.TestWorkTime;
+                                }
+                            }
+                            WP_Start();
                             break;
                         case 0x33:              //进入红斑测试
                             gComInfo.HMI_LastScene=eScene_Module_308test;
                             HMI_Scene_Recovery();
+                            Pause_Flag=0;
                             break;
                         case 0x34:              //退出红斑测试
                             gComInfo.HMI_LastScene=eScene_Module_308;
+                            gInfo.ModuleInfo.mini308Module.TestSelTime=3;
                             HMI_Scene_Recovery();
+                            Pause_Flag=0;
                             break;
                         case 0x35:              //红斑3s
-                            
+                            HMI_308Test_SelTime(3);
+                            gInfo.ModuleInfo.mini308Module.TestWorkTime=3;
+                            Pause_Flag=0;
                             break;
                         case 0x36:              //红斑6s
-                            
+                            HMI_308Test_SelTime(6);
+                            gInfo.ModuleInfo.mini308Module.TestWorkTime=6;
+                            Pause_Flag=0;
                             break;
                         case 0x37:              //红斑9s
-                            
+                            HMI_308Test_SelTime(9);
+                            gInfo.ModuleInfo.mini308Module.TestWorkTime=9;
+                            Pause_Flag=0;
                             break;
                         case 0x38:              //红斑12s
+                            HMI_308Test_SelTime(12);
+                            gInfo.ModuleInfo.mini308Module.TestWorkTime=12;
+                            Pause_Flag=0;
                             break;
                         case 0x39:              //红斑15s
+                            HMI_308Test_SelTime(15);
+                            gInfo.ModuleInfo.mini308Module.TestWorkTime=15;
+                            Pause_Flag=0;
                             break;
                         case 0x3A:              //红斑18s
+                            HMI_308Test_SelTime(18);
+                            gInfo.ModuleInfo.mini308Module.TestWorkTime=18;
+                            Pause_Flag=0;
                             break;
                         case 0x3C:              //进入IU界面
                             memset(&gInfo,0,sizeof(_Golbal_Info));  //清治疗头数据
@@ -216,6 +277,7 @@ void HMI_Process()
                             gComInfo.HMI_LastScene=eScene_Module_IU;
                             gInfo.ModuleInfo.RoutineModule.WorkTime=10;
                             HMI_Scene_Recovery();
+                            Pause_Flag=0;
                             break;
                         default:
                             break;
@@ -223,13 +285,32 @@ void HMI_Process()
                 }
                 else if(gComInfo.HMIMsg==eMsg_KeyLongPush && gComInfo.HMIArg1==eKeyCode_Group1)
                 {
-                    BeepEx(0);
-                    if (gComInfo.HMIArg2 == eKeyCodeG1_TimeAdd)
+                    
+                    if (gComInfo.HMIArg2 == 0x02)   //加
                     {
-                        
+                        BeepEx(0);
+                        if (gInfo.ModuleInfo.mini308Module.WorkTime<MODULE308_MAX_WORKTIME)
+                        {
+                            gInfo.ModuleInfo.mini308Module.WorkTime++;
+                        }
+                        else
+                        {
+                            gInfo.ModuleInfo.mini308Module.WorkTime=1;
+                        }
+                        HMI_Show_308WorkTime();
                     }
-                    else if(gComInfo.HMIArg2 == eKeyCodeG1_TimeDec)
+                    else if(gComInfo.HMIArg2 == 0x01)   //减
                     {
+                        BeepEx(0);
+                        if (gInfo.ModuleInfo.mini308Module.WorkTime<=1)
+                        {
+                            gInfo.ModuleInfo.mini308Module.WorkTime=MODULE308_MAX_WORKTIME;
+                        }
+                        else
+                        {
+                            gInfo.ModuleInfo.mini308Module.WorkTime--;
+                        }
+                        HMI_Show_308WorkTime();
                     }
                     else
                     {
@@ -741,7 +822,7 @@ void HMI_Process()
                                     break;
                             };
                         }
-                        else if((gInfo.DebugOpen&OPEN_DBG_Config)        && strcmp(gInfo.Password,"308308")==0) //进入设置
+                        else if((gInfo.DebugOpen&OPEN_DBG_Config)        && strcmp(gInfo.Password,"308308")==0) //TODO:进入设置
                         {
                             switch (gComInfo.ModuleType)    //该处根据治疗头类型来判断应解析执行的指令
                             {
@@ -749,13 +830,21 @@ void HMI_Process()
                                 case M_Type_633_1:
                                 case M_Type_IU:   
                                 case M_Type_UVA1: 
-                                    HMI_Goto_Page(62);
+                                    
                                     break;
                                 case M_Type_Wira: 
                                 case M_Type_4in1: 
-                                    HMI_Goto_Page(51);
+                                    
                                     break;
-                                case M_Type_650:  //不需调试界面
+                                case M_Type_650:  
+                                    break;
+                                case M_Type_308:
+                                    HMI_Goto_LocPage(11);
+                                    gComInfo.HMI_LastScene=eScene_Module_308;
+                                    gComInfo.HMI_Scene=eScene_Info;
+                                    LL_Module_Send("1*11&5&9",8);       //握手308 获取最新使用时间
+                                    LL_HMI_Send("\x98\x01\x23\x01\x7c\x21\x81\x02\x0\x1F\x0\x1FV1.0",16);  //显示308版本V1.0
+                                    LL_HMI_SendEnd();
                                     break;
                                 default:
                                     HMI_Goto_LocPage(ePage_Error_Password);
@@ -1003,6 +1092,75 @@ void HMI_Process()
                 }
             }
             break;
+        case eScene_Info:
+            if ((gComInfo.HMIMsg == eMsg_keyUp || gComInfo.HMIMsg== eMsg_KeyLongPush) && gComInfo.HMIArg1 == eKeyCode_Group3)
+            {
+                BeepEx(0);
+                gComInfo.HMIMsg=eMsg_NULL;
+                switch (gComInfo.HMIArg2)
+                {
+                    case 0x01:      //save
+                        break;
+                    case 0x02:      //触摸屏校准
+                        
+                        break;
+                    case 0x03:      //exit
+                        HMI_Scene_Recovery();
+                        break;
+                    case 0x04:      //设置    //只有308有设置
+                        HMI_Goto_LocPage(13);
+                        HMI_308Set_Freq();
+                        HMI_308Set_Duty();
+                        break;
+                    case 0x31:      //308专用   freq add
+                        if (gInfo.ModuleInfo.mini308Module.Freq>=250)
+                        {
+                            gInfo.ModuleInfo.mini308Module.Freq=50;
+                        }
+                        else
+                        {
+                            gInfo.ModuleInfo.mini308Module.Freq++;
+                        }
+                        HMI_308Set_Freq();
+                        break;
+                    case 0x32:      //308专用 freq dec
+                        if (gInfo.ModuleInfo.mini308Module.Freq<=50)
+                        {
+                            gInfo.ModuleInfo.mini308Module.Freq=250;
+                        }
+                        else
+                        {
+                            gInfo.ModuleInfo.mini308Module.Freq--;
+                        }
+                        HMI_308Set_Freq();
+                        break;
+                    case 0x33:      //308专用   duty add
+                        if (gInfo.ModuleInfo.mini308Module.Duty>=70)
+                        {
+                            gInfo.ModuleInfo.mini308Module.Duty=20;
+                        }
+                        else
+                        {
+                            gInfo.ModuleInfo.mini308Module.Duty++;
+                        }
+                        HMI_308Set_Duty();
+                        break;
+                    case 0x34:      //308专用 duty dec
+                        if (gInfo.ModuleInfo.mini308Module.Duty<=20)
+                        {
+                            gInfo.ModuleInfo.mini308Module.Duty=70;
+                        }
+                        else
+                        {
+                            gInfo.ModuleInfo.mini308Module.Duty--;
+                        }
+                        HMI_308Set_Duty();
+                        break;
+                    default:        
+                        break;
+                }
+            }
+            break;
         default:
            break;
     }
@@ -1078,11 +1236,14 @@ void HMI_Scene_Recovery()
         case eScene_Module_308:
             gComInfo.HMI_Scene=eScene_Module_308;
             HMI_Goto_LocPage(ePage_Module308);
-            
+            HMI_Show_308WorkTime();
             break;
         case eScene_Module_308test:
             gComInfo.HMI_Scene=eScene_Module_308test;
             HMI_Goto_LocPage(ePage_Module308Test);
+            HMI_308Test_SelTime(3);
+            gInfo.ModuleInfo.mini308Module.TestWorkTime=3;
+            HMI_308Test_AllPower();
             break;
         case eScene_Error:
             HMI_Goto_Error();

@@ -41,6 +41,7 @@
 #define OPEN_DBG_Config             (0x20)
 #define OPEN_DBG_ROOT               (0x10)
 
+#define MODULE308_MAX_WORKTIME      (140)   /*最大工作时间*/
 
 typedef struct Golbal_comInfo{
     uint8_t ModuleType;
@@ -99,8 +100,11 @@ typedef struct Golbal_Info{
         }New4in1Module;
         struct mini308Module{
             uint8_t WorkMode;       // 0->正常模式 1->红斑测试
-            uint16_t WorkTime;      //工作时间最长140s 预留2byte
-            uint16_t RemainTime;    //剩余时间
+            uint8_t TestSelTime;    //红斑模式选择的时间
+            uint8_t TestWorkTime;   //红斑测试的工作时间
+            uint8_t WorkTime;      //工作时间最长140s 预留2byte
+            uint8_t OnceWorkTime;  //单次工作时间,用于保存
+            uint8_t RemainTime;    //剩余时间
             uint16_t TotalTime;     //总红斑测试时间
             uint16_t Freq;      //工作频率
             uint16_t Duty;      //占空比
@@ -150,6 +154,8 @@ extern uint8_t idata uart2_buff[18];
 extern bit HMI_Msg_Flag;
 
 extern bit Fire_Flag;
+extern bit Pause_Flag;  //308暂停用
+
 
 extern bit SystemTime100ms;
 extern bit SystemTime1s;

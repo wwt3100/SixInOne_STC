@@ -25,11 +25,10 @@ void UART1_INT(void) interrupt 4 using 1
         {
             data_size++;
             uart1_buff[data_size]=rx_data;
-            if(data_size>5 &&
-            uart1_buff[data_size]==0x3C && 
-            uart1_buff[data_size-1]==0xC3 && 
-            uart1_buff[data_size-2]==0x33 && 
-            uart1_buff[data_size-3]==0xCC)      //0xCC33C33C
+            if(uart1_buff[data_size]  ==0x3C && 
+               uart1_buff[data_size-1]==0xC3 && 
+               uart1_buff[data_size-2]==0x33 && 
+               uart1_buff[data_size-3]==0xCC)      //0xCC33C33C
             {
                 uart1_buff[0]=(data_size);
                 Uart1_ReviceFrame=1;
@@ -65,31 +64,10 @@ void UART2_INT(void) interrupt 8 using 2
         {
             data_size++;
             uart2_buff[data_size]=rx_data;
-            if (tail==0)
+            if (rx_data == gComInfo.COMMProtocol_Tail2 && 
+                uart2_buff[data_size-1]==gComInfo.COMMProtocol_Tail1)
             {
-                if (rx_data==gComInfo.COMMProtocol_Tail1)
-                {
-                    tail++;
-                }
-            }
-            else if(tail==1)
-            {
-                if (rx_data == gComInfo.COMMProtocol_Tail2)
-                {
-                    tail++;
-                }
-                else if(rx_data == gComInfo.COMMProtocol_Tail1)
-                {
-                    ; //Do nothing
-                }
-                else
-                {
-                    tail=0;
-                }
-            }
-            else
-            {
-                uart2_buff[0]=(data_size);
+                uart2_buff[0]=(data_size)-2;    //去掉包尾
                 Uart2_ReviceFrame=1;
                 head=0;
                 tail=0;
@@ -110,7 +88,7 @@ void Timer0_isr() interrupt 1 using 3
 {
     TL0 = 0x00;		//设置定时初值    50ms
     TH0 = 0x4C;		//设置定时初值
-    gComInfo.TimerCounter++;
+    
     if (Fire_Flag==1 && gComInfo.WorkStat==eWS_Working && gInfo.ModuleInfo.RoutineModule.LightMode==1 && gComInfo.TimerCounter%10==0)   //2Hz 闪烁模式
     {
         switch (gComInfo.HMI_Scene)
@@ -125,6 +103,8 @@ void Timer0_isr() interrupt 1 using 3
                 break;
         }
     }
+    
+    gComInfo.TimerCounter++;
     if(gComInfo.TimerCounter % 2 == 0)
 	{
 		SystemTime100ms = 1;
