@@ -9,6 +9,7 @@ enum{
     eMsg_KeyDown,
     eMsg_KeyLongPush,
     eMsg_keyUp,
+    eMSg_CailDone,
 };
 
 enum{
@@ -57,6 +58,7 @@ void HMI_DGB_Show_DAval();
 
 //IU
 void HMI_Show_IU_Usedtime();
+void HMI_Show_IU_Temp();
 
 
 //308

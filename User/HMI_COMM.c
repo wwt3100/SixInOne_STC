@@ -54,6 +54,9 @@ void HMI_COMM()
                 //LOG_E("up\r\n");
             }
                 break;
+            case 0xE4:  //校准屏幕返回消息
+                gComInfo.HMIMsg=eMSg_CailDone;
+                break;
             default:
                 break;
         }
@@ -435,6 +438,75 @@ void HMI_Show_IU_Usedtime()
 
 }
 
+void HMI_Show_IU_Temp()         //根据陈工程序逻辑改写,显示假的温度
+{
+    uint16_t fv;
+    if (gComInfo.FeedbackVolt<1000)
+    {
+        fv=gComInfo.FeedbackVolt%1000;
+        if(fv>900)
+        {
+            HMI_Show_Temp(320);
+        }
+        else if(fv>800)
+        {
+            HMI_Show_Temp(310);
+        }
+        else if(fv>700)
+        {
+            HMI_Show_Temp(300);
+        }
+        else if(fv>500)
+        {
+            HMI_Show_Temp(290);
+        } 
+        else if(fv>200)
+        {
+            HMI_Show_Temp(280);
+        }
+        else if(fv>150)
+        {
+            HMI_Show_Temp(270);
+        }
+        else if(fv>100)
+        {
+            HMI_Show_Temp(260);
+        }
+        else
+        {
+            HMI_Show_Temp(250);
+        }
+    }
+    else
+    {
+        fv=gComInfo.FeedbackVolt%1000;
+        if(fv>500)
+        {
+            HMI_Show_Temp(420);
+        }
+        else if(fv>400)
+        {
+            HMI_Show_Temp(400);
+        }
+        else if(fv>300)
+        {
+            HMI_Show_Temp(380);
+        }
+        else if(fv>200)
+        {
+            HMI_Show_Temp(360);
+        } 
+        else if(fv>100)
+        {
+            HMI_Show_Temp(340);
+        }
+        else
+        {
+            HMI_Show_Temp(320);
+        }
+    }
+}
+
 void HMI_Show_308WorkTime()         //连同能量一起显示
 {
     uint8_t page,t;
@@ -655,7 +727,7 @@ void HMI_308Set_Freq()
 {
     uint8_t f;
     uint8_t xdata freq_str[3];
-    f=gInfo.ModuleInfo.mini308Module.Freq%100;
+    f=gInfo.ModuleInfo.mini308Module.Freq/100;
     if (f!=0)
     {
         freq_str[0]=f+'0';
@@ -664,6 +736,7 @@ void HMI_308Set_Freq()
     {
         freq_str[0]=' ';
     }
+    f=gInfo.ModuleInfo.mini308Module.Freq%100;
     freq_str[1]=f/10+'0';
     freq_str[2]=f%10+'0';
     HMI_Cut_Pic(0x71,13, 398, 203, 398+95, 203+52);

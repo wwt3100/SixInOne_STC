@@ -20,7 +20,8 @@ bit Uart2_ReviceFrame;
 bit HMI_Msg_Flag=0;
 
 bit Fire_Flag=0;
-bit Pause_Flag=0;
+bit Fire_MaxOut=0;  //用于慢启动 633 UVA1
+bit Pause_Flag=0;   //308暂停用
 
 bit SystemTime100ms=0;
 bit SystemTime1s=0;
@@ -64,14 +65,22 @@ void Delay10ms()		//@11.0592MHz
 }
 
 
-
-uint8_t idata BeepTime=0;     //蜂鸣器响的时间
-void BeepEx(uint8_t time)
+uint8_t BeepCount=0;
+uint8_t BeepTime=0;     //蜂鸣器响的时间
+void Beep(uint8_t time)
 {
-    BeepTime=time;
+    BeepCount=0;
+    BeepTime=time-1;
     BEEP_IO=0;
     CR=1;
     //LOG_E("BeepOn");
+}
+void BeepEx(uint8_t count,uint8_t time)
+{
+    BeepCount=count*2-1;
+    BeepTime=time-1;
+    BEEP_IO=0;
+    CR=1;
 }
 
 void IOPort_Init(void)
@@ -149,6 +158,20 @@ void Timer0Init(void)		//50毫秒@11.0592MHz自动重载
 	TF0 = 0;		//清除TF0标志
     ET0 = 1;        //enable timer0 interrupt
     TR0 = 1;		//定时器0开始计时
+}
+
+void ADC_Init(void)
+{
+ ///****** 配置P1.1高阻 ******/
+	P1M1 &=	~0x02;	 		// 0000 0010  
+	P1M0 &=	~0x00;	 		// 0000 0000  
+	Delay10ms();
+  	P1ASF = 0x10;                   //Set P1.4 as analog input port
+  	ADC_RES = 0;                    //Clear previous result
+	ADC_RESL = 0;					//clear low 
+	AUXR1 &= ~0x04;					//high 8 bit to ADC_RES
+  	ADC_CONTR = ADC_POWER | ADC_SPEEDL  | ADC_CHANNEL ;
+  	Delay10ms();                       //ADC power-on delay and Start A/D conversion
 }
 
 void SPI_Send(uint16_t dat)
@@ -279,7 +302,6 @@ void Save_ModuleSomething()
 
 int main()
 {
-
     gConfig.LANG=Byte_Read(0);
     if (gConfig.LANG>1)
     {
@@ -287,7 +309,7 @@ int main()
     }
     Init();
     //LOG_E("System Boot \t SysLang:%02X",(uint16_t)Byte_Read(0));//,0x30+gConfig.LANG);
-    BeepEx(0);  //响50ms
+    Beep(1);  //响50ms
     for(;;)
     {
         Module_COMM();

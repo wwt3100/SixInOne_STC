@@ -32,7 +32,7 @@ void HMI_Process()
                 }
                 else if(gComInfo.HMIArg1==ePage_LogoEnd)
                 {
-                    BeepEx(10-1);
+                    Beep(10);
                     gComInfo.HMI_Scene=eScene_StartPage;
                     HMI_Goto_LocPage(ePage_Main);
                 }
@@ -43,7 +43,7 @@ void HMI_Process()
               #else                         //调试模式跳过动画
                 if (gComInfo.HMIArg1==ePage_Startup)
                 {
-                    BeepEx(10-1);
+                    Beep(10);
                     gComInfo.HMI_Scene=eScene_StartPage;
                     HMI_Goto_LocPage(ePage_Main);
                 }
@@ -93,7 +93,7 @@ void HMI_Process()
                 {
                     ; //do nothing
                 }
-                BeepEx(0);
+                Beep(1);
             }
             break;
         case eScene_Wait:
@@ -134,11 +134,11 @@ void HMI_Process()
                             gComInfo.TimerCounter2=gComInfo.TimerCounter;   //保存定时器计数
                             Pause_Flag=1;
                             WP_Stop(0);     //暂停
-                            BeepEx(0);
+                            Beep(1);
                             break;
                         case 0x05:      //停止
                             Pause_Flag=0;
-                            BeepEx(0);
+                            Beep(1);
                             WP_Stop(1);
                             if (gComInfo.HMI_Scene==eScene_Module_308test)
                             {
@@ -160,7 +160,7 @@ void HMI_Process()
             {
                 if (gComInfo.HMIMsg==eMsg_keyUp && gComInfo.HMIArg1==eKeyCode_Group1)
                 {
-                    BeepEx(0);
+                    Beep(1);
                     switch (gComInfo.HMIArg2)
                     {
                         case 0x02:      //加
@@ -288,7 +288,7 @@ void HMI_Process()
                     
                     if (gComInfo.HMIArg2 == 0x02)   //加
                     {
-                        BeepEx(0);
+                        Beep(1);
                         if (gInfo.ModuleInfo.mini308Module.WorkTime<MODULE308_MAX_WORKTIME)
                         {
                             gInfo.ModuleInfo.mini308Module.WorkTime++;
@@ -301,7 +301,7 @@ void HMI_Process()
                     }
                     else if(gComInfo.HMIArg2 == 0x01)   //减
                     {
-                        BeepEx(0);
+                        Beep(1);
                         if (gInfo.ModuleInfo.mini308Module.WorkTime<=1)
                         {
                             gInfo.ModuleInfo.mini308Module.WorkTime=MODULE308_MAX_WORKTIME;
@@ -345,12 +345,12 @@ void HMI_Process()
                             gComInfo.TimerCounter=gComInfo.TimerCounter2;   //恢复计数
                             WP_Start();     //开始
                         }
-                        BeepEx(0);
+                        Beep(1);
                         
                     }
                     else if(gComInfo.HMIArg2==eKeyCodeG1_Stop) //停止
                     {
-                        BeepEx(0);
+                        Beep(1);
                         WP_Stop(1);
                     }
                     else
@@ -459,7 +459,7 @@ void HMI_Process()
                             default:
                                 break;
                         }
-                        BeepEx(0);
+                        Beep(1);
                     }
                 }
                 else if(gComInfo.HMIMsg==eMsg_KeyLongPush)
@@ -493,7 +493,7 @@ void HMI_Process()
                                 }
                                 HMI_Show_Worktime1();
                             }
-                            BeepEx(0);
+                            Beep(1);
                         }
                         else if(gComInfo.HMIArg2 == 0x02)
                         {
@@ -521,7 +521,7 @@ void HMI_Process()
                                 }
                                 HMI_Show_Worktime1();
                             }
-                            BeepEx(0);
+                            Beep(1);
                         }
                     }
                 }
@@ -542,11 +542,11 @@ void HMI_Process()
                         switch (gComInfo.HMIArg2)
                         {
                             case 0x01:      //暂停
-                                BeepEx(0);
+                                Beep(1);
                                 WP_Stop(0);
                                 break;
                             case 0x02:      //停止
-                                BeepEx(0);
+                                Beep(1);
                                 WP_Stop(1);
                                 break;
                             default:
@@ -596,7 +596,7 @@ void HMI_Process()
                             case 0x1F:
                             case 0x20:
                             case 0x21:
-                                BeepEx(0);
+                                Beep(1);
                             default:
                                 break;
                         }
@@ -731,12 +731,12 @@ void HMI_Process()
                     {
                         if (gComInfo.HMIArg2==0x14)
                         {
-                            BeepEx(0);
+                            Beep(1);
                             HMI_New_Add();
                         }
                         else if(gComInfo.HMIArg2==0x15)
                         {
-                            BeepEx(0);
+                            Beep(1);
                             HMI_New_Dec();
                         }
                         else
@@ -753,13 +753,13 @@ void HMI_Process()
             {
                 SystemTime100ms=0;
                 ErrorBeepTime++;    
-                BeepEx(0);
+                Beep(1);
             }
             break;
         case eScene_Password:
             if (gComInfo.HMIMsg == eMsg_keyUp && gComInfo.HMIArg1==eKeyCode_Group2)
             {
-                BeepEx(0);
+                Beep(1);
                 switch (gComInfo.HMIArg2)
                 {
                     case 1:         //错误提示,确认按钮
@@ -807,14 +807,17 @@ void HMI_Process()
                                 case M_Type_633_1:
                                 case M_Type_Wira: 
                                 case M_Type_4in1: 
+                                    BeepEx(3,2);
                                     LL_Module_Send("\x39\xee\x00",3);
                                     break;
                                 //case M_Type_650:  //不需调试界面
                                 case M_Type_IU:   
+                                    BeepEx(3,2);
                                     memset(&gModuleSave,0x30,12);
                                     Save_ModuleSomething();
                                     break;
                                 case M_Type_308:
+                                    BeepEx(3,2);
                                     LL_Module_Send("1*14&0&0",8);
                                     break;
                                 default:
@@ -822,7 +825,7 @@ void HMI_Process()
                                     break;
                             };
                         }
-                        else if((gInfo.DebugOpen&OPEN_DBG_Config)        && strcmp(gInfo.Password,"308308")==0) //TODO:进入设置
+                        else if((gInfo.DebugOpen&OPEN_DBG_Config)        && strcmp(gInfo.Password,"308308")==0)     //设置
                         {
                             switch (gComInfo.ModuleType)    //该处根据治疗头类型来判断应解析执行的指令
                             {
@@ -830,7 +833,7 @@ void HMI_Process()
                                 case M_Type_633_1:
                                 case M_Type_IU:   
                                 case M_Type_UVA1: 
-                                    
+                                    //TODO:进入设置
                                     break;
                                 case M_Type_Wira: 
                                 case M_Type_4in1: 
@@ -897,7 +900,7 @@ void HMI_Process()
             {
                 if(gInfo.PasswordLen!=0)
                 {
-                    BeepEx(0);
+                    Beep(1);
                     gInfo.PasswordLen=0;    //长按清空
                     HMI_Show_Password();
                 }
@@ -927,7 +930,7 @@ void HMI_Process()
                         case 0x0B:      //保存DAC
                         case 0x0C:      //电源开关
                         case 0x0D:      //DAC 5V开关
-                            BeepEx(0);
+                            Beep(1);
                         default:
                             break;
                     }
@@ -953,7 +956,7 @@ void HMI_Process()
                 }
                 else if(gComInfo.HMIArg1 == 0x03 && gComInfo.HMIArg2 == 0x03) //返回/退出
                 {
-                    BeepEx(0);
+                    Beep(1);
                     HMI_Scene_Recovery();
                 }
             }
@@ -973,7 +976,7 @@ void HMI_Process()
                         case 0x0B:      //保存DAC
                         case 0x0C:      //电源开关
                         case 0x0D:      //DAC 5V开关
-                            BeepEx(0);
+                            Beep(1);
                         default:
                             break;
                     }
@@ -1049,7 +1052,7 @@ void HMI_Process()
                 }
                 else if(gComInfo.HMIArg1 == 0x03 && gComInfo.HMIArg2 == 0x03) //返回/退出
                 {
-                    BeepEx(0);
+                    Beep(1);
                     HMI_Scene_Recovery();
                 }
             }
@@ -1061,7 +1064,7 @@ void HMI_Process()
                     switch (gComInfo.HMIArg2)
                     {
                         case 0x05:      //dac add
-                            BeepEx(0);
+                            Beep(1);
                             if (gInfo.Debug.dac<50)
                             {
                                 gInfo.Debug.dac++;
@@ -1074,7 +1077,7 @@ void HMI_Process()
                             
                             break;
                         case 0x06:      //dac dec
-                            BeepEx(0);
+                            Beep(1);
                             if (gInfo.Debug.dac>0)
                             {
                                 gInfo.Debug.dac--;
@@ -1095,14 +1098,41 @@ void HMI_Process()
         case eScene_Info:
             if ((gComInfo.HMIMsg == eMsg_keyUp || gComInfo.HMIMsg== eMsg_KeyLongPush) && gComInfo.HMIArg1 == eKeyCode_Group3)
             {
-                BeepEx(0);
+                Beep(1);
                 gComInfo.HMIMsg=eMsg_NULL;
                 switch (gComInfo.HMIArg2)
                 {
                     case 0x01:      //save
+                    {
+                        uint8_t xdata cmd[12]="1*12&000&0\0\0";
+                        uint8_t len;
+                        if (gInfo.ModuleInfo.mini308Module.Freq/100>0)
+                        {
+                            uint8_t t=0;
+                            cmd[5]=gInfo.ModuleInfo.mini308Module.Freq/100 +'0';
+                            t=gInfo.ModuleInfo.mini308Module.Freq%100;
+                            cmd[6]=t/10 +'0';
+                            cmd[7]=t%10 +'0';
+                            cmd[8]='&';
+                            cmd[9]=gInfo.ModuleInfo.mini308Module.Duty/10 +'0';
+                            cmd[10]=gInfo.ModuleInfo.mini308Module.Duty%10 +'0';
+                            len=11;
+                        }
+                        else
+                        {
+                            cmd[5]=gInfo.ModuleInfo.mini308Module.Freq/10 +'0';
+                            cmd[6]=gInfo.ModuleInfo.mini308Module.Freq%10 +'0';
+                            cmd[7]='&';
+                            cmd[8]=gInfo.ModuleInfo.mini308Module.Duty/10 +'0';
+                            cmd[9]=gInfo.ModuleInfo.mini308Module.Duty%10 +'0';
+                            len=10;
+                        }
+                        LL_Module_Send(cmd,len);
+                    }
                         break;
                     case 0x02:      //触摸屏校准
-                        
+                        LL_HMI_Send("\xE4\x55\xAA\x5A\xA5,",5);
+                        LL_HMI_SendEnd();
                         break;
                     case 0x03:      //exit
                         HMI_Scene_Recovery();
@@ -1157,6 +1187,22 @@ void HMI_Process()
                         HMI_308Set_Duty();
                         break;
                     default:        
+                        break;
+                }
+            }
+            if (gComInfo.HMIMsg == eMSg_CailDone)
+            {
+                gComInfo.HMIMsg=eMsg_NULL;
+                Beep(2);
+                switch (gComInfo.ModuleType)
+                {
+                    case M_Type_308:
+                        HMI_Goto_LocPage(13);
+                        HMI_308Set_Freq();
+                        HMI_308Set_Duty();
+                        break;
+                    default:
+                        HMI_Scene_Recovery();
                         break;
                 }
             }
@@ -1262,7 +1308,7 @@ void HMI_Goto_Error()
     }
     else
     {
-        
+        BeepEx(5,2);
         gComInfo.HMI_LastScene=gComInfo.HMI_Scene;
         gComInfo.HMI_Scene=eScene_Error;
         if (gComInfo.ErrorCode==Error_NoModule)

@@ -131,8 +131,10 @@ void Delay10ms();		//@11.0592MHz
 void LOG_E(void*str,...);
 
 
-void BeepEx(uint8_t time);
-
+void Beep(uint8_t time);
+void BeepEx(uint8_t count,uint8_t time);    //count 响的次数 time 50ms整数时间
+ 
+void ADC_Init(void);
 //最多写256byte
 void Save_Config();
 void Save_ModuleSomething();
@@ -154,6 +156,7 @@ extern uint8_t idata uart2_buff[18];
 extern bit HMI_Msg_Flag;
 
 extern bit Fire_Flag;
+extern bit Fire_MaxOut; //用于慢启动 633 UVA1
 extern bit Pause_Flag;  //308暂停用
 
 

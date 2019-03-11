@@ -204,7 +204,7 @@ void Module_COMM()
             {
                 //LOG_E("Recv Cmd 0x22 size %u",(uint16_t)data_size);
                 Resend_getUsedtime=0;
-                if (data_size==16)
+                if (data_size==13)
                 {
                     uint8_t code cmd[]="\x21\x81\x01\xFF\xFF\x00\x1F";
                     if (gConfig.LANG==LANG_ZH)
@@ -296,9 +296,11 @@ void Module_COMM()
                     {
                         case '&':   //光传感器错误
                             LOG_E("308 Error 1");
+                            gComInfo.ErrorCode=0x31;
+                            HMI_Goto_Error();
                             break;
                         case '0':   //已经点亮,开始计时
-                            LOG_E("308 Fire Flag");
+                            //LOG_E("308 Fire Flag");
                             gComInfo.WorkStat=eWS_Working;
                             gComInfo.TimerCounter=0;
                             SystemTime1s=0;
@@ -315,14 +317,15 @@ void Module_COMM()
                                 gInfo.DebugOpen=OPEN_DBG_ClearUsedtime|
                                         OPEN_DBG_Config|
                                         OPEN_DBG_ROOT;  //给治疗头授权 
+                                ADC_Init();//初始化ADC
                             }
                             break;
                         case '2':   //频率占空比           @1*12&频率数据&占空比数据*#
                             gInfo.ModuleInfo.mini308Module.Freq=atoi(pbuf+6);
                             gInfo.ModuleInfo.mini308Module.Duty=atoi(pbuf+10);
-                            LOG_E(" Freq:%d,Duty:%d",
-                                (uint16_t)gInfo.ModuleInfo.mini308Module.Freq,
-                                (uint16_t)gInfo.ModuleInfo.mini308Module.Duty);
+//                            LOG_E(" Freq:%d,Duty:%d",
+//                                (uint16_t)gInfo.ModuleInfo.mini308Module.Freq,
+//                                (uint16_t)gInfo.ModuleInfo.mini308Module.Duty);
                             break;
                         case '3':   //使用时间:@1*13&小时&分钟&秒钟*# 1*13&000&00&00(初始状态为0)
                             if (gComInfo.HMI_Scene==eScene_Info)    //确认场景
@@ -378,6 +381,8 @@ void Module_COMM()
                 else    //0 2 3 4 5 7 错误
                 {
                     LOG_E("308 Error %c",pbuf[3]);
+                    gComInfo.ErrorCode=pbuf[3];
+                    HMI_Goto_Error();
                 }
             }
         }

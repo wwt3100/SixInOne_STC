@@ -79,6 +79,7 @@ void Work_Process()
                         }
                         else
                         {
+                            BeepEx(3,3);
                             WP_Stop(1);     //Timeout Stop
                         }
                         break;
@@ -95,6 +96,7 @@ void Work_Process()
                         }
                         else
                         {
+                            BeepEx(3,3);
                             WP_Stop(1);     //Timeout Stop
                         }
                         break;
@@ -102,9 +104,22 @@ void Work_Process()
                         break;
                 }
             }
-            if (SystemTime100ms==1 && Fire_Flag==1)
+            if (SystemTime100ms==1 && Fire_MaxOut==0)   //慢启动
             {
-                //TODO: 慢启动
+                switch (gComInfo.HMI_Scene)
+                {
+                    case eScene_Module_633:
+                        gInfo.ModuleInfo.RoutineModule.DAC_Val+=10;
+                        if (gInfo.ModuleInfo.RoutineModule.DAC_Val>gInfo.ModuleInfo.RoutineModule.DAC_Cail)
+                        {
+                            gInfo.ModuleInfo.RoutineModule.DAC_Val=gInfo.ModuleInfo.RoutineModule.DAC_Cail;
+                            Fire_MaxOut=1;
+                        }
+                        SPI_Send(gInfo.ModuleInfo.RoutineModule.DAC_Val);
+                        break;
+                    default:
+                        break;
+                }
             }
         case eWS_Standby:
             if(SystemTime1s==1)
@@ -136,6 +151,14 @@ void Work_Process()
                         //gComInfo.TempCount++;     //TODO:暂不开报警
                         Module_GetTemp();
                         break;
+                    case eScene_Module_IU:
+                        if (ADConvertDone)          //读回Vfb
+                        {
+                            ADConvertDone=0;
+                            HMI_Show_IU_Temp();
+                            ADC_CONTR = ADC_POWER | ADC_SPEEDLL | ADC_START | 0x01 ;
+                        }
+                        break;
                     case eScene_Module_308:
                     case eScene_Module_308test:
 
@@ -163,21 +186,19 @@ void Work_Process()
                     gComInfo.ErrorCode=Error_TempSenerError;
                     HMI_Goto_Error();
                 }
+                
             }
             if (SystemTime100ms==1)     //重发
             {
                 SystemTime100ms=0;
                 if (Resend_getUsedtime)
                 {
+                    //LOG_E("ReSend GetUsedTime");
                     ModuleRoutine_GetUsedTime();
                 }
                 if (Resend_getCalibData)
                 {
                     ModuleRoutine_GetCalibData();
-                }
-                if (ADConvertDone)          //读回Vfb
-                {
-                    ADConvertDone=0;
                 }
             }
             break;
@@ -227,7 +248,18 @@ void WP_Start()
             break;
         case eScene_Module_633:
             //SPI_Send(30310);        //2V
-            SPI_Send(gInfo.ModuleInfo.RoutineModule.DAC_Cail);
+            gInfo.ModuleInfo.RoutineModule.DAC_Val=0x7000|2457;   //3V
+            if (gInfo.ModuleInfo.RoutineModule.LightMode==0)
+            {
+                SPI_Send(gInfo.ModuleInfo.RoutineModule.DAC_Val);   //从3V开始
+                Fire_MaxOut=0;
+            }
+            else
+            {
+                SPI_Send(gInfo.ModuleInfo.RoutineModule.DAC_Cail);  //直接输出最大
+                Fire_MaxOut=1;
+            }
+            
             //SPI_Send(0x700|3440);   //4.2
             PowerCtr_Light1=POWER_ON; 
             PowerCtr_Main=POWER_ON;   
@@ -349,6 +381,7 @@ void WP_Stop(uint8_t stop_type)
             PowerCtr_Light1=POWER_OFF;  //off
             PowerCtr_Main=POWER_OFF;    //off
             SPI_Send(0x7000);           //DAC 0V
+            Fire_MaxOut=0;
             break;
         case eScene_Module_UVA1:
             Module_Send_PWM(1,0);

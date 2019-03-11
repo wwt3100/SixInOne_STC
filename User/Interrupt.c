@@ -82,7 +82,8 @@ void UART2_INT(void) interrupt 8 using 2
 /*			     定时中断一次	                               */
 /*******************************************************/
 
-extern uint8_t idata BeepTime;
+extern uint8_t BeepTime;
+extern uint8_t BeepCount;
 
 void Timer0_isr() interrupt 1 using 3
 {
@@ -125,22 +126,32 @@ void Timer0_isr() interrupt 1 using 3
 /*               PCA中断                                 */
 /*			     定时中断一次	                               */
 /*******************************************************/
-
 void Timer_PCA(void) interrupt 7 using 3		//PCA中断函数 蜂鸣器定时,50ms为单位
 {
+    static uint8_t time=0;
     CL=0;
     CH=0;
     CCF0=0;
-    if (BeepTime==0)
+    KEY_LED_IO=ENABLE;  //For test
+
+    if (time>=BeepTime)
     {
-        BEEP_IO=1;  //关蜂鸣器
-        CR=0;
+        BEEP_IO=!BEEP_IO;
+        time=0;
+        if (BeepCount==0)
+        {
+            BEEP_IO=1;  //关蜂鸣器
+            CR=0;
+        }
+        else
+        {
+            BeepCount--;
+        }
     }
     else
     {
-        --BeepTime;
+        time++;
     }
-    KEY_LED_IO=ENABLE;
 }
 
 void ADC_ISR(void) interrupt 5 
@@ -148,7 +159,7 @@ void ADC_ISR(void) interrupt 5
     uint16_t ADC_Value=0;
     ADC_CONTR &= ~ADC_FLAG;         						//Clear ADC interrupt flag
     ADC_Value=(ADC_RES<<2)|ADC_RESL;
-    gComInfo.FeedbackVolt=(ADC_Value *1000L *5L) >>10;
+    gComInfo.FeedbackVolt=(ADC_Value *1000L *5L) >>10;      //数据扩大1000倍
     ADConvertDone=1;
 }
 
