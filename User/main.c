@@ -8,27 +8,10 @@
 
 #include "STC_EEPROM.h"
 
-bit Uart1_Busy=0;
-bit Uart2_Busy=0;
-
-bit Uart1_buf_sel=0;
-bit Uart2_buf_sel=0;
-bit Uart1_ReviceFrame;
-bit Uart2_ReviceFrame;
-
-
-bit HMI_Msg_Flag=0;
-
-bit Fire_Flag=0;
-bit Fire_MaxOut=0;  //用于慢启动 633 UVA1
-bit Pause_Flag=0;   //308暂停用
-
 bit SystemTime100ms=0;
 bit SystemTime1s=0;
 bit SystemTime1s_1=0;
 bit Heardbeat1s=1;
-
-bit ADConvertDone;
 
 //通信重发
 bit Resend_getUsedtime;
@@ -42,9 +25,9 @@ bit Dbg_Admin;      //管理员权限
 
 
 uint8_t idata uart1_buff[18];
-uint8_t idata uart2_buff[18];
+uint8_t idata uart2_buff[20];
 
-_Golbal_comInfo idata gComInfo={0};
+_Golbal_comInfo idata gCom={0};
 _Golbal_Config  idata gConfig={0};
 _Golbal_Info    xdata gInfo={0};
 
@@ -209,9 +192,9 @@ void Init()
     Timer0Init();
     EA=1;
 
-    gComInfo.COMMProtocol_Head=0xAA;    //默认先试常规治疗头协议
-    gComInfo.COMMProtocol_Tail1=0xC3;
-    gComInfo.COMMProtocol_Tail2=0x3C;
+    gCom.COMMProtocol_Head=0xAA;    //默认先试常规治疗头协议
+    gCom.COMMProtocol_Tail1=0xC3;
+    gCom.COMMProtocol_Tail2=0x3C;
 }
 
 void LOG_E(void*str,...)
@@ -222,16 +205,16 @@ void LOG_E(void*str,...)
     va_start(ap, str);
     vsprintf(buf, (char const*)str, ap);
     va_end(ap);
-    while (Uart2_Busy); //防止正常数据没发完
+    while (gCom.Uart2_Busy); //防止正常数据没发完
     AUXR1 |= 0x10;  //串口IO切到P4
     while (buf[i])
     {
-        while(Uart2_Busy);
-        Uart2_Busy=1;
+        while(gCom.Uart2_Busy);
+        gCom.Uart2_Busy=1;
         S2BUF=buf[i];
         i++;
     }
-    while(Uart2_Busy);  //等待最后一个byte发送完成
+    while(gCom.Uart2_Busy);  //等待最后一个byte发送完成
     AUXR1 &= 0xEF;  //串口IO复原
 }
 
@@ -324,9 +307,9 @@ int main()
             KEY_LED_IO=DISABLE;
             //CR=1;
 //            LOG_E("Scene:%u WorkState: %u ModuleType:%X ",
-//                    (uint16_t)gComInfo.HMI_Scene,
-//                    (uint16_t)gComInfo.WorkStat,
-//                    (uint16_t)gComInfo.ModuleType);
+//                    (uint16_t)gCom.HMI_Scene,
+//                    (uint16_t)gCom.WorkStat,
+//                    (uint16_t)gCom.ModuleType);
         }
     }
 }

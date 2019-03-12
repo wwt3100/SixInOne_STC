@@ -44,6 +44,18 @@
 #define MODULE308_MAX_WORKTIME      (140)   /*最大工作时间*/
 
 typedef struct Golbal_comInfo{
+    //串口相关位
+    uint8_t Uart1_Busy:1;
+    uint8_t Uart2_Busy:1;
+    uint8_t Uart1_ReviceFrame:1;
+    uint8_t Uart2_ReviceFrame:1;
+    
+    //标志位
+    uint8_t Fire_Flag:1;
+    uint8_t Fire_MaxOut:1;  //用于慢启动 633 UVA1
+    uint8_t Pause_Flag:1;   //308暂停用
+    uint8_t ADConvertDone:1;
+    
     uint8_t ModuleType;
     uint8_t WorkStat;       //0-未接治疗头         1-停止    2-暂停    3-运行
     
@@ -85,20 +97,25 @@ typedef struct Golbal_Info{
             
             uint32_t UsedTime;          //已经使用时间
             uint32_t UsedCount;         //已经使用次数
-        }RoutineModule;
-        struct New4in1Module{
-            uint8_t ConfigSel;          //设置选择
-            uint8_t ConfigSelLight;     //选择
-            uint8_t LightMode;          //选择出光模式 0专家 1-4智能
-            uint8_t StepSel;
-            uint8_t LightStep [5][27];       //出光步骤
-                                            //需要预先读出工作模式,显示到界面上
-                                            //[0]bit7模式 bit6-0步数,[3*n+1]光,[3*n+2]能量,[3*n+3]时间
+        }Routine;
+        struct New4in1{
+            uint8_t ConfigSel;           //设置选择
+            uint8_t ConfigSelLight;      //选择   bit7:用于强制刷新 
+            uint8_t LightGroup;          //选择出光模式 0专家 1-4智能
+            uint8_t LastSelGroup;        //上次选择的模式 1-4
+            uint8_t LocStep;        //当前工步
+            struct LightStep{
+                uint8_t StepMode:1;     //0->顺序    1->同步
+                uint8_t StepNum:7;      //工步数,最多4步
+                uint8_t Data[12];       //工步数据,[3*n+1]光,[3*n+2]能量,[3*n+3]时间
+            }LightStep[5];
+            uint8_t PowerMax[4];        //最大能量
+            uint8_t PowerMix[4];        //最小能量
             uint8_t PowerLevel[4];
             uint8_t WorkTime[5];        //设置的时间,单位min             [0]同步模式时间 [1-4]顺序模式4光
             uint16_t RemainTime[4];     //剩余时间,单位s
-        }New4in1Module;
-        struct mini308Module{
+        }New4in1;
+        struct mini308{
             uint8_t WorkMode;       // 0->正常模式 1->红斑测试
             uint8_t TestSelTime;    //红斑模式选择的时间
             uint8_t TestWorkTime;   //红斑测试的工作时间
@@ -108,7 +125,7 @@ typedef struct Golbal_Info{
             uint16_t TotalTime;     //总红斑测试时间
             uint16_t Freq;      //工作频率
             uint16_t Duty;      //占空比
-        }mini308Module;
+        }mini308;
     }ModuleInfo;
     uint8_t DebugOpen;      //该治疗头能接受的密码,位控制,暂定最多8种
     char    Password[9];    //8字节+结尾0
@@ -140,41 +157,27 @@ void Save_Config();
 void Save_ModuleSomething();
 void SPI_Send(uint16_t dat);    //控制48V电源
 
-extern _Golbal_comInfo idata gComInfo;
+extern _Golbal_comInfo idata gCom;
 extern _Golbal_Config  idata gConfig;
 extern _Golbal_Info    xdata gInfo;
 extern _ModuleSave xdata gModuleSave;
 
-
-extern bit Uart1_Busy;
-extern bit Uart2_Busy;
-extern bit Uart1_ReviceFrame;
-extern bit Uart2_ReviceFrame;
 extern uint8_t idata uart1_buff[18];
-extern uint8_t idata uart2_buff[18];
-
-extern bit HMI_Msg_Flag;
-
-extern bit Fire_Flag;
-extern bit Fire_MaxOut; //用于慢启动 633 UVA1
-extern bit Pause_Flag;  //308暂停用
-
+extern uint8_t idata uart2_buff[20];
 
 extern bit SystemTime100ms;
 extern bit SystemTime1s;
 extern bit SystemTime1s_1;
 extern bit Heardbeat1s;
 
-extern bit ADConvertDone;
-
 extern bit Resend_getUsedtime;
 extern bit Resend_getCalibData;
 
 extern bit Dbg_Flag_DAC5V;
 extern bit Dbg_Flag_MainPower;
-
 extern bit Dbg_Admin;
 
 
 #endif
+
 

@@ -38,7 +38,6 @@ uint8_t Byte_Read(uint16_t add);              //读一字节，调用前需打开IAP 功能
 void Byte_Program(uint16_t add, uint8_t ch);  //字节编程，调用前需打开IAP 功能
 void Sector_Erase(uint16_t add);            //擦除扇区
 void IAP_Disable();                       //关闭IAP 功能
-void Delay();
 
 //读一字节，调用前需打开IAP 功能，入口:DPTR = 字节地址，返回:A = 读出字节
 uint8_t Byte_Read(uint16_t add)
@@ -109,17 +108,6 @@ void IAP_Disable()
     IAP_TRIG  = 0;      //清命令触发寄存器,使命令触发寄存器无触发,此句可不用
     IAP_ADDRH = 0;
     IAP_ADDRL = 0;
-}
-
-void Delay()
-{
-    uint8_t idata i;
-    uint16_t idata d=5000;
-    while (d--)
-    {
-        i=255;
-        while (i--);
-    }
 }
 
 

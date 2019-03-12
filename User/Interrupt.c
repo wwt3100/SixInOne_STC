@@ -11,7 +11,7 @@ void UART1_INT(void) interrupt 4 using 1
 	if(TI==1)   //发送完1byte
 	{
 		TI=0;
-		Uart1_Busy=0;	//TIFLG作为其他程序的查询标记；
+		gCom.Uart1_Busy=0;	//TIFLG作为其他程序的查询标记；
 	}
 	if(RI==1)  //接收到1byte
 	{	
@@ -31,7 +31,7 @@ void UART1_INT(void) interrupt 4 using 1
                uart1_buff[data_size-3]==0xCC)      //0xCC33C33C
             {
                 uart1_buff[0]=(data_size);
-                Uart1_ReviceFrame=1;
+                gCom.Uart1_ReviceFrame=1;
                 head=0;
                 data_size=0;
             }
@@ -50,13 +50,13 @@ void UART2_INT(void) interrupt 8 using 2
 	if(S2CON & S2TI)
 	{
 		S2CON &= ~S2TI;		//Clear transmit interrupt flag
-		Uart2_Busy = 0;
+		gCom.Uart2_Busy = 0;
 	}
 	if(S2CON & S2RI)
 	{
 		S2CON &= ~S2RI;		//Clear receive interrupt flag
 		rx_data = S2BUF;
-		if (head!=gComInfo.COMMProtocol_Head)
+		if (head!=gCom.COMMProtocol_Head)
         {
             head=rx_data;
         }
@@ -64,11 +64,11 @@ void UART2_INT(void) interrupt 8 using 2
         {
             data_size++;
             uart2_buff[data_size]=rx_data;
-            if (rx_data == gComInfo.COMMProtocol_Tail2 && 
-                uart2_buff[data_size-1]==gComInfo.COMMProtocol_Tail1)
+            if (rx_data == gCom.COMMProtocol_Tail2 && 
+                uart2_buff[data_size-1]==gCom.COMMProtocol_Tail1)
             {
                 uart2_buff[0]=(data_size)-2;    //去掉包尾
-                Uart2_ReviceFrame=1;
+                gCom.Uart2_ReviceFrame=1;
                 head=0;
                 tail=0;
                 data_size=0;
@@ -90,9 +90,9 @@ void Timer0_isr() interrupt 1 using 3
     TL0 = 0x00;		//设置定时初值    50ms
     TH0 = 0x4C;		//设置定时初值
     
-    if (Fire_Flag==1 && gComInfo.WorkStat==eWS_Working && gInfo.ModuleInfo.RoutineModule.LightMode==1 && gComInfo.TimerCounter%10==0)   //2Hz 闪烁模式
+    if (gCom.Fire_Flag==1 && gCom.WorkStat==eWS_Working && gInfo.ModuleInfo.Routine.LightMode==1 && gCom.TimerCounter%10==0)   //2Hz 闪烁模式
     {
-        switch (gComInfo.HMI_Scene)
+        switch (gCom.HMI_Scene)
         {
             case eScene_Module_650:
                 PowerCtr_Module12v=~PowerCtr_Module12v;
@@ -105,18 +105,18 @@ void Timer0_isr() interrupt 1 using 3
         }
     }
     
-    gComInfo.TimerCounter++;
-    if(gComInfo.TimerCounter % 2 == 0)
+    gCom.TimerCounter++;
+    if(gCom.TimerCounter % 2 == 0)
 	{
 		SystemTime100ms = 1;
 	}
-	if(gComInfo.TimerCounter >= 20)
+	if(gCom.TimerCounter >= 20)
 	{
-		gComInfo.TimerCounter = 0;
+		gCom.TimerCounter = 0;
 		SystemTime1s = 1;		//治疗时间1s倒计时标志
 		SystemTime1s_1=1;
 	}
-	else if(gComInfo.TimerCounter == 10)    //与工作秒错开500ms
+	else if(gCom.TimerCounter == 10)    //与工作秒错开500ms
 	{
 	    Heardbeat1s=1;
 	}
@@ -159,8 +159,8 @@ void ADC_ISR(void) interrupt 5
     uint16_t ADC_Value=0;
     ADC_CONTR &= ~ADC_FLAG;         						//Clear ADC interrupt flag
     ADC_Value=(ADC_RES<<2)|ADC_RESL;
-    gComInfo.FeedbackVolt=(ADC_Value *1000L *5L) >>10;      //数据扩大1000倍
-    ADConvertDone=1;
+    gCom.FeedbackVolt=(ADC_Value *1000L *5L) >>10;      //数据扩大1000倍
+    gCom.ADConvertDone=1;
 }
 
 

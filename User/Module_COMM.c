@@ -8,38 +8,38 @@ void LL_Module_Send(const void* str,uint8_t str_len)
 {
     uint8_t i;
     const uint8_t *ptr=str;
-    while (Uart2_Busy);
-    Uart2_Busy=1;
-    S2BUF=gComInfo.COMMProtocol_Head;
+    while (gCom.Uart2_Busy);
+    gCom.Uart2_Busy=1;
+    S2BUF=gCom.COMMProtocol_Head;
     for (i = 0; i < str_len; i++)
     {
-        while (Uart2_Busy);
-        Uart2_Busy=1;
+        while (gCom.Uart2_Busy);
+        gCom.Uart2_Busy=1;
         S2BUF=*ptr;
         ptr++;
     }
-    while (Uart2_Busy);
-    Uart2_Busy=1;
-    S2BUF=gComInfo.COMMProtocol_Tail1;
-    while (Uart2_Busy);
-    Uart2_Busy=1;
-    S2BUF=gComInfo.COMMProtocol_Tail2;
-    if (gComInfo.COMMProtocol_Head=='@')    //如果是308头,多发'\n'
+    while (gCom.Uart2_Busy);
+    gCom.Uart2_Busy=1;
+    S2BUF=gCom.COMMProtocol_Tail1;
+    while (gCom.Uart2_Busy);
+    gCom.Uart2_Busy=1;
+    S2BUF=gCom.COMMProtocol_Tail2;
+    if (gCom.COMMProtocol_Head=='@')    //如果是308头,多发'\n'
     {
-        while (Uart2_Busy);
-        Uart2_Busy=1;
+        while (gCom.Uart2_Busy);
+        gCom.Uart2_Busy=1;
         S2BUF=0x0A;
     }
-    while (Uart2_Busy);     //等待发送完
+    while (gCom.Uart2_Busy);     //等待发送完
     #if defined(_DEBUG) && 0 /*干扰正常工作流程*/
-    LOG_E("%02X ",(uint16_t)gComInfo.COMMProtocol_Head);
+    LOG_E("%02X ",(uint16_t)gCom.COMMProtocol_Head);
     for (i = 0; i < str_len; i++)
     {
         LOG_E("%02X ",(uint16_t)*((uint8_t*)(str+i)));
     }
-    LOG_E("%02X ",(uint16_t)gComInfo.COMMProtocol_Tail1);
-    LOG_E("%02X ",(uint16_t)gComInfo.COMMProtocol_Tail2);
-    if (gComInfo.COMMProtocol_Head=='@')    //如果是308头,多发'\n'
+    LOG_E("%02X ",(uint16_t)gCom.COMMProtocol_Tail1);
+    LOG_E("%02X ",(uint16_t)gCom.COMMProtocol_Tail2);
+    if (gCom.COMMProtocol_Head=='@')    //如果是308头,多发'\n'
     {
         LOG_E("%02X ",(uint16_t)'\n');
     }
@@ -49,21 +49,21 @@ void LL_Module_Send(const void* str,uint8_t str_len)
 
 void Module_COMM()
 {
-    if (Uart2_ReviceFrame==0)
+    if (gCom.Uart2_ReviceFrame==0)
     {
         return;
     }
     else
     {
-        uint8_t xdata pbuf[18]={0};
+        uint8_t xdata pbuf[20]={0};
         uint8_t data_size=uart2_buff[0];
-        if (data_size>18)
+        if (data_size>20)
         {
-            data_size=18;
+            data_size=20;
         }
         memcpy(pbuf+1,uart2_buff+1,data_size);
-        Uart2_ReviceFrame=0;
-        if (gComInfo.COMMProtocol_Head==0xAA)
+        gCom.Uart2_ReviceFrame=0;
+        if (gCom.COMMProtocol_Head==0xAA)
         {
             if (pbuf[1]==0x21)
             {
@@ -71,63 +71,73 @@ void Module_COMM()
                 switch (cmd)
                 {
                     case 0x01:      //握手回复治疗头类型
-                        gComInfo.ModuleType=pbuf[3];
-                        LOG_E("Module Type: %02X",(uint16_t)gComInfo.ModuleType);
-                        gComInfo.TimerCounter=0;
+                        gCom.ModuleType=pbuf[3];
+                        LOG_E("Module Type: %02X",(uint16_t)gCom.ModuleType);
+                        gCom.TimerCounter=0;
                         SystemTime1s=0;
                         gInfo.DebugOpen=OPEN_DBG_Calib|
                                         OPEN_DBG_ClearUsedtime|
                                         OPEN_DBG_Config|
                                         OPEN_DBG_ROOT;  //给治疗头授权 
                         //TODO: 不同治疗头授权不一样
-                        switch (gComInfo.ModuleType)    //治疗头数据初始化
+                        switch (gCom.ModuleType)    //治疗头数据初始化
                         {
                             case M_Type_650:
-                                gComInfo.WorkStat=eWS_Standby;
+                                gCom.WorkStat=eWS_Standby;
                                 DS18B20_StartCovert();
-                                gInfo.ModuleInfo.RoutineModule.WorkTime=10;  //默认10分钟
-                                gInfo.ModuleInfo.RoutineModule.PowerLevel=1800;   //治疗头没回复能量大小
-                                gComInfo.HMI_LastScene=eScene_Module_650;
+                                gInfo.ModuleInfo.Routine.WorkTime=10;  //默认10分钟
+                                gInfo.ModuleInfo.Routine.PowerLevel=1800;   //治疗头没回复能量大小
+                                gCom.HMI_LastScene=eScene_Module_650;
                                 break;
                             case M_Type_633:
                             case M_Type_633_1:
-                                gComInfo.WorkStat=eWS_Standby;
+                                gCom.WorkStat=eWS_Standby;
                                 DS18B20_StartCovert();
-                                gInfo.ModuleInfo.RoutineModule.WorkTime=10;
-                                gInfo.ModuleInfo.RoutineModule.PowerLevel=150;   //633治疗头没回复能量大小
-                                gComInfo.HMI_LastScene=eScene_Module_633;
+                                gInfo.ModuleInfo.Routine.WorkTime=10;
+                                gInfo.ModuleInfo.Routine.PowerLevel=150;   //633治疗头没回复能量大小
+                                gCom.HMI_LastScene=eScene_Module_633;
                                 break;
                           //case M_Type_IU:     //IU是另外协议,在此不会收到
                             case M_Type_UVA1:
-                                gComInfo.WorkStat=eWS_Standby;
-                                gInfo.ModuleInfo.RoutineModule.WorkTime=10;
-                                gComInfo.HMI_LastScene=eScene_Module_UVA1;
+                                gCom.WorkStat=eWS_Standby;
+                                gInfo.ModuleInfo.Routine.WorkTime=10;
+                                gCom.HMI_LastScene=eScene_Module_UVA1;
                                 break;
                             case M_Type_Wira:
-                                gComInfo.WorkStat=eWS_Standby;
-                                gComInfo.HMI_LastScene=eScene_Module_Wira;
-                                gInfo.ModuleInfo.New4in1Module.PowerLevel[0]=100;
-                                gInfo.ModuleInfo.New4in1Module.PowerLevel[1]=100;
-                                gInfo.ModuleInfo.New4in1Module.PowerLevel[2]=100;
-                                gInfo.ModuleInfo.New4in1Module.PowerLevel[3]=100;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[0]=30;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[1]=30;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[2]=30;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[3]=30;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[4]=30;
+                                gCom.WorkStat=eWS_Standby;
+                                gCom.HMI_LastScene=eScene_Module_Wira;
+                                gInfo.ModuleInfo.New4in1.PowerLevel[0]=100;
+                                gInfo.ModuleInfo.New4in1.PowerLevel[1]=100;
+                                gInfo.ModuleInfo.New4in1.PowerLevel[2]=100;
+                                gInfo.ModuleInfo.New4in1.PowerLevel[3]=100;
+                                gInfo.ModuleInfo.New4in1.PowerMax[0]=100;
+                                gInfo.ModuleInfo.New4in1.PowerMax[1]=100;
+                                gInfo.ModuleInfo.New4in1.PowerMax[2]=100;
+                                gInfo.ModuleInfo.New4in1.PowerMax[3]=100;
+                                gInfo.ModuleInfo.New4in1.WorkTime[0]=30;
+                                gInfo.ModuleInfo.New4in1.WorkTime[1]=30;
+                                gInfo.ModuleInfo.New4in1.WorkTime[2]=30;
+                                gInfo.ModuleInfo.New4in1.WorkTime[3]=30;
+                                gInfo.ModuleInfo.New4in1.WorkTime[4]=30;
+                                gInfo.ModuleInfo.New4in1.LightGroup=0xFF;
                                 break;
                             case M_Type_4in1:
-                                gComInfo.WorkStat=eWS_Standby;
-                                gComInfo.HMI_LastScene=eScene_Module_4in1;
-                                gInfo.ModuleInfo.New4in1Module.PowerLevel[0]=100;
-                                gInfo.ModuleInfo.New4in1Module.PowerLevel[1]=100;
-                                gInfo.ModuleInfo.New4in1Module.PowerLevel[2]=100;
-                                gInfo.ModuleInfo.New4in1Module.PowerLevel[3]=100;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[0]=10;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[1]=10;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[2]=10;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[3]=10;
-                                gInfo.ModuleInfo.New4in1Module.WorkTime[4]=10;
+                                gCom.WorkStat=eWS_Standby;
+                                gCom.HMI_LastScene=eScene_Module_4in1;
+                                gInfo.ModuleInfo.New4in1.PowerLevel[0]=100;
+                                gInfo.ModuleInfo.New4in1.PowerLevel[1]=100;
+                                gInfo.ModuleInfo.New4in1.PowerLevel[2]=100;
+                                gInfo.ModuleInfo.New4in1.PowerLevel[3]=100;
+                                gInfo.ModuleInfo.New4in1.PowerMax[0]=100;
+                                gInfo.ModuleInfo.New4in1.PowerMax[1]=100;
+                                gInfo.ModuleInfo.New4in1.PowerMax[2]=100;
+                                gInfo.ModuleInfo.New4in1.PowerMax[3]=100;
+                                gInfo.ModuleInfo.New4in1.WorkTime[0]=10;
+                                gInfo.ModuleInfo.New4in1.WorkTime[1]=10;
+                                gInfo.ModuleInfo.New4in1.WorkTime[2]=10;
+                                gInfo.ModuleInfo.New4in1.WorkTime[3]=10;
+                                gInfo.ModuleInfo.New4in1.WorkTime[4]=10;
+                                gInfo.ModuleInfo.New4in1.LightGroup=0xFF;
                                 break;
                             default:
                                 break;
@@ -135,14 +145,14 @@ void Module_COMM()
                         break;
                     case 0x03:      //光1光功率
                         //LOG_E("Get PowerLevel %u",(uint16_t)pbuf[3]);
-                        switch (gComInfo.ModuleType)
+                        switch (gCom.ModuleType)
                         {
                             case M_Type_650:    //1800mw
-                                gInfo.ModuleInfo.RoutineModule.PowerLevel=pbuf[3]*10;
+                                gInfo.ModuleInfo.Routine.PowerLevel=pbuf[3]*10;
                                 break;
                             case M_Type_633:
                             case M_Type_633_1:
-                                gInfo.ModuleInfo.RoutineModule.PowerLevel=pbuf[3];
+                                gInfo.ModuleInfo.Routine.PowerLevel=pbuf[3];
                                 break;
                             default:
                                 break;
@@ -153,12 +163,12 @@ void Module_COMM()
                         break;
                     case 0x0B:      //DAC Vfb
                         Resend_getCalibData=0;
-                        switch (gComInfo.ModuleType)    //治疗头数据初始化
+                        switch (gCom.ModuleType)    //治疗头数据初始化
                         {
                             case M_Type_633:
                             case M_Type_633_1:
-                                gInfo.ModuleInfo.RoutineModule.DAC_Cail=pbuf[3]<<8|pbuf[4];
-                                gComInfo.FeedbackVolt=pbuf[5]<<8|pbuf[6];
+                                gInfo.ModuleInfo.Routine.DAC_Cail=pbuf[3]<<8|pbuf[4];
+                                gCom.FeedbackVolt=pbuf[5]<<8|pbuf[6];
                                 break;
                             case M_Type_UVA1:
                             case M_Type_Wira:
@@ -167,30 +177,30 @@ void Module_COMM()
                             default:
                                 break;
                         }
-                        if (gComInfo.HMI_Scene==eScene_Debug)
+                        if (gCom.HMI_Scene==eScene_Debug)
                         {
                             char xdata str[6]={0};
                             HMI_Cut_Pic(0x71,62, 657, 21, 657+117, 21+53);  //Vfb背景恢复
                             HMI_Cut_Pic(0x71,62, 109, 396, 109+106, 396+61);  //DA背景恢复
                             LL_HMI_Send("\x98",1);
                             LL_HMI_SendXY(685, 32);
-                            LL_HMI_Send_Pure("\x21\x81\x03\x00\x1F\x00\x1F",7);
-                            sprintf(str,"%u",gComInfo.FeedbackVolt);
+                            LL_HMI_Send_Pure("\x5\x80\x05\x00\x1F\x00\x1F",7);
+                            sprintf(str,"%u",gCom.FeedbackVolt);
                             LL_HMI_Send_Pure(str ,strlen(str));
                             LL_HMI_SendEnd();
                             
-                            gInfo.Debug.dac=((float)0.01220703125*(gInfo.ModuleInfo.RoutineModule.DAC_Cail&0xFFF)+0.05);
+                            gInfo.Debug.dac=((float)0.01220703125*(gInfo.ModuleInfo.Routine.DAC_Cail&0xFFF)+0.05);
                             LL_HMI_Send("\x98",1);
                             LL_HMI_SendXY(134, 411);
-                            LL_HMI_Send_Pure("\x21\x81\x03\x00\x1F\x00\x1F",7);
-                            while (Uart1_Busy);
-                            Uart1_Busy=1;
+                            LL_HMI_Send_Pure("\x5\x80\x05\x00\x1F\x00\x1F",7);
+                            while (gCom.Uart1_Busy);
+                            gCom.Uart1_Busy=1;
                             SBUF=gInfo.Debug.dac/10+'0';
-                            while (Uart1_Busy);
-                            Uart1_Busy=1;
+                            while (gCom.Uart1_Busy);
+                            gCom.Uart1_Busy=1;
                             SBUF='.';
-                            while (Uart1_Busy);
-                            Uart1_Busy=1;
+                            while (gCom.Uart1_Busy);
+                            gCom.Uart1_Busy=1;
                             SBUF=gInfo.Debug.dac%10+'0';
                             LL_HMI_SendEnd();
                         }
@@ -249,13 +259,13 @@ void Module_COMM()
             }
             else if(pbuf[1]==0x20)      //读取温度
             {
-                switch (gComInfo.HMI_Scene)
+                switch (gCom.HMI_Scene)
                 {
                     case eScene_Module_UVA1:
                         if (pbuf[2]==0)     //读到数据且正确
                         {
                             int16_t temp=pbuf[3]*10;
-                            gComInfo.TempCount=0;
+                            gCom.TempCount=0;
                             HMI_Show_Temp(temp);
                         }
                         else
@@ -267,7 +277,7 @@ void Module_COMM()
                         if (pbuf[2]==0)     //读到数据且正确
                         {
                             int16_t temp=pbuf[3]*10;
-                            gComInfo.TempCount=0;
+                            gCom.TempCount=0;
                             if(Dbg_Admin)
                             {
                                 HMI_Show_Temp(temp);
@@ -285,7 +295,7 @@ void Module_COMM()
                 ;   //do nothing
             }
         }
-        else    //gComInfo.COMMProtocol_Head=='@'
+        else    //gCom.COMMProtocol_Head=='@'
         {
             //LOG_E("%s",pbuf+1);   //打印协议
             if (pbuf[1]=='1' && pbuf[2]=='*')   //协议共同部分
@@ -296,24 +306,24 @@ void Module_COMM()
                     {
                         case '&':   //光传感器错误
                             LOG_E("308 Error 1");
-                            gComInfo.ErrorCode=0x31;
+                            gCom.ErrorCode=0x31;
                             HMI_Goto_Error();
                             break;
                         case '0':   //已经点亮,开始计时
                             //LOG_E("308 Fire Flag");
-                            gComInfo.WorkStat=eWS_Working;
-                            gComInfo.TimerCounter=0;
+                            gCom.WorkStat=eWS_Working;
+                            gCom.TimerCounter=0;
                             SystemTime1s=0;
                             HMI_Show_308RemainTime();
                             break;
                         case '1':   //308握手 @1*11&9&5*#
-                            if (gComInfo.HMI_Scene!=eScene_Info)    //如果是系统信息场景不处理
+                            if (gCom.HMI_Scene!=eScene_Info)    //如果是系统信息场景不处理
                             {
                                 memset(&gInfo,0,sizeof(_Golbal_Info));  //清治疗头数据
-                                gComInfo.WorkStat=eWS_Standby;
-                                gComInfo.ModuleType=M_Type_308;
-                                gComInfo.HMI_Scene=eScene_Module_308Wait;       //直接切换场景等待进入
-                                gInfo.ModuleInfo.mini308Module.WorkTime=15;     //默认30秒
+                                gCom.WorkStat=eWS_Standby;
+                                gCom.ModuleType=M_Type_308;
+                                gCom.HMI_Scene=eScene_Module_308Wait;       //直接切换场景等待进入
+                                gInfo.ModuleInfo.mini308.WorkTime=15;     //默认30秒
                                 gInfo.DebugOpen=OPEN_DBG_ClearUsedtime|
                                         OPEN_DBG_Config|
                                         OPEN_DBG_ROOT;  //给治疗头授权 
@@ -321,14 +331,14 @@ void Module_COMM()
                             }
                             break;
                         case '2':   //频率占空比           @1*12&频率数据&占空比数据*#
-                            gInfo.ModuleInfo.mini308Module.Freq=atoi(pbuf+6);
-                            gInfo.ModuleInfo.mini308Module.Duty=atoi(pbuf+10);
+                            gInfo.ModuleInfo.mini308.Freq=atoi(pbuf+6);
+                            gInfo.ModuleInfo.mini308.Duty=atoi(pbuf+10);
 //                            LOG_E(" Freq:%d,Duty:%d",
-//                                (uint16_t)gInfo.ModuleInfo.mini308Module.Freq,
-//                                (uint16_t)gInfo.ModuleInfo.mini308Module.Duty);
+//                                (uint16_t)gInfo.ModuleInfo.mini308.Freq,
+//                                (uint16_t)gInfo.ModuleInfo.mini308.Duty);
                             break;
                         case '3':   //使用时间:@1*13&小时&分钟&秒钟*# 1*13&000&00&00(初始状态为0)
-                            if (gComInfo.HMI_Scene==eScene_Info)    //确认场景
+                            if (gCom.HMI_Scene==eScene_Info)    //确认场景
                             {
                                 pbuf[9]=':';
                                 pbuf[12]=':';
@@ -338,7 +348,7 @@ void Module_COMM()
                             }
                             break;
                         case '4':   //剩余时间@1*14&300&00&00*#(初始状态为300小时，00分钟，00秒钟)
-                            if (gComInfo.HMI_Scene==eScene_Info)    //确认场景
+                            if (gCom.HMI_Scene==eScene_Info)    //确认场景
                             {
                                 pbuf[9]=':';
                                 pbuf[12]=':';
@@ -354,10 +364,10 @@ void Module_COMM()
                         {
                             uint8_t i=0;
                             memset(&gInfo,0,sizeof(_Golbal_Info));  //清治疗头数据
-                            gComInfo.WorkStat=eWS_Standby;
-                            gComInfo.ModuleType=M_Type_IU;
-                            gComInfo.HMI_LastScene=eScene_Module_IU;
-                            gInfo.ModuleInfo.RoutineModule.WorkTime=10;
+                            gCom.WorkStat=eWS_Standby;
+                            gCom.ModuleType=M_Type_IU;
+                            gCom.HMI_LastScene=eScene_Module_IU;
+                            gInfo.ModuleInfo.Routine.WorkTime=10;
                             gInfo.DebugOpen=OPEN_DBG_Calib|
                                         OPEN_DBG_ClearUsedtime|
                                         OPEN_DBG_ROOT;  //给治疗头授权 
@@ -381,7 +391,7 @@ void Module_COMM()
                 else    //0 2 3 4 5 7 错误
                 {
                     LOG_E("308 Error %c",pbuf[3]);
-                    gComInfo.ErrorCode=pbuf[3];
+                    gCom.ErrorCode=pbuf[3];
                     HMI_Goto_Error();
                 }
             }
