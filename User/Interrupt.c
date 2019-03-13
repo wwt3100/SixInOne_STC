@@ -11,7 +11,7 @@ void UART1_INT(void) interrupt 4 using 1
 	if(TI==1)   //发送完1byte
 	{
 		TI=0;
-		gCom.Uart1_Busy=0;	//TIFLG作为其他程序的查询标记；
+		Uart1_Busy=0;	//TIFLG作为其他程序的查询标记；
 	}
 	if(RI==1)  //接收到1byte
 	{	
@@ -31,7 +31,7 @@ void UART1_INT(void) interrupt 4 using 1
                uart1_buff[data_size-3]==0xCC)      //0xCC33C33C
             {
                 uart1_buff[0]=(data_size);
-                gCom.Uart1_ReviceFrame=1;
+                Uart1_ReviceFrame=1;
                 head=0;
                 data_size=0;
             }
@@ -50,7 +50,7 @@ void UART2_INT(void) interrupt 8 using 2
 	if(S2CON & S2TI)
 	{
 		S2CON &= ~S2TI;		//Clear transmit interrupt flag
-		gCom.Uart2_Busy = 0;
+		Uart2_Busy = 0;
 	}
 	if(S2CON & S2RI)
 	{
@@ -68,7 +68,7 @@ void UART2_INT(void) interrupt 8 using 2
                 uart2_buff[data_size-1]==gCom.COMMProtocol_Tail1)
             {
                 uart2_buff[0]=(data_size)-2;    //去掉包尾
-                gCom.Uart2_ReviceFrame=1;
+                Uart2_ReviceFrame=1;
                 head=0;
                 tail=0;
                 data_size=0;
@@ -90,7 +90,7 @@ void Timer0_isr() interrupt 1 using 3
     TL0 = 0x00;		//设置定时初值    50ms
     TH0 = 0x4C;		//设置定时初值
     
-    if (gCom.Fire_Flag==1 && gCom.WorkStat==eWS_Working && gInfo.ModuleInfo.Routine.LightMode==1 && gCom.TimerCounter%10==0)   //2Hz 闪烁模式
+    if (Fire_Flag==1 && gCom.WorkStat==eWS_Working && gInfo.ModuleInfo.Routine.LightMode==1 && gCom.TimerCounter%10==0)   //2Hz 闪烁模式
     {
         switch (gCom.HMI_Scene)
         {
@@ -160,7 +160,7 @@ void ADC_ISR(void) interrupt 5
     ADC_CONTR &= ~ADC_FLAG;         						//Clear ADC interrupt flag
     ADC_Value=(ADC_RES<<2)|ADC_RESL;
     gCom.FeedbackVolt=(ADC_Value *1000L *5L) >>10;      //数据扩大1000倍
-    gCom.ADConvertDone=1;
+    ADConvertDone=1;
 }
 
 

@@ -6,7 +6,7 @@ void HMI_COMM()
 {
     static uint8_t LongPushTime=0;
     
-    if (gCom.Uart1_ReviceFrame==0)
+    if (Uart1_ReviceFrame==0)
     {
         return;
     }
@@ -18,7 +18,7 @@ void HMI_COMM()
         memcpy(pbuf,uart1_buff,18);
         //data_size=pbuf[0]<=32?pbuf[0]:32;   //做判断防止堆栈溢出
         HMI_Cmd=pbuf[1];
-        gCom.Uart1_ReviceFrame=0;
+        Uart1_ReviceFrame=0;
         switch (HMI_Cmd)
         {
             case 0:
@@ -138,23 +138,23 @@ void HMI_Show_Worktime1()       //650 633 IU 使用
     {
         char code cmd[]={0x98,0x02,0x5A,0x01,0x0F,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
         LL_HMI_Send(cmd,12);
-        while (gCom.Uart1_Busy);
-        gCom.Uart1_Busy=1;
+        while (Uart1_Busy);
+        Uart1_Busy=1;
         SBUF=' ';
     }
     else
     {
         char code cmd[]={0x98,0x02,0x62,0x01,0x0F,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
         LL_HMI_Send(cmd,12);
-        while (gCom.Uart1_Busy);
-        gCom.Uart1_Busy=1;
+        while (Uart1_Busy);
+        Uart1_Busy=1;
         SBUF=gInfo.ModuleInfo.Routine.WorkTime/10+'0';
     }
-    while (gCom.Uart1_Busy);
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
     SBUF=gInfo.ModuleInfo.Routine.WorkTime%10+'0';
-//    while (gCom.Uart1_Busy);
-//    gCom.Uart1_Busy=1;
+//    while (Uart1_Busy);
+//    Uart1_Busy=1;
 //    SBUF=' ';           //多显示一个空格
     LL_HMI_SendEnd();
 }
@@ -167,20 +167,20 @@ void HMI_Show_Worktime2()         //UVA1 使用 同时显示能量
     {
         char code cmd[]={0x98,0x02,0x8C,0x01,0x19,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
         LL_HMI_Send(cmd,12);
-        while (gCom.Uart1_Busy);
-        gCom.Uart1_Busy=1;
+        while (Uart1_Busy);
+        Uart1_Busy=1;
         SBUF=' ';
     }
     else
     {
         char code cmd[]={0x98,0x02,0x94,0x01,0x19,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
         LL_HMI_Send(cmd,12);
-        while (gCom.Uart1_Busy);
-        gCom.Uart1_Busy=1;
+        while (Uart1_Busy);
+        Uart1_Busy=1;
         SBUF=gInfo.ModuleInfo.Routine.WorkTime/10+'0';
     }
-    while (gCom.Uart1_Busy);
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
     SBUF=gInfo.ModuleInfo.Routine.WorkTime%10+'0';
     LL_HMI_SendEnd();
     
@@ -197,8 +197,8 @@ void HMI_Show_Worktime2()         //UVA1 使用 同时显示能量
         {
             char code cmd[]={0x98,0x02,0x94,0x00,0xf1,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
             LL_HMI_Send(cmd,12);
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=t/10+'0';
         }
     }
@@ -206,15 +206,15 @@ void HMI_Show_Worktime2()         //UVA1 使用 同时显示能量
     {
         char code cmd[]={0x98,0x02,0x8B,0x00,0xf1,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
         LL_HMI_Send(cmd,12);
-        while (gCom.Uart1_Busy);
-        gCom.Uart1_Busy=1;
+        while (Uart1_Busy);
+        Uart1_Busy=1;
         SBUF=power/100+'0';
-        while (gCom.Uart1_Busy);
-        gCom.Uart1_Busy=1;
+        while (Uart1_Busy);
+        Uart1_Busy=1;
         SBUF=t/10+'0';
     }
-    while (gCom.Uart1_Busy);
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
     SBUF=t%10+'0';
     LL_HMI_SendEnd();
 }
@@ -224,8 +224,8 @@ void HMI_Show_Power()       //显示光功率 650 633
     uint16_t pl=gInfo.ModuleInfo.Routine.PowerLevel;
     uint8_t code cmd[]={0x98,0x00,0x3C,0x01,0x5E,0x21,0x81,0x03,0x00,0x1F,0x00,0x1F};
     LL_HMI_Send(cmd,12);
-    while (gCom.Uart1_Busy);     //千位
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);     //千位
+    Uart1_Busy=1;
     if (pl/1000==0)
     {
         SBUF=' ';
@@ -235,8 +235,8 @@ void HMI_Show_Power()       //显示光功率 650 633
         SBUF=pl/1000+'0';
     }
     pl=pl%1000;
-    while (gCom.Uart1_Busy);     //百位
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);     //百位
+    Uart1_Busy=1;
     if (pl/100==0)
     {
         SBUF=' ';
@@ -246,11 +246,11 @@ void HMI_Show_Power()       //显示光功率 650 633
         SBUF=pl/100+'0';
     }
     pl=pl%100;
-    while (gCom.Uart1_Busy);     //十位
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);     //十位
+    Uart1_Busy=1;
     SBUF=pl/10+'0';
-    while (gCom.Uart1_Busy);     //个位
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);     //个位
+    Uart1_Busy=1;
     SBUF=pl%10+'0';
     LL_HMI_SendEnd();
 }
@@ -263,8 +263,8 @@ void HMI_Show_RemainTime()
     HMI_Cut_Pic(0x71,gConfig.LANG*100 + 16, 556, 145, 556+215, 145+264);     //切到剩余时间
     
     LL_HMI_Send("\x98\x02\x4E\x01\x0B\x21\x81\x05\x00\x1F\x00\x1F",12);
-    while (gCom.Uart1_Busy);     //min十位
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);     //min十位
+    Uart1_Busy=1;
     if (min/10==0)
     {
         SBUF=' ';
@@ -273,17 +273,17 @@ void HMI_Show_RemainTime()
     {
         SBUF=min/10+'0';
     }
-    while (gCom.Uart1_Busy);     //min个位
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);     //min个位
+    Uart1_Busy=1;
     SBUF=min%10+'0';
     LL_HMI_SendEnd();
     
     LL_HMI_Send("\x98\x02\xA6\x01\x0B\x21\x81\x05\x00\x1F\x00\x1F",12);
-    while (gCom.Uart1_Busy);     //s十位
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);     //s十位
+    Uart1_Busy=1;
     SBUF=s/10+'0';
-    while (gCom.Uart1_Busy);     //s个位
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);     //s个位
+    Uart1_Busy=1;
     SBUF=s%10+'0';
     LL_HMI_SendEnd();
 }
@@ -328,18 +328,18 @@ void HMI_Show_Temp(int16_t temp)
     }
     if (temp/10==0)
     {
-        while (gCom.Uart1_Busy);     //十位
-        gCom.Uart1_Busy=1;
+        while (Uart1_Busy);     //十位
+        Uart1_Busy=1;
         SBUF=' ';
     }
     else
     {
-        while (gCom.Uart1_Busy);     //十位
-        gCom.Uart1_Busy=1;
+        while (Uart1_Busy);     //十位
+        Uart1_Busy=1;
         SBUF=temp/10+'0';
     }
-    while (gCom.Uart1_Busy);     //温度个位
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);     //温度个位
+    Uart1_Busy=1;
     SBUF=temp%10+'0';
     LL_HMI_SendEnd();
 }
@@ -378,17 +378,17 @@ void HMI_DGB_Show_DAval()
     LL_HMI_Send("\x98",1);
     LL_HMI_SendXY(134, 411);
     LL_HMI_Send_Pure("\x6\x80\x05\x00\x1F\x00\x1F",7);
-    while (gCom.Uart1_Busy);
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
     SBUF=gInfo.Debug.dac/10+'0';
-    while (gCom.Uart1_Busy);
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
     SBUF='.';
-    while (gCom.Uart1_Busy);
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
     SBUF=gInfo.Debug.dac%10+'0';
     LL_HMI_SendEnd();
-    if (gCom.Fire_Flag)      //运行时实时可以改电压
+    if (Fire_Flag)      //运行时实时可以改电压
     {
         uint16_t dac=(float)gInfo.Debug.dac/0.01220703125;
         SPI_Send(dac|0x7000);
@@ -549,18 +549,18 @@ void HMI_Show_308WorkTime()         //连同能量一起显示
     LL_HMI_Send("\x98",1);
     LL_HMI_SendXY(362,295);
     LL_HMI_Send_Pure("\x05\x80\x05\x01\xAF\x0\x1f",7);
-    while (gCom.Uart1_Busy);
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
     SBUF='0'+power/100;
-    while (gCom.Uart1_Busy);
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
     SBUF='.';
     power=power%100;
-    while (gCom.Uart1_Busy);
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
     SBUF='0'+power/10;
-    while (gCom.Uart1_Busy);
-    gCom.Uart1_Busy=1;
+    while (Uart1_Busy);
+    Uart1_Busy=1;
     SBUF='0'+power%10;
     LL_HMI_SendEnd();
 }
@@ -570,7 +570,7 @@ void HMI_Show_308RemainTime()
     uint8_t t;
     uint16_t power;
     uint8_t xdata time_str[4]={0x20};
-    uint8_t xdata power_str[]={"0.00J/cm\xB2"};  //0.00J/cm2
+    uint8_t xdata power_str[]={"0.00J/cm\xB2"};  //0.00J/cm2 ±2 Ⅱ
     if (gCom.HMI_Scene==eScene_Module_308)
     {
         uint16_t p;
@@ -781,7 +781,7 @@ void HMI_New_Show_LightName(uint8_t sellight)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7);     //白字
                 }
-                LL_HMI_Send_Pure("590nm",5);
+                LL_HMI_Send_Pure(STR_NEW4IN1_L1WL);
                 LL_HMI_SendEnd();
             }
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x02) != (sellight & 0x02)) || (sellight & 0x80))
@@ -798,7 +798,7 @@ void HMI_New_Show_LightName(uint8_t sellight)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7);     //白字
                 }
-                LL_HMI_Send_Pure("830nm",5);
+                LL_HMI_Send_Pure(STR_NEW4IN1_L2WL);
                 LL_HMI_SendEnd();
             }
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x04) != (sellight & 0x04)) || (sellight & 0x80))
@@ -815,7 +815,7 @@ void HMI_New_Show_LightName(uint8_t sellight)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7);     //白字
                 }
-                LL_HMI_Send_Pure("415nm",5);
+                LL_HMI_Send_Pure(STR_NEW4IN1_L3WL);
                 LL_HMI_SendEnd();
             }
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x08) != (sellight & 0x08)) || (sellight & 0x80))
@@ -832,7 +832,7 @@ void HMI_New_Show_LightName(uint8_t sellight)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7);     //白字
                 }
-                LL_HMI_Send_Pure("633nm",5);
+                LL_HMI_Send_Pure(STR_NEW4IN1_L4WL);
                 LL_HMI_SendEnd();
             }
             gInfo.ModuleInfo.New4in1.ConfigSelLight=sellight;
@@ -852,7 +852,7 @@ void HMI_New_Show_LightName(uint8_t sellight)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7);     //白字
                 }
-                LL_HMI_Send_Pure("633nm",5);
+                LL_HMI_Send_Pure(STR_NEWWIRA_L1WL);
                 LL_HMI_SendEnd();
             }
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x02) != (sellight & 0x02)) || (sellight & 0x80))
@@ -869,7 +869,7 @@ void HMI_New_Show_LightName(uint8_t sellight)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7);     //白字
                 }
-                LL_HMI_Send_Pure("810nm",5);
+                LL_HMI_Send_Pure(STR_NEWWIRA_L2WL);
                 LL_HMI_SendEnd();
             }
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x04) != (sellight & 0x04)) || (sellight & 0x80))
@@ -886,7 +886,7 @@ void HMI_New_Show_LightName(uint8_t sellight)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7);     //白字
                 }
-                LL_HMI_Send_Pure("940nm",5);
+                LL_HMI_Send_Pure(STR_NEWWIRA_L3WL);
                 LL_HMI_SendEnd();
             }
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x08) != (sellight & 0x08)) || (sellight & 0x80))
@@ -903,7 +903,7 @@ void HMI_New_Show_LightName(uint8_t sellight)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7);     //白字
                 }
-                LL_HMI_Send_Pure("830nm",5);
+                LL_HMI_Send_Pure(STR_NEWWIRA_L4WL);
                 LL_HMI_SendEnd();
             }
             gInfo.ModuleInfo.New4in1.ConfigSelLight=sellight&0x7F;
@@ -925,8 +925,8 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_SendXY(80-16, 215);
             LL_HMI_Send_Pure("\x3\x80\x03\x1C\xFF\x00\x1F",7);     //蓝字
             p=gInfo.ModuleInfo.New4in1.PowerLevel[0]/100;
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             if (p==0)
             {
                 SBUF=' ';
@@ -936,11 +936,11 @@ void HMI_New_ShowStr(uint8_t sel)
                 SBUF=p+'0';
             }
             p=gInfo.ModuleInfo.New4in1.PowerLevel[0]%100;
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=p/10+'0';
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=p%10+'0';
             LL_HMI_Send_Pure("mW/cm\xB2",6);
             LL_HMI_SendEnd();
@@ -951,8 +951,8 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_SendXY(235-16, 215);
             LL_HMI_Send_Pure("\x3\x80\x03\xF9\x04,\x00\x1F",7);    //红字
             p=gInfo.ModuleInfo.New4in1.PowerLevel[1]/100;
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             if (p==0)
             {
                 SBUF=' ';
@@ -962,11 +962,11 @@ void HMI_New_ShowStr(uint8_t sel)
                 SBUF=p+'0';
             }
             p=gInfo.ModuleInfo.New4in1.PowerLevel[1]%100;
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=p/10+'0';
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=p%10+'0';
             LL_HMI_Send_Pure("mW/cm\xB2",6);
             LL_HMI_SendEnd();
@@ -977,8 +977,8 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_SendXY(388-16, 215);
             LL_HMI_Send_Pure("\x3\x80\x03\xD5\x00\x00\x1F",7);     //黄字
             p=gInfo.ModuleInfo.New4in1.PowerLevel[2]/100;
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             if (p==0)
             {
                 SBUF=' ';
@@ -988,11 +988,11 @@ void HMI_New_ShowStr(uint8_t sel)
                 SBUF=p+'0';
             }
             p=gInfo.ModuleInfo.New4in1.PowerLevel[2]%100;
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=p/10+'0';
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=p%10+'0';
             LL_HMI_Send_Pure("mW/cm\xB2",6);
             LL_HMI_SendEnd();
@@ -1003,8 +1003,8 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_SendXY(548-16, 215);
             LL_HMI_Send_Pure("\x3\x80\x03\xD3\x40\x00\x1F",7);     //橙字
             p=gInfo.ModuleInfo.New4in1.PowerLevel[3]/100;
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             if (p==0)
             {
                 SBUF=' ';
@@ -1014,11 +1014,11 @@ void HMI_New_ShowStr(uint8_t sel)
                 SBUF=p+'0';
             }
             p=gInfo.ModuleInfo.New4in1.PowerLevel[3]%100;
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=p/10+'0';
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=p%10+'0';
             LL_HMI_Send_Pure("mW/cm\xB2",6);
             LL_HMI_SendEnd();
@@ -1028,8 +1028,8 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_Send("\x98",1);
             LL_HMI_SendXY(68, 301);
             LL_HMI_Send_Pure("\x4\x80\x04\x1C\xFF\x00\x1F",7);     //蓝字
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             p=gInfo.ModuleInfo.New4in1.WorkTime[1]/10;
             if (p==0)
             {
@@ -1039,8 +1039,8 @@ void HMI_New_ShowStr(uint8_t sel)
             {
                 SBUF=p+'0';
             }
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=gInfo.ModuleInfo.New4in1.WorkTime[1]%10+'0';
             LL_HMI_Send_Pure("min",3);
             LL_HMI_SendEnd();
@@ -1050,8 +1050,8 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_Send("\x98",1);
             LL_HMI_SendXY(226, 301);
             LL_HMI_Send_Pure("\x4\x80\x04\xF9\x04\x00\x1F",7);    //红字
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             p=gInfo.ModuleInfo.New4in1.WorkTime[2]/10;
             if (p==0)
             {
@@ -1061,8 +1061,8 @@ void HMI_New_ShowStr(uint8_t sel)
             {
                 SBUF=p+'0';
             }
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=gInfo.ModuleInfo.New4in1.WorkTime[2]%10+'0';
             LL_HMI_Send_Pure("min",3);
             LL_HMI_SendEnd();
@@ -1072,8 +1072,8 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_Send("\x98",1);
             LL_HMI_SendXY(380, 301);
             LL_HMI_Send_Pure("\x4\x80\x04\xD5\x00\x00\x1F",7);     //黄字
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             p=gInfo.ModuleInfo.New4in1.WorkTime[3]/10;
             if (p==0)
             {
@@ -1083,8 +1083,8 @@ void HMI_New_ShowStr(uint8_t sel)
             {
                 SBUF=p+'0';
             }
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=gInfo.ModuleInfo.New4in1.WorkTime[3]%10+'0';
             LL_HMI_Send_Pure("min",3);
             LL_HMI_SendEnd();
@@ -1094,8 +1094,8 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_Send("\x98",1);
             LL_HMI_SendXY(538, 301);
             LL_HMI_Send_Pure("\x4\x80\x04\xD3\x40\x00\x1F",7);     //橙字
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             p=gInfo.ModuleInfo.New4in1.WorkTime[4]/10;
             if (p==0)
             {
@@ -1105,8 +1105,8 @@ void HMI_New_ShowStr(uint8_t sel)
             {
                 SBUF=p+'0';
             }
-            while (gCom.Uart1_Busy);
-            gCom.Uart1_Busy=1;
+            while (Uart1_Busy);
+            Uart1_Busy=1;
             SBUF=gInfo.ModuleInfo.New4in1.WorkTime[4]%10+'0';
             LL_HMI_Send_Pure("min",3);
             LL_HMI_SendEnd();
@@ -1360,14 +1360,189 @@ void HMI_New_Sel(uint8_t sel)
 }
 void HMI_New_ShowLite()         //显示智能编辑模式选项下面的模式
 {
-
+    bit step_mode=0;
+    if (gInfo.ModuleInfo.New4in1.LightGroup!=0)
+    {
+        uint8_t i,j=0;
+        uint8_t step_num;
+        for (i = 1; i < 5; i++)     //4次
+        {
+            step_mode=gInfo.ModuleInfo.New4in1.LightStep[i].StepMode;
+            step_num=gInfo.ModuleInfo.New4in1.LightStep[i].StepNum;     //提高效率
+            if (gInfo.ModuleInfo.New4in1.LightGroup!=(i)) //没选的才显示
+            {
+                LL_HMI_Send("\x98",1);
+                switch (step_num)
+                {
+                    case 1:
+                        LL_HMI_SendXY(42+(i-1)*188,312);    //TODO:根据情况修改x值
+                        break;
+                    case 2:
+                        LL_HMI_SendXY(42+(i-1)*188,312);
+                        break;
+                    case 3:
+                        LL_HMI_SendXY(42+(i-1)*188,312);
+                        break;
+                    case 4:
+                        LL_HMI_SendXY(42+(i-1)*188,312);
+                        break;
+                    default:
+                        LL_HMI_SendXY(0,0);
+                        break;
+                }
+                LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7);     //白字
+                while (j < step_num)   //如果为0,显示不会出错
+                {
+                    uint8_t light=gInfo.ModuleInfo.New4in1.LightStep[i].Data[j*3];
+//                    if (light&0x01)       //光波长写到治疗头里,未启用
+//                    {
+//                        if (j>0)
+//                        {
+//                            LL_HMI_Send_Pure("/",1);
+//                        }
+//                        LL_HMI_Send_Pure(gInfo.ModuleInfo.New4in1.Str_LightWavelength[0],
+//                            strlen(gInfo.ModuleInfo.New4in1.Str_LightWavelength[0]));
+//                    }
+//                    if (light&0x02)
+//                    {
+//                        if (step_mode==1 || j>0)
+//                        {
+//                            LL_HMI_Send_Pure("/",1);
+//                        }
+//                        LL_HMI_Send_Pure(gInfo.ModuleInfo.New4in1.Str_LightWavelength[1],
+//                            strlen(gInfo.ModuleInfo.New4in1.Str_LightWavelength[1]));
+//                    }
+//                    if (light&0x04)
+//                    {
+//                        if (step_mode==1 || j>0)
+//                        {
+//                            LL_HMI_Send_Pure("/",1);
+//                        }
+//                        LL_HMI_Send_Pure(gInfo.ModuleInfo.New4in1.Str_LightWavelength[2],
+//                            strlen(gInfo.ModuleInfo.New4in1.Str_LightWavelength[2]));
+//                    }
+//                    if (light&0x08)
+//                    {
+//                        if (step_mode==1 || j>0)
+//                        {
+//                            LL_HMI_Send_Pure("/",1);
+//                        }
+//                        LL_HMI_Send_Pure(gInfo.ModuleInfo.New4in1.Str_LightWavelength[3],
+//                            strlen(gInfo.ModuleInfo.New4in1.Str_LightWavelength[3]));
+//                    }
+                    if (gCom.HMI_Scene==eScene_Module_4in1)
+                    {
+                        if (light&0x01)       //光波长写到治疗头里,未启用
+                        {
+                            if (j>0)
+                            {
+                                LL_HMI_Send_Pure("/",1);
+                            }
+                            LL_HMI_Send_Pure(STR_NEW4IN1_L1WL);
+                        }
+                        if (light&0x02)
+                        {
+                            if (step_mode==1 || j>0)
+                            {
+                                LL_HMI_Send_Pure("/",1);
+                            }
+                            LL_HMI_Send_Pure(STR_NEW4IN1_L2WL);
+                        }
+                        if (light&0x04)
+                        {
+                            if (step_mode==1 || j>0)
+                            {
+                                LL_HMI_Send_Pure("/",1);
+                            }
+                            LL_HMI_Send_Pure(STR_NEW4IN1_L3WL);
+                        }
+                        if (light&0x08)
+                        {
+                            if (step_mode==1 || j>0)
+                            {
+                                LL_HMI_Send_Pure("/",1);
+                            }
+                            LL_HMI_Send_Pure(STR_NEW4IN1_L4WL);
+                        }
+                    }
+                    else if (gCom.HMI_Scene==eScene_Module_Wira)
+                    {
+                        if (light&0x01)       //光波长写到治疗头里,未启用
+                        {
+                            if (j>0)
+                            {
+                                LL_HMI_Send_Pure("/",1);
+                            }
+                            LL_HMI_Send_Pure(STR_NEWWIRA_L1WL);
+                        }
+                        if (light&0x02)
+                        {
+                            if (step_mode==1 || j>0)
+                            {
+                                LL_HMI_Send_Pure("/",1);
+                            }
+                            LL_HMI_Send_Pure(STR_NEWWIRA_L2WL);
+                        }
+                        if (light&0x04)
+                        {
+                            if (step_mode==1 || j>0)
+                            {
+                                LL_HMI_Send_Pure("/",1);
+                            }
+                            LL_HMI_Send_Pure(STR_NEWWIRA_L3WL);
+                        }
+                        if (light&0x08)
+                        {
+                            if (step_mode==1 || j>0)
+                            {
+                                LL_HMI_Send_Pure("/",1);
+                            }
+                            LL_HMI_Send_Pure(STR_NEWWIRA_L4WL);
+                        }
+                    }
+                    else
+                    {
+                        ;//MUST not be here
+                    }
+                    j++;
+                }
+                LL_HMI_SendEnd();
+            }
+            else
+            {
+                ;//do nothing 
+            }
+        }
+    }
+    else
+    {
+        ; //智能模式 //do nothing
+    }
 }
 void HMI_New_ShowDetail()       //显示选择后的详细信息
 {
-
+    bit step_mode;
+    uint8_t light_group;
+    uint16_t x;
+    light_group=gInfo.ModuleInfo.New4in1.LightGroup;
+    step_mode = gInfo.ModuleInfo.New4in1.LightStep[light_group].StepMode;
+    
+    switch (light_group)        //同步/顺序模式元素显示
+    {
+        case 1:   
+        case 2:
+        case 3:
+        case 4:
+            LL_HMI_Send("\x71\x3D",2);      //剪切指令
+            x=450+90*step_mode+140*gConfig.LANG; //计算剪切元素
+            LL_HMI_SendXY(x,0);
+            LL_HMI_SendXY(x+47,47);
+            LL_HMI_SendXY(94+(light_group-1)*188,275);  //同步顺序模式元素显示位置
+            LL_HMI_SendEnd();
+            break;
+        case 0:
+        default:    // 专家模式或未选择模式直接返回
+            return;
+    }
 }
 
-void HMI_New_SwitchMode()
-{
-
-}

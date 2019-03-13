@@ -23,11 +23,22 @@ bit Dbg_Flag_MainPower;
 
 bit Dbg_Admin;      //管理员权限
 
+//串口相关位
+bit Uart1_Busy;
+bit Uart2_Busy;
+bit Uart1_ReviceFrame;
+bit Uart2_ReviceFrame;
+
+//标志位
+bit Fire_Flag;
+bit Fire_MaxOut;  //用于慢启动 633 UVA1
+bit Pause_Flag;   //308暂停用
+bit ADConvertDone;
 
 uint8_t idata uart1_buff[18];
 uint8_t idata uart2_buff[20];
 
-_Golbal_comInfo idata gCom={0};
+_Golbal_ComInfo idata gCom={0};
 _Golbal_Config  idata gConfig={0};
 _Golbal_Info    xdata gInfo={0};
 
@@ -205,16 +216,16 @@ void LOG_E(void*str,...)
     va_start(ap, str);
     vsprintf(buf, (char const*)str, ap);
     va_end(ap);
-    while (gCom.Uart2_Busy); //防止正常数据没发完
+    while (Uart2_Busy); //防止正常数据没发完
     AUXR1 |= 0x10;  //串口IO切到P4
     while (buf[i])
     {
-        while(gCom.Uart2_Busy);
-        gCom.Uart2_Busy=1;
+        while(Uart2_Busy);
+        Uart2_Busy=1;
         S2BUF=buf[i];
         i++;
     }
-    while(gCom.Uart2_Busy);  //等待最后一个byte发送完成
+    while(Uart2_Busy);  //等待最后一个byte发送完成
     AUXR1 &= 0xEF;  //串口IO复原
 }
 

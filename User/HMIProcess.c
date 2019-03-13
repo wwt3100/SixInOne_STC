@@ -4,10 +4,7 @@
 #include "HMI_COMM.h"
 #include "Module_COMM.h"
 
-uint8_t ErrorBeepTime=0;
-
 uint8_t HMI_Count=0;
-
 
 void HMI_Process()
 {
@@ -132,12 +129,12 @@ void HMI_Process()
                             break;
                         case 0x32:      //暂停
                             gCom.TimerCounter2=gCom.TimerCounter;   //保存定时器计数
-                            gCom.Pause_Flag=1;
+                            Pause_Flag=1;
                             WP_Stop(0);     //暂停
                             Beep(1);
                             break;
                         case 0x05:      //停止
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             Beep(1);
                             WP_Stop(1);
                             if (gCom.HMI_Scene==eScene_Module_308test)
@@ -173,7 +170,7 @@ void HMI_Process()
                                 gInfo.ModuleInfo.mini308.WorkTime=1;
                             }
                             HMI_Show_308WorkTime();
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             break;
                         case 0x01:      //减
                             if (gInfo.ModuleInfo.mini308.WorkTime<=1)
@@ -185,13 +182,13 @@ void HMI_Process()
                                 gInfo.ModuleInfo.mini308.WorkTime--;
                             }
                             HMI_Show_308WorkTime();
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             break;
                         case eKeyCodeG1_SysInfo:        //进入密码输入页
                             HMI_Goto_LocPage(ePage_PasswordInput);
                             gCom.HMI_LastScene=gCom.HMI_Scene;
                             gCom.HMI_Scene=eScene_Password;
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             break;
                         case eKeyCodeG1_Stop:
                             if (gCom.HMI_Scene==eScene_Module_308test)
@@ -204,17 +201,17 @@ void HMI_Process()
                             {
                                 HMI_Cut_Pic(0x71,ePage_Module308, 162, 409, 162+464, 407+33);     //进度条背景恢复
                             }
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                         case 0x32:              //暂停
                             //TODO: 提示尚未开始
                             //LL_Module_Send("1*7&0&0",7); 
                             break;
                         case 0x31:              //开始
-                            if (gCom.Pause_Flag==1)
+                            if (Pause_Flag==1)
                             {
                                 gCom.TimerCounter=gCom.TimerCounter2;
                                 SystemTime1s=0;
-                                gCom.Pause_Flag=0;
+                                Pause_Flag=0;
                             }
                             else
                             {
@@ -232,43 +229,43 @@ void HMI_Process()
                         case 0x33:              //进入红斑测试
                             gCom.HMI_LastScene=eScene_Module_308test;
                             HMI_Scene_Recovery();
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             break;
                         case 0x34:              //退出红斑测试
                             gCom.HMI_LastScene=eScene_Module_308;
                             gInfo.ModuleInfo.mini308.TestSelTime=3;
                             HMI_Scene_Recovery();
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             break;
                         case 0x35:              //红斑3s
                             HMI_308Test_SelTime(3);
                             gInfo.ModuleInfo.mini308.TestWorkTime=3;
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             break;
                         case 0x36:              //红斑6s
                             HMI_308Test_SelTime(6);
                             gInfo.ModuleInfo.mini308.TestWorkTime=6;
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             break;
                         case 0x37:              //红斑9s
                             HMI_308Test_SelTime(9);
                             gInfo.ModuleInfo.mini308.TestWorkTime=9;
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             break;
                         case 0x38:              //红斑12s
                             HMI_308Test_SelTime(12);
                             gInfo.ModuleInfo.mini308.TestWorkTime=12;
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             break;
                         case 0x39:              //红斑15s
                             HMI_308Test_SelTime(15);
                             gInfo.ModuleInfo.mini308.TestWorkTime=15;
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             break;
                         case 0x3A:              //红斑18s
                             HMI_308Test_SelTime(18);
                             gInfo.ModuleInfo.mini308.TestWorkTime=18;
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             break;
                         case 0x3C:              //进入IU界面
                             memset(&gInfo,0,sizeof(_Golbal_Info));  //清治疗头数据
@@ -277,7 +274,7 @@ void HMI_Process()
                             gCom.HMI_LastScene=eScene_Module_IU;
                             gInfo.ModuleInfo.Routine.WorkTime=10;
                             HMI_Scene_Recovery();
-                            gCom.Pause_Flag=0;
+                            Pause_Flag=0;
                             break;
                         default:
                             break;
@@ -334,7 +331,7 @@ void HMI_Process()
                 {
                     if (gCom.HMIArg2==eKeyCodeG1_StartPause)     
                     {
-                        if(gCom.Fire_Flag==1)    
+                        if(Fire_Flag==1)    
                         {
                             gCom.TimerCounter2=gCom.TimerCounter;   //保存定时器计数
                             WP_Stop(0);     //暂停
@@ -774,12 +771,7 @@ void HMI_Process()
             gCom.HMIMsg=eMsg_NULL;
             break;
         case eScene_Error:      //密码错误在密码场景来处理
-            if (ErrorBeepTime<3 && SystemTime100ms==1)
-            {
-                SystemTime100ms=0;
-                ErrorBeepTime++;    
-                Beep(1);
-            }
+
             break;
         case eScene_Password:
             if (gCom.HMIMsg == eMsg_keyUp && gCom.HMIArg1==eKeyCode_Group2)
@@ -833,7 +825,7 @@ void HMI_Process()
                                 case M_Type_Wira: 
                                 case M_Type_4in1: 
                                     BeepEx(3,2);
-                                    LL_Module_Send("\x39\xee\x00",3);
+                                    LL_Module_Send("\x39\xee\x00",3);   //常规头清时间
                                     break;
                                 //case M_Type_650:  //不需调试界面
                                 case M_Type_IU:   
@@ -843,7 +835,7 @@ void HMI_Process()
                                     break;
                                 case M_Type_308:
                                     BeepEx(3,2);
-                                    LL_Module_Send("1*14&0&0",8);
+                                    LL_Module_Send("1*14&0&0",8);   //308头清时间
                                     break;
                                 default:
                                     HMI_Goto_LocPage(ePage_Error_Password);
@@ -1033,7 +1025,7 @@ void HMI_Process()
                             ModuleRoutine_GetCalibData();
                             break;
                         case 0x09:      //输出/停止
-                            if (gCom.Fire_Flag)
+                            if (Fire_Flag)
                             {
                                 WP_Stop(1);
                             }
@@ -1280,9 +1272,9 @@ void HMI_Scene_Recovery()
             HMI_Show_Power();
             ModuleRoutine_GetCalibData();
             break;
-        case eScene_Module_4in1:
-            i=100;                  //4合1元素像素点多100
         case eScene_Module_Wira:
+            i=100;                  //4合1元素像素点多100
+        case eScene_Module_4in1:
             gCom.HMI_Scene=gCom.HMI_LastScene;
             switch (gInfo.ModuleInfo.New4in1.LightGroup)
             {
@@ -1295,7 +1287,7 @@ void HMI_Scene_Recovery()
                         gInfo.ModuleInfo.New4in1.ConfigSel=i;
                         HMI_New_ShowStr(0);
                     }
-                    HMI_Cut_Pic(0x71,gConfig.LANG*100+45+gInfo.ModuleInfo.New4in1.LightStep[gInfo.ModuleInfo.New4in1.LightGroup].StepMode
+                    HMI_Cut_Pic(0x71,gConfig.LANG*100+45+gInfo.ModuleInfo.New4in1.LightStep[0].StepMode
                                     , 655, 366, 655+94, 366+111);      //切换顺序/同步按钮状态
                     gInfo.ModuleInfo.New4in1.ConfigSel=0;
                     break;
@@ -1369,7 +1361,7 @@ void HMI_Goto_Error()
 }
 void HMI_Exit_Error()
 {
-    ErrorBeepTime=0;
+    
 }
 
 

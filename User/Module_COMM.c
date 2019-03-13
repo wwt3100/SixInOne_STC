@@ -8,29 +8,29 @@ void LL_Module_Send(const void* str,uint8_t str_len)
 {
     uint8_t i;
     const uint8_t *ptr=str;
-    while (gCom.Uart2_Busy);
-    gCom.Uart2_Busy=1;
+    while (Uart2_Busy);
+    Uart2_Busy=1;
     S2BUF=gCom.COMMProtocol_Head;
     for (i = 0; i < str_len; i++)
     {
-        while (gCom.Uart2_Busy);
-        gCom.Uart2_Busy=1;
+        while (Uart2_Busy);
+        Uart2_Busy=1;
         S2BUF=*ptr;
         ptr++;
     }
-    while (gCom.Uart2_Busy);
-    gCom.Uart2_Busy=1;
+    while (Uart2_Busy);
+    Uart2_Busy=1;
     S2BUF=gCom.COMMProtocol_Tail1;
-    while (gCom.Uart2_Busy);
-    gCom.Uart2_Busy=1;
+    while (Uart2_Busy);
+    Uart2_Busy=1;
     S2BUF=gCom.COMMProtocol_Tail2;
     if (gCom.COMMProtocol_Head=='@')    //如果是308头,多发'\n'
     {
-        while (gCom.Uart2_Busy);
-        gCom.Uart2_Busy=1;
+        while (Uart2_Busy);
+        Uart2_Busy=1;
         S2BUF=0x0A;
     }
-    while (gCom.Uart2_Busy);     //等待发送完
+    while (Uart2_Busy);     //等待发送完
     #if defined(_DEBUG) && 0 /*干扰正常工作流程*/
     LOG_E("%02X ",(uint16_t)gCom.COMMProtocol_Head);
     for (i = 0; i < str_len; i++)
@@ -49,7 +49,7 @@ void LL_Module_Send(const void* str,uint8_t str_len)
 
 void Module_COMM()
 {
-    if (gCom.Uart2_ReviceFrame==0)
+    if (Uart2_ReviceFrame==0)
     {
         return;
     }
@@ -62,7 +62,7 @@ void Module_COMM()
             data_size=20;
         }
         memcpy(pbuf+1,uart2_buff+1,data_size);
-        gCom.Uart2_ReviceFrame=0;
+        Uart2_ReviceFrame=0;
         if (gCom.COMMProtocol_Head==0xAA)
         {
             if (pbuf[1]==0x21)
@@ -193,14 +193,14 @@ void Module_COMM()
                             LL_HMI_Send("\x98",1);
                             LL_HMI_SendXY(134, 411);
                             LL_HMI_Send_Pure("\x5\x80\x05\x00\x1F\x00\x1F",7);
-                            while (gCom.Uart1_Busy);
-                            gCom.Uart1_Busy=1;
+                            while (Uart1_Busy);
+                            Uart1_Busy=1;
                             SBUF=gInfo.Debug.dac/10+'0';
-                            while (gCom.Uart1_Busy);
-                            gCom.Uart1_Busy=1;
+                            while (Uart1_Busy);
+                            Uart1_Busy=1;
                             SBUF='.';
-                            while (gCom.Uart1_Busy);
-                            gCom.Uart1_Busy=1;
+                            while (Uart1_Busy);
+                            Uart1_Busy=1;
                             SBUF=gInfo.Debug.dac%10+'0';
                             LL_HMI_SendEnd();
                         }
@@ -334,8 +334,7 @@ void Module_COMM()
                             gInfo.ModuleInfo.mini308.Freq=atoi(pbuf+6);
                             gInfo.ModuleInfo.mini308.Duty=atoi(pbuf+10);
 //                            LOG_E(" Freq:%d,Duty:%d",
-//                                (uint16_t)gInfo.ModuleInfo.mini308.Freq,
-//                                (uint16_t)gInfo.ModuleInfo.mini308.Duty);
+//                                (uint16_t)gInfo.ModuleInfo.mini308.Freq,(uint16_t)gInfo.ModuleInfo.mini308.Duty);
                             break;
                         case '3':   //使用时间:@1*13&小时&分钟&秒钟*# 1*13&000&00&00(初始状态为0)
                             if (gCom.HMI_Scene==eScene_Info)    //确认场景

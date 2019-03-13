@@ -1,3 +1,15 @@
+/*
+    注1: 变量一般使用帕斯卡命名,局部变量使用下划线命名或m_开头
+    注2: define的值一般为全大写
+    注3: 除bit变量外,其他全局变量使用结构体打包(bit变量可用位域代替,但代码效率不如直接bit高)
+    注4: 串口接收buffer因执行效率考虑放idata段,串口发送用阻塞式
+    注5: 治疗头数据比较大且并不会几个同时用,故使用union减少空间占用
+    注6: 串口屏视图抽象成Scene(场景),一个Scene对应1个或多个page(页面)
+    注7: 往串口屏写字符前需手动更新字符背景,否则会造成字符重叠,若重新刷新page则不需更新背景
+    注8: 程序中Module(组件/模块)对应的含义为治疗头
+    注9: 需求上的4个智能模式+专家模式,抽象成5个Step(工步),数据皆可修改,只是入口不一样
+    注10:每个Module都有自己的调试权限,通过位选择,暂只有4种,故只用1byte
+*/
 #ifndef __MAIN_H
 #define __MAIN_H
 
@@ -13,14 +25,14 @@
 #include "STC_EEPROM.h"
 #include "DS18B20.h"
 
-#define LANG_ZH     0       //中文
-#define LANG_EN     1       //英文
+#define LANG_ZH     (0)       //中文
+#define LANG_EN     (1)       //英文
 
-#define ENABLE        1
-#define DISABLE       0
+#define ENABLE        (1)
+#define DISABLE       (0)
 
-#define POWER_ON      0
-#define POWER_OFF     1
+#define POWER_ON      (0)
+#define POWER_OFF     (1)
 
 #define M_Type_650      (1)
 #define M_Type_633      (3)
@@ -29,8 +41,8 @@
 
 #define M_Type_308      (0x0B)
 #define M_Type_UVA1     (4)
-#define M_Type_Wira     (0x43)
-#define M_Type_4in1     (0x41)
+#define M_Type_Wira     (0x43)  /*DermaII*/
+#define M_Type_4in1     (0x41)  /*DermaI*/
 
 #define Error_NoModule          (1)
 #define Error_PasswordError     (2)
@@ -43,19 +55,18 @@
 
 #define MODULE308_MAX_WORKTIME      (140)   /*最大工作时间*/
 
-typedef struct Golbal_comInfo{
-    //串口相关位
-    uint8_t Uart1_Busy:1;
-    uint8_t Uart2_Busy:1;
-    uint8_t Uart1_ReviceFrame:1;
-    uint8_t Uart2_ReviceFrame:1;
-    
-    //标志位
-    uint8_t Fire_Flag:1;
-    uint8_t Fire_MaxOut:1;  //用于慢启动 633 UVA1
-    uint8_t Pause_Flag:1;   //308暂停用
-    uint8_t ADConvertDone:1;
-    
+#define STR_NEW4IN1_L1WL "590nm",5
+#define STR_NEW4IN1_L2WL "830nm",5
+#define STR_NEW4IN1_L3WL "415nm",5
+#define STR_NEW4IN1_L4WL "633nm",5
+
+#define STR_NEWWIRA_L1WL "633nm",5
+#define STR_NEWWIRA_L2WL "810nm",5
+#define STR_NEWWIRA_L3WL "940nm",5
+#define STR_NEWWIRA_L4WL "830nm",5
+
+
+typedef struct Golbal_ComInfo{  
     uint8_t ModuleType;
     uint8_t WorkStat;       //0-未接治疗头         1-停止    2-暂停    3-运行
     
@@ -77,7 +88,7 @@ typedef struct Golbal_comInfo{
     uint8_t COMMProtocol_Tail2;
     
     uint16_t FeedbackVolt;  //电源反馈电压值          电流?
-}_Golbal_comInfo;
+}_Golbal_ComInfo;
 
 typedef struct Golbal_Config{
     uint8_t LANG;           //0-中文   1-英文
@@ -107,8 +118,9 @@ typedef struct Golbal_Info{
             struct LightStep{
                 uint8_t StepMode:1;     //0->顺序    1->同步
                 uint8_t StepNum:7;      //工步数,最多4步
-                uint8_t Data[12];       //工步数据,[3*n+1]光,[3*n+2]能量,[3*n+3]时间
-            }LightStep[5];
+                uint8_t Data[12];       //工步数据,[3*n+0]光,[3*n+1]能量,[3*n+2]时间
+            }LightStep[5];              //工步0为 专家模式
+            uint8_t Str_LightWavelength[4][7]; //4种光的波长 协议为2byte,转字符串为了加速显示//暂未用
             uint8_t PowerMax[4];        //最大能量
             uint8_t PowerMix[4];        //最小能量
             uint8_t PowerLevel[4];
@@ -157,7 +169,7 @@ void Save_Config();
 void Save_ModuleSomething();
 void SPI_Send(uint16_t dat);    //控制48V电源
 
-extern _Golbal_comInfo idata gCom;
+extern _Golbal_ComInfo idata gCom;
 extern _Golbal_Config  idata gConfig;
 extern _Golbal_Info    xdata gInfo;
 extern _ModuleSave xdata gModuleSave;
@@ -176,6 +188,18 @@ extern bit Resend_getCalibData;
 extern bit Dbg_Flag_DAC5V;
 extern bit Dbg_Flag_MainPower;
 extern bit Dbg_Admin;
+
+//串口相关位
+extern bit Uart1_Busy;
+extern bit Uart2_Busy;
+extern bit Uart1_ReviceFrame;
+extern bit Uart2_ReviceFrame;
+
+//标志位
+extern bit Fire_Flag;
+extern bit Fire_MaxOut;  //用于慢启动 633 UVA1
+extern bit Pause_Flag;   //308暂停用
+extern bit ADConvertDone;
 
 
 #endif

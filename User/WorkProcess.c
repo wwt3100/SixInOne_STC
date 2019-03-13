@@ -63,7 +63,7 @@ void Work_Process()
             }
             break;
         case eWS_Working:
-            if(SystemTime1s==1 && gCom.Fire_Flag==1)
+            if(SystemTime1s==1 && Fire_Flag==1)
             {
                 gCom.Count=0;
                 switch (gCom.HMI_Scene)
@@ -104,7 +104,7 @@ void Work_Process()
                         break;
                 }
             }
-            if (SystemTime100ms==1 && gCom.Fire_MaxOut==0)   //慢启动
+            if (SystemTime100ms==1 && Fire_MaxOut==0)   //慢启动
             {
                 switch (gCom.HMI_Scene)
                 {
@@ -113,7 +113,7 @@ void Work_Process()
                         if (gInfo.ModuleInfo.Routine.DAC_Val>gInfo.ModuleInfo.Routine.DAC_Cail)
                         {
                             gInfo.ModuleInfo.Routine.DAC_Val=gInfo.ModuleInfo.Routine.DAC_Cail;
-                            gCom.Fire_MaxOut=1;
+                            Fire_MaxOut=1;
                         }
                         SPI_Send(gInfo.ModuleInfo.Routine.DAC_Val);
                         break;
@@ -152,9 +152,9 @@ void Work_Process()
                         Module_GetTemp();
                         break;
                     case eScene_Module_IU:
-                        if (gCom.ADConvertDone)          //读回Vfb
+                        if (ADConvertDone)          //读回Vfb
                         {
-                            gCom.ADConvertDone=0;
+                            ADConvertDone=0;
                             HMI_Show_IU_Temp();
                             ADC_CONTR = ADC_POWER | ADC_SPEEDLL | ADC_START | 0x01 ;
                         }
@@ -174,7 +174,7 @@ void Work_Process()
                     default:
                         break;
                 }
-                if (gCom.Fire_Flag==0)      //吹到低于45度再关风扇
+                if (Fire_Flag==0)      //吹到低于45度再关风扇
                 {
                     if(gCom.Count++>10 && temp<4500)    //关闭之后继续吹10秒再关
                     {
@@ -252,12 +252,12 @@ void WP_Start()
             if (gInfo.ModuleInfo.Routine.LightMode==0)
             {
                 SPI_Send(gInfo.ModuleInfo.Routine.DAC_Val);   //从3V开始
-                gCom.Fire_MaxOut=0;
+                Fire_MaxOut=0;
             }
             else
             {
                 SPI_Send(gInfo.ModuleInfo.Routine.DAC_Cail);  //直接输出最大
-                gCom.Fire_MaxOut=1;
+                Fire_MaxOut=1;
             }
             
             //SPI_Send(0x700|3440);   //4.2
@@ -366,12 +366,12 @@ void WP_Start()
     }
     gCom.WorkStat=eWS_Working;
     gCom.TimerCounter=0;
-    gCom.Fire_Flag=1;
+    Fire_Flag=1;
 }
 
 void WP_Stop(uint8_t stop_type)
 {
-    gCom.Fire_Flag=0;
+    Fire_Flag=0;
     switch (gCom.HMI_Scene)     //工作部分
     {
         case eScene_Module_650:
@@ -381,7 +381,7 @@ void WP_Stop(uint8_t stop_type)
             PowerCtr_Light1=POWER_OFF;  //off
             PowerCtr_Main=POWER_OFF;    //off
             SPI_Send(0x7000);           //DAC 0V
-            gCom.Fire_MaxOut=0;
+            Fire_MaxOut=0;
             break;
         case eScene_Module_UVA1:
             Module_Send_PWM(1,0);
@@ -561,7 +561,7 @@ void WP_Stop(uint8_t stop_type)
             FAN_IO=DISABLE;
             break;
         case eScene_Module_308:
-            if (gCom.Pause_Flag==1)
+            if (Pause_Flag==1)
             {
                 ;//do nothing
             }
@@ -571,7 +571,7 @@ void WP_Stop(uint8_t stop_type)
             }
             break;
         case eScene_Module_308test:
-            if (gCom.Pause_Flag==0)
+            if (Pause_Flag==0)
             {
                 HMI_Cut_Pic(0x71,ePage_Module308Test, 178, 399, 178+440, 399+39);     //进度条背景恢复
             }
