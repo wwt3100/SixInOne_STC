@@ -208,6 +208,7 @@ void Init()
     gCom.COMMProtocol_Tail2=0x3C;
 }
 
+#ifdef _DEBUG
 void LOG_E(void*str,...)
 {
     uint8_t i=0;
@@ -228,6 +229,7 @@ void LOG_E(void*str,...)
     while(Uart2_Busy);  //等待最后一个byte发送完成
     AUXR1 &= 0xEF;  //串口IO复原
 }
+#endif
 
 void Save_Config()
 {

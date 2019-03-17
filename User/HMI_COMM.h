@@ -84,7 +84,10 @@ void HMI_New_Sel(uint8_t sel);
 void HMI_New_ShowStr(uint8_t sel);
 void HMI_New_Show_LightName(uint8_t sellight);
 void HMI_New_ShowLite();
-void HMI_New_ShowDetail();
+void HMI_New_ShowDetail(uint8_t countdown);
+
+
+void HMI_NEW_SaveLightStep();
 
 
 

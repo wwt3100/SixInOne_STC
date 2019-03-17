@@ -1,5 +1,5 @@
 /*
-    注1: 变量一般使用帕斯卡命名,局部变量使用下划线命名或m_开头
+    注1: 变量一般使用帕斯卡命名,全局变量一般用g开头,局部变量使用下划线命名或m_开头
     注2: define的值一般为全大写
     注3: 除bit变量外,其他全局变量使用结构体打包(bit变量可用位域代替,但代码效率不如直接bit高)
     注4: 串口接收buffer因执行效率考虑放idata段,串口发送用阻塞式
@@ -7,8 +7,9 @@
     注6: 串口屏视图抽象成Scene(场景),一个Scene对应1个或多个page(页面)
     注7: 往串口屏写字符前需手动更新字符背景,否则会造成字符重叠,若重新刷新page则不需更新背景
     注8: 程序中Module(组件/模块)对应的含义为治疗头
-    注9: 需求上的4个智能模式+专家模式,抽象成5个Step(工步),数据皆可修改,只是入口不一样
-    注10:每个Module都有自己的调试权限,通过位选择,暂只有4种,故只用1byte
+    注9: 需求上的4个智能模式+专家模式,抽象成5个Group(组),数据皆可修改,只是入口不一样
+    注10:Group里的步骤抽象成Step(工步),详见struct LightStep
+    注11:每个Module都有自己的调试权限,通过位选择,暂只有4种,故只用1byte
 */
 #ifndef __MAIN_H
 #define __MAIN_H
@@ -65,6 +66,15 @@
 #define STR_NEWWIRA_L3WL "940nm",5
 #define STR_NEWWIRA_L4WL "830nm",5
 
+#define STEP_MODE_Serial        (0)     /*顺序*/
+#define STEP_MODE_Parallel      (1)     /*同步*/
+
+
+#if 1
+#define MIN2S 
+#else
+#define MIN2S *60
+#endif
 
 typedef struct Golbal_ComInfo{  
     uint8_t ModuleType;
@@ -115,17 +125,19 @@ typedef struct Golbal_Info{
             uint8_t LightGroup;          //选择出光模式 0专家 1-4智能
             uint8_t LastSelGroup;        //上次选择的模式 1-4
             uint8_t LocStep;        //当前工步
+            uint8_t EditMode;       //编辑模式
             struct LightStep{
                 uint8_t StepMode:1;     //0->顺序    1->同步
-                uint8_t StepNum:7;      //工步数,最多4步
-                uint8_t Data[12];       //工步数据,[3*n+0]光,[3*n+1]能量,[3*n+2]时间
-            }LightStep[5];              //工步0为 专家模式
-            uint8_t Str_LightWavelength[4][7]; //4种光的波长 协议为2byte,转字符串为了加速显示//暂未用
+                uint8_t StepNum:7;      //工步数,最多4步 对于同步模式就是开启光的数量
+                uint8_t Data[12];       //工步数据,[3*n+0]光,[3*n+1]能量,[3*n+2]时间(同步模式时间相同)
+            }LightStep[5],TempStep;              //工步0为 专家模式
+                                                 //设置的工步先保存到TempStep中,当保存或启动时再存入LightStep再保存
+//            uint8_t Str_LightWavelength[4][7]; //4种光的波长 协议为2byte,转字符串为了加速显示//暂未用
             uint8_t PowerMax[4];        //最大能量
             uint8_t PowerMix[4];        //最小能量
-            uint8_t PowerLevel[4];
-            uint8_t WorkTime[5];        //设置的时间,单位min             [0]同步模式时间 [1-4]顺序模式4光
-            uint16_t RemainTime[4];     //剩余时间,单位s
+            uint8_t PowerLevel[4];      //设置用的能量
+            uint8_t WorkTime[5];        //设置用的时间,单位min             [0]同步模式时间 [1-4]顺序模式4光
+            uint16_t RemainTime;     //剩余时间,单位s
         }New4in1;
         struct mini308{
             uint8_t WorkMode;       // 0->正常模式 1->红斑测试
@@ -157,8 +169,11 @@ typedef struct ModuleSave{
 
 void Delay10ms();		//@11.0592MHz
 
+#ifdef _DEBUG
 void LOG_E(void*str,...);
-
+#else
+#define LOG_E(...)
+#endif
 
 void Beep(uint8_t time);
 void BeepEx(uint8_t count,uint8_t time);    //count 响的次数 time 50ms整数时间

@@ -764,15 +764,27 @@ void HMI_308Set_Duty()
 
 void HMI_New_Show_LightName(uint8_t sellight)
 {
+    uint8_t edit_mode;
+    edit_mode=gInfo.ModuleInfo.New4in1.EditMode;
     switch (gCom.HMI_Scene)
     {
         case eScene_Module_4in1:
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x01) != (sellight & 0x01)) || (sellight & 0x80))
             {
-                uint8_t page = (sellight & 0x01)? 46:45;
-                HMI_Cut_Pic(0x71,page, 38, 94, 38+145, 94+75);      //±³¾°»Ö¸´
-                LL_HMI_Send("\x98",1);
-                LL_HMI_SendXY(67-8, 117);
+                if (edit_mode==0)
+                {
+                    uint8_t page = (sellight & 0x01)? 46:45;
+                    HMI_Cut_Pic(0x71,page, 38, 94, 38+145, 94+75);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(67-8, 117);
+                }
+                else
+                {
+                    uint8_t page = (sellight & 0x01)? 48:47;
+                    HMI_Cut_Pic(0x71,page, 47, 178, 47+142, 178+66);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(65, 196);
+                }
                 if(sellight & 0x01)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\x0\x0\x00\x1F",7);     //ºÚ×Ö
@@ -786,10 +798,20 @@ void HMI_New_Show_LightName(uint8_t sellight)
             }
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x02) != (sellight & 0x02)) || (sellight & 0x80))
             {
-                uint8_t page = (sellight & 0x02)? 46:45;
-                HMI_Cut_Pic(0x71,page, 193, 94, 193+145, 94+75);      //±³¾°»Ö¸´
-                LL_HMI_Send("\x98",1);
-                LL_HMI_SendXY(221-8, 117);
+                if (edit_mode==0)
+                {
+                    uint8_t page = (sellight & 0x02)? 46:45;
+                    HMI_Cut_Pic(0x71,page, 193, 94, 193+145, 94+75);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(221-8, 117);
+                }
+                else
+                {
+                    uint8_t page = (sellight & 0x02)? 48:47;
+                    HMI_Cut_Pic(0x71,page, 203, 178, 203+142, 178+66);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(218, 196);
+                }
                 if(sellight & 0x02)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\x0\x0\x00\x1F",7);     //ºÚ×Ö
@@ -803,10 +825,20 @@ void HMI_New_Show_LightName(uint8_t sellight)
             }
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x04) != (sellight & 0x04)) || (sellight & 0x80))
             {
-                uint8_t page = (sellight & 0x04)? 46:45;
-                HMI_Cut_Pic(0x71,page, 348, 94, 348+145, 94+75);      //±³¾°»Ö¸´
-                LL_HMI_Send("\x98",1);
-                LL_HMI_SendXY(378-8, 117);
+                if (edit_mode==0)
+                {
+                    uint8_t page = (sellight & 0x04)? 46:45;
+                    HMI_Cut_Pic(0x71,page, 348, 94, 348+145, 94+75);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(378-8, 117);
+                }
+                else
+                {
+                    uint8_t page = (sellight & 0x04)? 48:47;
+                    HMI_Cut_Pic(0x71,page, 359, 178, 359+142, 178+66);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(374, 196);
+                }
                 if(sellight & 0x04)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\x0\x0\x00\x1F",7);     //ºÚ×Ö
@@ -820,10 +852,20 @@ void HMI_New_Show_LightName(uint8_t sellight)
             }
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x08) != (sellight & 0x08)) || (sellight & 0x80))
             {
-                uint8_t page = (sellight & 0x08)? 46:45;
-                HMI_Cut_Pic(0x71,page, 505, 94, 505+145, 94+75);      //±³¾°»Ö¸´
-                LL_HMI_Send("\x98",1);
-                LL_HMI_SendXY(534-8, 117);
+                if (edit_mode==0)
+                {
+                    uint8_t page = (sellight & 0x08)? 46:45;
+                    HMI_Cut_Pic(0x71,page, 505, 94, 505+145, 94+75);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(534-8, 117);
+                }
+                else
+                {
+                    uint8_t page = (sellight & 0x08)? 48:47;
+                    HMI_Cut_Pic(0x71,page, 516, 178, 516+142, 178+66);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(530, 196);
+                }
                 if(sellight & 0x08)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\x0\x0\x00\x1F",7);     //ºÚ×Ö
@@ -840,10 +882,20 @@ void HMI_New_Show_LightName(uint8_t sellight)
         case eScene_Module_Wira:
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x01) != (sellight & 0x01)) || (sellight & 0x80))
             {
-                uint8_t page = (sellight & 0x01)? 46:45;
-                HMI_Cut_Pic(0x71,page, 38, 94, 38+145, 94+75);      //±³¾°»Ö¸´
-                LL_HMI_Send("\x98",1);
-                LL_HMI_SendXY(67-8, 117);
+                if (edit_mode==0)
+                {
+                    uint8_t page = (sellight & 0x01)? 46:45;
+                    HMI_Cut_Pic(0x71,page, 38, 94, 38+145, 94+75);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(67-8, 117);
+                }
+                else
+                {
+                    uint8_t page = (sellight & 0x01)? 48:47;
+                    HMI_Cut_Pic(0x71,page, 47, 178, 47+142, 178+66);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(65, 196);
+                }
                 if(sellight & 0x01)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\x0\x0\x00\x1F",7);     //ºÚ×Ö
@@ -857,10 +909,20 @@ void HMI_New_Show_LightName(uint8_t sellight)
             }
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x02) != (sellight & 0x02)) || (sellight & 0x80))
             {
-                uint8_t page = (sellight & 0x02)? 46:45;
-                HMI_Cut_Pic(0x71,page, 193, 94, 193+145, 94+75);      //±³¾°»Ö¸´
-                LL_HMI_Send("\x98",1);
-                LL_HMI_SendXY(221-8, 117);
+                if (edit_mode==0)
+                {
+                    uint8_t page = (sellight & 0x02)? 46:45;
+                    HMI_Cut_Pic(0x71,page, 193, 94, 193+145, 94+75);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(221-8, 117);
+                }
+                else
+                {
+                    uint8_t page = (sellight & 0x02)? 48:47;
+                    HMI_Cut_Pic(0x71,page, 203, 178, 203+142, 178+66);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(218, 196);
+                }
                 if(sellight & 0x02)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\x0\x0\x00\x1F",7);     //ºÚ×Ö
@@ -874,10 +936,20 @@ void HMI_New_Show_LightName(uint8_t sellight)
             }
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x04) != (sellight & 0x04)) || (sellight & 0x80))
             {
-                uint8_t page = (sellight & 0x04)? 46:45;
-                HMI_Cut_Pic(0x71,page, 348, 94, 348+145, 94+75);      //±³¾°»Ö¸´
-                LL_HMI_Send("\x98",1);
-                LL_HMI_SendXY(378-8, 117);
+                if (edit_mode==0)
+                {
+                    uint8_t page = (sellight & 0x04)? 46:45;
+                    HMI_Cut_Pic(0x71,page, 348, 94, 348+145, 94+75);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(378-8, 117);
+                }
+                else
+                {
+                    uint8_t page = (sellight & 0x04)? 48:47;
+                    HMI_Cut_Pic(0x71,page, 359, 178, 359+142, 178+66);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(374, 196);
+                }
                 if(sellight & 0x04)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\x0\x0\x00\x1F",7);     //ºÚ×Ö
@@ -891,10 +963,20 @@ void HMI_New_Show_LightName(uint8_t sellight)
             }
             if (((gInfo.ModuleInfo.New4in1.ConfigSelLight & 0x08) != (sellight & 0x08)) || (sellight & 0x80))
             {
-                uint8_t page = (sellight & 0x08)? 46:45;
-                HMI_Cut_Pic(0x71,page, 505, 94, 505+145, 94+75);      //±³¾°»Ö¸´
-                LL_HMI_Send("\x98",1);
-                LL_HMI_SendXY(534-8, 117);
+                if (edit_mode==0)
+                {
+                    uint8_t page = (sellight & 0x08)? 46:45;
+                    HMI_Cut_Pic(0x71,page, 505, 94, 505+145, 94+75);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(534-8, 117);
+                }
+                else
+                {
+                    uint8_t page = (sellight & 0x08)? 48:47;
+                    HMI_Cut_Pic(0x71,page, 516, 178, 516+142, 178+66);      //±³¾°»Ö¸´
+                    LL_HMI_Send("\x98",1);
+                    LL_HMI_SendXY(530, 196);
+                }
                 if(sellight & 0x08)
                 {
                     LL_HMI_Send_Pure("\x6\x80\x05\x0\x0\x00\x1F",7);     //ºÚ×Ö
@@ -915,14 +997,32 @@ void HMI_New_Show_LightName(uint8_t sellight)
 
 void HMI_New_ShowStr(uint8_t sel)
 {
-    uint8_t page=sel==1?46:45;
+    uint8_t page,edit_mode;
     uint8_t p;
+    edit_mode=gInfo.ModuleInfo.New4in1.EditMode;
+    if (edit_mode==0)
+    {
+        page=sel==1?46:45;
+    }
+    else
+    {
+        page=sel==1?48:47;
+    }
     switch (gInfo.ModuleInfo.New4in1.ConfigSel)
     {
         case eHMICode_PowerLevel1:
-            HMI_Cut_Pic(0x71,page, 35, 189, 35+145, 189+75);      //±³¾°»Ö¸´
-            LL_HMI_Send("\x98",1);
-            LL_HMI_SendXY(80-16, 215);
+            if (edit_mode==0)
+            {
+                HMI_Cut_Pic(0x71,page, 35, 189, 35+145, 189+75);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(80-16, 215);
+            }
+            else
+            {
+                HMI_Cut_Pic(0x71,page, 47, 259, 47+143, 259+71);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(68, 279);
+            }
             LL_HMI_Send_Pure("\x3\x80\x03\x1C\xFF\x00\x1F",7);     //À¶×Ö
             p=gInfo.ModuleInfo.New4in1.PowerLevel[0]/100;
             while (Uart1_Busy);
@@ -946,9 +1046,18 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_SendEnd();
             break;
         case eHMICode_PowerLevel2:
-            HMI_Cut_Pic(0x71,page, 191, 189, 191+145, 189+75);      //±³¾°»Ö¸´
-            LL_HMI_Send("\x98",1);
-            LL_HMI_SendXY(235-16, 215);
+            if (edit_mode==0)
+            {
+                HMI_Cut_Pic(0x71,page, 191, 189, 191+145, 189+75);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(235-16, 215);
+            }
+            else
+            {
+                HMI_Cut_Pic(0x71,page, 203, 258, 203+142, 258+72);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(219, 279);
+            }
             LL_HMI_Send_Pure("\x3\x80\x03\xF9\x04,\x00\x1F",7);    //ºì×Ö
             p=gInfo.ModuleInfo.New4in1.PowerLevel[1]/100;
             while (Uart1_Busy);
@@ -972,9 +1081,18 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_SendEnd();
             break;
         case eHMICode_PowerLevel3:
-            HMI_Cut_Pic(0x71,page, 349, 189, 349+145, 189+75);      //±³¾°»Ö¸´
-            LL_HMI_Send("\x98",1);
-            LL_HMI_SendXY(388-16, 215);
+            if (edit_mode==0)
+            {
+                HMI_Cut_Pic(0x71,page, 349, 189, 349+145, 189+75);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(388-16, 215);
+            }
+            else
+            {
+                HMI_Cut_Pic(0x71,page, 361, 261, 361+143, 261+68);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(378, 279);
+            }
             LL_HMI_Send_Pure("\x3\x80\x03\xD5\x00\x00\x1F",7);     //»Æ×Ö
             p=gInfo.ModuleInfo.New4in1.PowerLevel[2]/100;
             while (Uart1_Busy);
@@ -998,9 +1116,18 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_SendEnd();
             break;
         case eHMICode_PowerLevel4:
-            HMI_Cut_Pic(0x71,page, 514, 189, 514+145, 189+75);      //±³¾°»Ö¸´
-            LL_HMI_Send("\x98",1);
-            LL_HMI_SendXY(548-16, 215);
+            if (edit_mode==0)
+            {
+                HMI_Cut_Pic(0x71,page, 514, 189, 514+145, 189+75);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(548-16, 215);
+            }
+            else
+            {
+                HMI_Cut_Pic(0x71,page, 516, 259, 516+143, 259+72);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(530, 279);
+            }
             LL_HMI_Send_Pure("\x3\x80\x03\xD3\x40\x00\x1F",7);     //³È×Ö
             p=gInfo.ModuleInfo.New4in1.PowerLevel[3]/100;
             while (Uart1_Busy);
@@ -1024,9 +1151,18 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_SendEnd();
             break;
         case eHMICode_Worktime1:
-            HMI_Cut_Pic(0x71,page, 34, 280, 34+145, 280+75);      //±³¾°»Ö¸´
-            LL_HMI_Send("\x98",1);
-            LL_HMI_SendXY(68, 301);
+            if (edit_mode==0)
+            {
+                HMI_Cut_Pic(0x71,page, 34, 280, 34+145, 280+75);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(68, 301);
+            }
+            else
+            {
+                HMI_Cut_Pic(0x71,page, 47, 343, 47+140, 343+71);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(65, 366);
+            }
             LL_HMI_Send_Pure("\x4\x80\x04\x1C\xFF\x00\x1F",7);     //À¶×Ö
             while (Uart1_Busy);
             Uart1_Busy=1;
@@ -1046,9 +1182,18 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_SendEnd();
             break;
         case eHMICode_Worktime2:
-            HMI_Cut_Pic(0x71,page, 190, 280, 190+145, 280+75);      //±³¾°»Ö¸´
-            LL_HMI_Send("\x98",1);
-            LL_HMI_SendXY(226, 301);
+            if (edit_mode==0)
+            {
+                HMI_Cut_Pic(0x71,page, 190, 280, 190+145, 280+75);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(226, 301);
+            }
+            else
+            {
+                HMI_Cut_Pic(0x71,page, 205, 343, 205+140, 343+71);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(217, 366);
+            }
             LL_HMI_Send_Pure("\x4\x80\x04\xF9\x04\x00\x1F",7);    //ºì×Ö
             while (Uart1_Busy);
             Uart1_Busy=1;
@@ -1068,9 +1213,18 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_SendEnd();
             break;
         case eHMICode_Worktime3:
-            HMI_Cut_Pic(0x71,page, 344, 280, 344+145, 280+75);      //±³¾°»Ö¸´
-            LL_HMI_Send("\x98",1);
-            LL_HMI_SendXY(380, 301);
+            if (edit_mode==0)
+            {
+                HMI_Cut_Pic(0x71,page, 344, 280, 344+145, 280+75);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(380, 301);
+            }
+            else
+            {
+                HMI_Cut_Pic(0x71,page, 360, 343, 360+140, 343+71);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(373, 366);
+            }
             LL_HMI_Send_Pure("\x4\x80\x04\xD5\x00\x00\x1F",7);     //»Æ×Ö
             while (Uart1_Busy);
             Uart1_Busy=1;
@@ -1090,9 +1244,18 @@ void HMI_New_ShowStr(uint8_t sel)
             LL_HMI_SendEnd();
             break;
         case eHMICode_Worktime4:
-            HMI_Cut_Pic(0x71,page, 503, 280, 503+145, 280+75);      //±³¾°»Ö¸´
-            LL_HMI_Send("\x98",1);
-            LL_HMI_SendXY(538, 301);
+            if (edit_mode==0)
+            {
+                HMI_Cut_Pic(0x71,page, 503, 280, 503+145, 280+75);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(538, 301);
+            }
+            else
+            {
+                HMI_Cut_Pic(0x71,page, 516, 343, 516+140, 343+71);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(531, 366);
+            }
             LL_HMI_Send_Pure("\x4\x80\x04\xD3\x40\x00\x1F",7);     //³È×Ö
             while (Uart1_Busy);
             Uart1_Busy=1;
@@ -1120,31 +1283,60 @@ void HMI_New_ShowStr(uint8_t sel)
                 str[0]=p+'0';
             }
             str[1]=gInfo.ModuleInfo.New4in1.WorkTime[0]%10+'0';
-            
-            HMI_Cut_Pic(0x71,page, 34, 280, 34+145, 280+75);      //±³¾°»Ö¸´
-            LL_HMI_Send("\x98",1);
-            LL_HMI_SendXY(68, 301);
-            LL_HMI_Send_Pure("\x4\x80\x04\x1C\xFF\x00\x1F",7);     //À¶×Ö
-            LL_HMI_Send_Pure(str,5);
-            LL_HMI_SendEnd();
-            HMI_Cut_Pic(0x71,page, 190, 280, 190+145, 280+75);      //±³¾°»Ö¸´
-            LL_HMI_Send("\x98",1);
-            LL_HMI_SendXY(226, 301);
-            LL_HMI_Send_Pure("\x4\x80\x04\xF9\x04\x00\x1F",7);    //ºì×Ö
-            LL_HMI_Send_Pure(str,5);
-            LL_HMI_SendEnd();
-            HMI_Cut_Pic(0x71,page, 344, 280, 344+145, 280+75);      //±³¾°»Ö¸´
-            LL_HMI_Send("\x98",1);
-            LL_HMI_SendXY(380, 301);
-            LL_HMI_Send_Pure("\x4\x80\x04\xD5\x00\x00\x1F",7);     //»Æ×Ö
-            LL_HMI_Send_Pure(str,5);
-            LL_HMI_SendEnd();
-            HMI_Cut_Pic(0x71,page, 503, 280, 503+145, 280+75);      //±³¾°»Ö¸´
-            LL_HMI_Send("\x98",1);
-            LL_HMI_SendXY(538, 301);
-            LL_HMI_Send_Pure("\x4\x80\x04\xD3\x40\x00\x1F",7);     //³È×Ö
-            LL_HMI_Send_Pure(str,5);
-            LL_HMI_SendEnd();
+            if (edit_mode==0)
+            {
+                HMI_Cut_Pic(0x71,page, 34, 280, 34+145, 280+75);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(68, 301);
+                LL_HMI_Send_Pure("\x4\x80\x04\x1C\xFF\x00\x1F",7);     //À¶×Ö
+                LL_HMI_Send_Pure(str,5);
+                LL_HMI_SendEnd();
+                HMI_Cut_Pic(0x71,page, 190, 280, 190+145, 280+75);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(226, 301);
+                LL_HMI_Send_Pure("\x4\x80\x04\xF9\x04\x00\x1F",7);    //ºì×Ö
+                LL_HMI_Send_Pure(str,5);
+                LL_HMI_SendEnd();
+                HMI_Cut_Pic(0x71,page, 344, 280, 344+145, 280+75);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(380, 301);
+                LL_HMI_Send_Pure("\x4\x80\x04\xD5\x00\x00\x1F",7);     //»Æ×Ö
+                LL_HMI_Send_Pure(str,5);
+                LL_HMI_SendEnd();
+                HMI_Cut_Pic(0x71,page, 503, 280, 503+145, 280+75);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(538, 301);
+                LL_HMI_Send_Pure("\x4\x80\x04\xD3\x40\x00\x1F",7);     //³È×Ö
+                LL_HMI_Send_Pure(str,5);
+                LL_HMI_SendEnd();
+            }
+            else
+            {
+                HMI_Cut_Pic(0x71,page, 47, 343, 47+140, 343+71);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(65, 366);
+                LL_HMI_Send_Pure("\x4\x80\x04\x1C\xFF\x00\x1F",7);     //À¶×Ö
+                LL_HMI_Send_Pure(str,5);
+                LL_HMI_SendEnd();
+                HMI_Cut_Pic(0x71,page, 205, 343, 205+140, 343+71);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(217, 366);
+                LL_HMI_Send_Pure("\x4\x80\x04\xF9\x04\x00\x1F",7);    //ºì×Ö
+                LL_HMI_Send_Pure(str,5);
+                LL_HMI_SendEnd();
+                HMI_Cut_Pic(0x71,page, 360, 343, 360+140, 343+71);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(373, 366);
+                LL_HMI_Send_Pure("\x4\x80\x04\xD3\x40\x00\x1F",7);     //³È×Ö
+                LL_HMI_Send_Pure(str,5);
+                LL_HMI_SendEnd();
+                HMI_Cut_Pic(0x71,page, 516, 343, 516+140, 343+71);      //±³¾°»Ö¸´
+                LL_HMI_Send("\x98",1);
+                LL_HMI_SendXY(531, 366);
+                LL_HMI_Send_Pure("\x4\x80\x04\xD3\x40\x00\x1F",7);     //³È×Ö
+                LL_HMI_Send_Pure(str,5);
+                LL_HMI_SendEnd();
+            }
         }
             break;
         default:
@@ -1363,37 +1555,58 @@ void HMI_New_ShowLite()         //ÏÔÊ¾ÖÇÄÜ±à¼­Ä£Ê½Ñ¡ÏîÏÂÃæµÄÄ£Ê½
     bit step_mode=0;
     if (gInfo.ModuleInfo.New4in1.LightGroup!=0)
     {
-        uint8_t i,j=0;
+        uint8_t i,j;
         uint8_t step_num;
+        int8_t ui_offset;
         for (i = 1; i < 5; i++)     //4´Î
         {
+            //LOG_E("SL %d   ",(uint16_t)i);
             step_mode=gInfo.ModuleInfo.New4in1.LightStep[i].StepMode;
             step_num=gInfo.ModuleInfo.New4in1.LightStep[i].StepNum;     //Ìá¸ßÐ§ÂÊ
+            switch (step_num)
+            {
+                case 1:
+                    ui_offset=54;
+                    break;
+                case 2:
+                    ui_offset=32;
+                    break;
+                case 3:
+                    ui_offset=0;
+                    break;
+                case 4:
+                    ui_offset=-10;
+                    break;
+                default:
+                    break;
+            }
             if (gInfo.ModuleInfo.New4in1.LightGroup!=(i)) //Ã»Ñ¡µÄ²ÅÏÔÊ¾
             {
                 LL_HMI_Send("\x98",1);
-                switch (step_num)
+                switch (i)      //¸ù¾Ý²»Í¬¹¤²½ÏÔÊ¾Î»ÖÃ
                 {
                     case 1:
-                        LL_HMI_SendXY(42+(i-1)*188,312);    //TODO:¸ù¾ÝÇé¿öÐÞ¸ÄxÖµ
+                        LL_HMI_SendXY(42+(i-1)*188+ui_offset,312);    
                         break;
                     case 2:
-                        LL_HMI_SendXY(42+(i-1)*188,312);
+                        LL_HMI_SendXY(42+(i-1)*188+ui_offset,312);
                         break;
                     case 3:
-                        LL_HMI_SendXY(42+(i-1)*188,312);
+                        LL_HMI_SendXY(42+(i-1)*188+ui_offset,312);
                         break;
                     case 4:
-                        LL_HMI_SendXY(42+(i-1)*188,312);
+                        LL_HMI_SendXY(42+(i-1)*188+ui_offset,312);
                         break;
                     default:
                         LL_HMI_SendXY(0,0);
                         break;
                 }
-                LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7);     //°××Ö
+                LL_HMI_Send_Pure("\x3\x80\x03\x34\x5F\x00\x1F",7);     //À¶×Ö
+                j=0;    //½øwhileÇ°ÐèÇåÁã
                 while (j < step_num)   //Èç¹ûÎª0,ÏÔÊ¾²»»á³ö´í
                 {
                     uint8_t light=gInfo.ModuleInfo.New4in1.LightStep[i].Data[j*3];
+                    #if 0
 //                    if (light&0x01)       //¹â²¨³¤Ð´µ½ÖÎÁÆÍ·Àï,Î´ÆôÓÃ
 //                    {
 //                        if (j>0)
@@ -1403,33 +1616,7 @@ void HMI_New_ShowLite()         //ÏÔÊ¾ÖÇÄÜ±à¼­Ä£Ê½Ñ¡ÏîÏÂÃæµÄÄ£Ê½
 //                        LL_HMI_Send_Pure(gInfo.ModuleInfo.New4in1.Str_LightWavelength[0],
 //                            strlen(gInfo.ModuleInfo.New4in1.Str_LightWavelength[0]));
 //                    }
-//                    if (light&0x02)
-//                    {
-//                        if (step_mode==1 || j>0)
-//                        {
-//                            LL_HMI_Send_Pure("/",1);
-//                        }
-//                        LL_HMI_Send_Pure(gInfo.ModuleInfo.New4in1.Str_LightWavelength[1],
-//                            strlen(gInfo.ModuleInfo.New4in1.Str_LightWavelength[1]));
-//                    }
-//                    if (light&0x04)
-//                    {
-//                        if (step_mode==1 || j>0)
-//                        {
-//                            LL_HMI_Send_Pure("/",1);
-//                        }
-//                        LL_HMI_Send_Pure(gInfo.ModuleInfo.New4in1.Str_LightWavelength[2],
-//                            strlen(gInfo.ModuleInfo.New4in1.Str_LightWavelength[2]));
-//                    }
-//                    if (light&0x08)
-//                    {
-//                        if (step_mode==1 || j>0)
-//                        {
-//                            LL_HMI_Send_Pure("/",1);
-//                        }
-//                        LL_HMI_Send_Pure(gInfo.ModuleInfo.New4in1.Str_LightWavelength[3],
-//                            strlen(gInfo.ModuleInfo.New4in1.Str_LightWavelength[3]));
-//                    }
+                    #endif
                     if (gCom.HMI_Scene==eScene_Module_4in1)
                     {
                         if (light&0x01)       //¹â²¨³¤Ð´µ½ÖÎÁÆÍ·Àï,Î´ÆôÓÃ
@@ -1438,31 +1625,52 @@ void HMI_New_ShowLite()         //ÏÔÊ¾ÖÇÄÜ±à¼­Ä£Ê½Ñ¡ÏîÏÂÃæµÄÄ£Ê½
                             {
                                 LL_HMI_Send_Pure("/",1);
                             }
-                            LL_HMI_Send_Pure(STR_NEW4IN1_L1WL);
+                            LL_HMI_Send_Pure(STR_NEW4IN1_L1WL-2);
                         }
                         if (light&0x02)
                         {
-                            if (step_mode==1 || j>0)
-                            {
-                                LL_HMI_Send_Pure("/",1);
+                            if (j>0)
+                            {   
+                                if (step_mode==STEP_MODE_Serial)
+                                {
+                                    LL_HMI_Send_Pure("/",1);
+                                }
+                                else
+                                {
+                                    LL_HMI_Send_Pure("+",1);
+                                }
                             }
-                            LL_HMI_Send_Pure(STR_NEW4IN1_L2WL);
+                            LL_HMI_Send_Pure(STR_NEW4IN1_L2WL-2);
                         }
                         if (light&0x04)
                         {
-                            if (step_mode==1 || j>0)
-                            {
-                                LL_HMI_Send_Pure("/",1);
+                            if (j>0)
+                            {   
+                                if (step_mode==STEP_MODE_Serial)
+                                {
+                                    LL_HMI_Send_Pure("/",1);
+                                }
+                                else
+                                {
+                                    LL_HMI_Send_Pure("+",1);
+                                }
                             }
-                            LL_HMI_Send_Pure(STR_NEW4IN1_L3WL);
+                            LL_HMI_Send_Pure(STR_NEW4IN1_L3WL-2);
                         }
                         if (light&0x08)
                         {
-                            if (step_mode==1 || j>0)
-                            {
-                                LL_HMI_Send_Pure("/",1);
+                            if (j>0)
+                            {   
+                                if (step_mode==STEP_MODE_Serial)
+                                {
+                                    LL_HMI_Send_Pure("/",1);
+                                }
+                                else
+                                {
+                                    LL_HMI_Send_Pure("+",1);
+                                }
                             }
-                            LL_HMI_Send_Pure(STR_NEW4IN1_L4WL);
+                            LL_HMI_Send_Pure(STR_NEW4IN1_L4WL-2);
                         }
                     }
                     else if (gCom.HMI_Scene==eScene_Module_Wira)
@@ -1470,34 +1678,62 @@ void HMI_New_ShowLite()         //ÏÔÊ¾ÖÇÄÜ±à¼­Ä£Ê½Ñ¡ÏîÏÂÃæµÄÄ£Ê½
                         if (light&0x01)       //¹â²¨³¤Ð´µ½ÖÎÁÆÍ·Àï,Î´ÆôÓÃ
                         {
                             if (j>0)
-                            {
-                                LL_HMI_Send_Pure("/",1);
+                            {   
+                                if (step_mode==STEP_MODE_Serial)
+                                {
+                                    LL_HMI_Send_Pure("/",1);
+                                }
+                                else
+                                {
+                                    LL_HMI_Send_Pure("+",1);
+                                }
                             }
-                            LL_HMI_Send_Pure(STR_NEWWIRA_L1WL);
+                            LL_HMI_Send_Pure(STR_NEWWIRA_L1WL-2);
                         }
                         if (light&0x02)
                         {
-                            if (step_mode==1 || j>0)
-                            {
-                                LL_HMI_Send_Pure("/",1);
+                            if (j>0)
+                            {   
+                                if (step_mode==STEP_MODE_Serial)
+                                {
+                                    LL_HMI_Send_Pure("/",1);
+                                }
+                                else
+                                {
+                                    LL_HMI_Send_Pure("+",1);
+                                }
                             }
-                            LL_HMI_Send_Pure(STR_NEWWIRA_L2WL);
+                            LL_HMI_Send_Pure(STR_NEWWIRA_L2WL-2);
                         }
                         if (light&0x04)
                         {
-                            if (step_mode==1 || j>0)
-                            {
-                                LL_HMI_Send_Pure("/",1);
+                            if (j>0)
+                            {   
+                                if (step_mode==STEP_MODE_Serial)
+                                {
+                                    LL_HMI_Send_Pure("/",1);
+                                }
+                                else
+                                {
+                                    LL_HMI_Send_Pure("+",1);
+                                }
                             }
-                            LL_HMI_Send_Pure(STR_NEWWIRA_L3WL);
+                            LL_HMI_Send_Pure(STR_NEWWIRA_L3WL-2);
                         }
                         if (light&0x08)
                         {
-                            if (step_mode==1 || j>0)
-                            {
-                                LL_HMI_Send_Pure("/",1);
+                            if (j>0)
+                            {   
+                                if (step_mode==STEP_MODE_Serial)
+                                {
+                                    LL_HMI_Send_Pure("/",1);
+                                }
+                                else
+                                {
+                                    LL_HMI_Send_Pure("+",1);
+                                }
                             }
-                            LL_HMI_Send_Pure(STR_NEWWIRA_L4WL);
+                            LL_HMI_Send_Pure(STR_NEWWIRA_L4WL-2);
                         }
                     }
                     else
@@ -1516,17 +1752,26 @@ void HMI_New_ShowLite()         //ÏÔÊ¾ÖÇÄÜ±à¼­Ä£Ê½Ñ¡ÏîÏÂÃæµÄÄ£Ê½
     }
     else
     {
-        ; //ÖÇÄÜÄ£Ê½ //do nothing
+        ; //×¨¼ÒÄ£Ê½ //do nothing
     }
 }
-void HMI_New_ShowDetail()       //ÏÔÊ¾Ñ¡ÔñºóµÄÏêÏ¸ÐÅÏ¢
+void HMI_New_ShowDetail(uint8_t countdown)       //ÏÔÊ¾Ñ¡ÔñºóµÄÏêÏ¸ÐÅÏ¢ countdown==1 µ¹¼ÆÊ±Ä£Ê½
 {
     bit step_mode;
-    uint8_t light_group;
+    uint8_t light_group,step_num,light,power;
+    uint16_t time;
     uint16_t x;
+    uint8_t i,j;
+    uint8_t xdata power_str[]=" 00mW/cm\xB2";
+    uint8_t xdata time_str[]=" 0min";
+    uint8_t xdata remain_time_str[]=" 0min00s";
     light_group=gInfo.ModuleInfo.New4in1.LightGroup;
     step_mode = gInfo.ModuleInfo.New4in1.LightStep[light_group].StepMode;
-    
+    step_num =  gInfo.ModuleInfo.New4in1.LightStep[light_group].StepNum;
+    if (step_num==0)
+    {
+        return;     //Èç¹ûÃ»ÓÐ¹¤²½Ö±½Ó·µ»Ø
+    }
     switch (light_group)        //Í¬²½/Ë³ÐòÄ£Ê½ÔªËØÏÔÊ¾
     {
         case 1:   
@@ -1544,5 +1789,132 @@ void HMI_New_ShowDetail()       //ÏÔÊ¾Ñ¡ÔñºóµÄÏêÏ¸ÐÅÏ¢
         default:    // ×¨¼ÒÄ£Ê½»òÎ´Ñ¡ÔñÄ£Ê½Ö±½Ó·µ»Ø
             return;
     }
+    HMI_Cut_Pic(0x71,41, 0, 370, 800, 480); //»Ö¸´±³¾°
+
+    for (i = 0; i < step_num; i++)
+    {
+        light=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[i*3];
+        LL_HMI_Send("\x98",1);
+        switch (i)
+        {
+            case 0:
+                LL_HMI_SendXY(82,399);
+                break;
+            case 1:
+                LL_HMI_SendXY(430,399);
+                break;
+            case 2:
+                LL_HMI_SendXY(82,439);
+                break;
+            case 3:
+                LL_HMI_SendXY(430,439);
+                break;
+            default:
+                LL_HMI_SendXY(0,0); //Should not be here
+                break;
+        }
+        if (countdown==1 && (gInfo.ModuleInfo.New4in1.LocStep == i || step_mode==STEP_MODE_Parallel))
+        {
+            LL_HMI_Send_Pure("\x3\x80\x03\x0\x0\x00\x1F",7);     //ºÚ×Ö
+        }
+        else
+        {
+            LL_HMI_Send_Pure("\x3\x80\x03\x34\x5F\x00\x1F",7);     //À¶×Ö
+        }
+        if (gCom.HMI_Scene==eScene_Module_4in1)
+        {
+            if (light&0x01)      
+            {
+                LL_HMI_Send_Pure(STR_NEW4IN1_L1WL);
+            }
+            else if (light&0x02)
+            {
+                LL_HMI_Send_Pure(STR_NEW4IN1_L2WL);
+            }
+            else if (light&0x04)
+            {
+                LL_HMI_Send_Pure(STR_NEW4IN1_L3WL);
+            }
+            else if (light&0x08)
+            {
+                LL_HMI_Send_Pure(STR_NEW4IN1_L4WL);
+            }
+        }
+        else if (gCom.HMI_Scene==eScene_Module_Wira)
+        {
+            if (light&0x01)      
+            {
+                LL_HMI_Send_Pure(STR_NEWWIRA_L1WL);
+            }
+            else if (light&0x02)
+            {
+                LL_HMI_Send_Pure(STR_NEWWIRA_L2WL);
+            }
+            else if (light&0x04)
+            {
+                LL_HMI_Send_Pure(STR_NEWWIRA_L3WL);
+            }
+            else if (light&0x08)
+            {
+                LL_HMI_Send_Pure(STR_NEWWIRA_L4WL);
+            }
+        }
+        if (countdown==1 && (gInfo.ModuleInfo.New4in1.LocStep == i || step_mode==STEP_MODE_Parallel))
+        {
+            LL_HMI_Send_Pure("    ",2);     //ÖÐ¼ä¿Õ¸ñ
+        }
+        else
+        {
+            LL_HMI_Send_Pure("    ",3);     //ÖÐ¼ä¿Õ¸ñ
+        }
+        power=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[i*3+1];
+        if (power/100>0)
+        {
+            power_str[0]=power/100+'0';
+        }
+        power=power%100;
+        power_str[1]=power/10+'0';
+        power_str[2]=power%10+'0';
+        LL_HMI_Send_Pure(power_str,9);
+        if (countdown==1 && (gInfo.ModuleInfo.New4in1.LocStep == i || step_mode==STEP_MODE_Parallel))
+        {   //" 0min00s";
+            LL_HMI_Send_Pure("    ",1);     //ÖÐ¼ä¿Õ¸ñ
+            time=gInfo.ModuleInfo.New4in1.RemainTime/600;
+            if (time!=0)
+            {
+                remain_time_str[0]=time+'0';
+            }
+            time=gInfo.ModuleInfo.New4in1.RemainTime%600;
+            remain_time_str[1]=time/60+'0';
+            time=time%60;
+            remain_time_str[5]=time/10+'0';
+            remain_time_str[6]=time%10+'0';
+            LL_HMI_Send_Pure(remain_time_str,8);
+        }
+        else
+        {
+            LL_HMI_Send_Pure("    ",2);     //ÖÐ¼ä¿Õ¸ñ
+            time=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[i*3+2];
+            if (time/10!=0)
+            {
+                time_str[0]=time/10+'0';
+            }
+            time_str[1]=time%10+'0';
+            LL_HMI_Send_Pure(time_str,5);
+        }
+        LL_HMI_SendEnd();
+    }
+}
+
+void HMI_NEW_SaveLightStep()        //±£´æÉèÖÃµÄ¹¤²½
+{
+
+}
+void HMI_NEW_Add_Step(uint8_t st)   //Ôö¼Ó¹¤²½/¹â
+{
+    
+}
+void HMI_NEW_Dec_Step(uint8_t st)   //¼õ¹¤²½/¹â
+{
 }
 

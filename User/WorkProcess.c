@@ -100,6 +100,40 @@ void Work_Process()
                             WP_Stop(1);     //Timeout Stop
                         }
                         break;
+                    case eScene_Module_4in1:
+                    case eScene_Module_Wira:
+                    {
+                        uint8_t light_group=gInfo.ModuleInfo.New4in1.LightGroup;
+                        if(gInfo.ModuleInfo.New4in1.RemainTime>1)
+                        {
+                            gInfo.ModuleInfo.New4in1.RemainTime--;
+                        }
+                        else    //timeout
+                        {
+                            if (gInfo.ModuleInfo.New4in1.LightStep[light_group].StepMode==0)    //顺序
+                            {
+                                gInfo.ModuleInfo.New4in1.LocStep++;
+                            }
+                            else
+                            {
+                                gInfo.ModuleInfo.New4in1.LocStep+=4;    //
+                            }
+                            if (gInfo.ModuleInfo.New4in1.LocStep >= gInfo.ModuleInfo.New4in1.LightStep[light_group].StepNum)
+                            {
+                                BeepEx(3,3);
+                                WP_Stop(1);     //Timeout Stop
+                            }
+                            else
+                            {
+                                gInfo.ModuleInfo.New4in1.RemainTime=
+                                    gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[gInfo.ModuleInfo.New4in1.LocStep*3+2] MIN2S;
+                                BeepEx(2,2);
+                                WP_Start();
+                            }
+                        }
+                        HMI_New_ShowDetail(1);
+                    }
+                        break;
                     default:
                         break;
                 }
@@ -237,6 +271,7 @@ void WP_Start()
         case eScene_Module_Wira:
         case eScene_Module_4in1:
             HMI_Cut_Pic(0x71,gConfig.LANG*100 + 46, 652, 504, 652+112, 504+72);     //按钮切暂停
+            HMI_New_ShowDetail(1); //倒计时
             break;
         default:
             break;
@@ -309,31 +344,79 @@ void WP_Start()
             break;
         case eScene_Module_4in1:
         {
-            uint8_t xdata m_cmd[]={"\x39\x31\xff\x1\x5"};
-            LL_Module_Send("\x39\x31\xff\xff\x0",5);    //先关闭
-            if (gInfo.ModuleInfo.New4in1.ConfigSelLight&0x01)
+            
+            uint8_t light_group=gInfo.ModuleInfo.New4in1.LightGroup;
+            bit step_mode=gInfo.ModuleInfo.New4in1.LightStep[light_group].StepMode;
+            if (step_mode==STEP_MODE_Serial)   //顺序模式
             {
-                m_cmd[3]=1;
-                m_cmd[4]=gInfo.ModuleInfo.New4in1.PowerLevel[0];
-                LL_Module_Send(m_cmd,5);     //再打开
+                uint8_t loc_step=gInfo.ModuleInfo.New4in1.LocStep;
+                uint8_t light=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[loc_step*3];
+                uint8_t power=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[loc_step*3+1];   
+                //TODO:根据PowerMaxMin计算0-100%的能量再发送
+                uint8_t xdata m_cmd[]={"\x39\x31\xff\x1\x5"};
+                LL_Module_Send("\x39\x31\xff\xff\x0",5);    //先关闭
+                if (light&0x01)
+                {
+                    m_cmd[3]=1;
+                    m_cmd[4]=power;
+                    LL_Module_Send(m_cmd,5);     //再打开
+                }
+                else if (light&0x02)
+                {
+                    m_cmd[3]=2;
+                    m_cmd[4]=power;
+                    LL_Module_Send(m_cmd,5);     //再打开
+                }
+                else if (light&0x04)
+                {
+                    m_cmd[3]=3;
+                    m_cmd[4]=power;
+                    LL_Module_Send(m_cmd,5);     //再打开
+                }
+                else if (light&0x08)
+                {
+                    m_cmd[3]=4;
+                    m_cmd[4]=power;
+                    LL_Module_Send(m_cmd,5);     //再打开
+                }
             }
-            if (gInfo.ModuleInfo.New4in1.ConfigSelLight&0x02)
+            else    //同步模式
             {
-                m_cmd[3]=2;
-                m_cmd[4]=gInfo.ModuleInfo.New4in1.PowerLevel[0];
-                LL_Module_Send(m_cmd,5);     //再打开
-            }
-            if (gInfo.ModuleInfo.New4in1.ConfigSelLight&0x04)
-            {
-                m_cmd[3]=3;
-                m_cmd[4]=gInfo.ModuleInfo.New4in1.PowerLevel[0];
-                LL_Module_Send(m_cmd,5);     //再打开
-            }
-            if (gInfo.ModuleInfo.New4in1.ConfigSelLight&0x08)
-            {
-                m_cmd[3]=4;
-                m_cmd[4]=gInfo.ModuleInfo.New4in1.PowerLevel[0];
-                LL_Module_Send(m_cmd,5);     //再打开
+                uint8_t i;
+                uint8_t light_num=gInfo.ModuleInfo.New4in1.LightStep[light_group].StepNum;
+                uint8_t xdata m_cmd[]={"\x39\x31\xff\x1\x5"};
+                LL_Module_Send("\x39\x31\xff\xff\x0",5);    //先关闭
+                for (i = 0; i < light_num; i++)
+                {
+                    uint8_t light=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[i*3];
+                    uint8_t power=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[i*3+1];   
+                    //TODO:根据PowerMaxMin计算0-100%的能量再发送
+                    
+                    if (light&0x01)
+                    {
+                        m_cmd[3]=1;
+                        m_cmd[4]=power;
+                        LL_Module_Send(m_cmd,5);     //再打开
+                    }
+                    else if (light&0x02)
+                    {
+                        m_cmd[3]=2;
+                        m_cmd[4]=power;
+                        LL_Module_Send(m_cmd,5);     //再打开
+                    }
+                    else if (light&0x04)
+                    {
+                        m_cmd[3]=3;
+                        m_cmd[4]=power;
+                        LL_Module_Send(m_cmd,5);     //再打开
+                    }
+                    else if (light&0x08)
+                    {
+                        m_cmd[3]=4;
+                        m_cmd[4]=power;
+                        LL_Module_Send(m_cmd,5);     //再打开
+                    }
+                }
             }
             
             Delay10ms();
@@ -557,6 +640,14 @@ void WP_Stop(uint8_t stop_type)
         case eScene_Module_Wira:
         case eScene_Module_4in1:
             HMI_Cut_Pic(0x71,gConfig.LANG*100 + 45, 652, 504, 652+112, 504+72);     //按钮切暂停
+            if (stop_type==1)
+            {
+                HMI_New_ShowDetail(0);
+            }
+            else //暂停
+            {
+                ;//do nothing
+            }
             gCom.WorkStat=eWS_Standby;
             FAN_IO=DISABLE;
             break;

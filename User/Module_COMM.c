@@ -138,6 +138,32 @@ void Module_COMM()
                                 gInfo.ModuleInfo.New4in1.WorkTime[3]=10;
                                 gInfo.ModuleInfo.New4in1.WorkTime[4]=10;
                                 gInfo.ModuleInfo.New4in1.LightGroup=0xFF;
+
+                                gInfo.ModuleInfo.New4in1.LightStep[1].StepNum=2;        //顺序模式1+2 10min
+                                gInfo.ModuleInfo.New4in1.LightStep[1].Data[0]=0x01;
+                                gInfo.ModuleInfo.New4in1.LightStep[1].Data[1]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[1].Data[2]=10;
+                                gInfo.ModuleInfo.New4in1.LightStep[1].Data[3]=0x02;
+                                gInfo.ModuleInfo.New4in1.LightStep[1].Data[4]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[1].Data[5]=10;
+
+                                gInfo.ModuleInfo.New4in1.LightStep[2].StepNum=2;        //顺序模式3+4 5+10min
+                                gInfo.ModuleInfo.New4in1.LightStep[2].Data[0]=0x04;
+                                gInfo.ModuleInfo.New4in1.LightStep[2].Data[1]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[2].Data[2]=5;
+                                gInfo.ModuleInfo.New4in1.LightStep[2].Data[3]=0x08;
+                                gInfo.ModuleInfo.New4in1.LightStep[2].Data[4]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[2].Data[5]=15;
+
+                                gInfo.ModuleInfo.New4in1.LightStep[3].StepNum=1;        //顺序模式4 20min
+                                gInfo.ModuleInfo.New4in1.LightStep[3].Data[0]=0x08;
+                                gInfo.ModuleInfo.New4in1.LightStep[3].Data[1]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[3].Data[2]=20;
+
+                                gInfo.ModuleInfo.New4in1.LightStep[4].StepNum=1;        //顺序模式2 20min
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[0]=0x02;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[1]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[2]=20;
                                 break;
                             default:
                                 break;
