@@ -530,6 +530,8 @@ void HMI_Process()
             break;
         case eScene_Module_Wira:
         case eScene_Module_4in1:
+        case eScene_Module_WiraUsedtime:
+        case eScene_Module_4in1Usedtime:
             if (gCom.WorkStat == eWS_Working)
             {
                 if (gCom.HMIMsg == eMsg_keyUp)
@@ -561,6 +563,7 @@ void HMI_Process()
                 {
                     if (gCom.HMIArg1==0x08)
                     {
+                        uint8_t light_group=gInfo.ModuleInfo.New4in1.LightGroup;
                         switch (gCom.HMIArg2)       //Beep  比if效率高
                         {
                             case 0x01:      //开始/暂停
@@ -586,7 +589,7 @@ void HMI_Process()
                             case 0x15:
                             case 0x16:
                             case 0x17:
-//                            case 0x18:    //没有的时候不响
+//                            case 0x18:    //点击列表的声音另行控制
 //                            case 0x19:
 //                            case 0x1A:
 //                            case 0x1B:
@@ -615,46 +618,57 @@ void HMI_Process()
                                 }
                                 else
                                 {
-                                    //TODO: 切换工步组
+                                    HMI_New_LoadLightStep();
+                                    HMI_New_ShowEditMode();
+                                    HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x80);
+                                    HMI_New_ShowList();
                                 }
                                 break;
                             case 0x8:       //选择光
                                 if (gInfo.ModuleInfo.New4in1.ConfigSelLight&0x01)
                                 {
+                                    HMI_New_Dec_Step(0x01);
                                     HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight&0xFE);
                                 }
                                 else
                                 {
+                                    HMI_New_Add_Step(0x01);
                                     HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x01);
                                 }
                                 break;
                             case 0x9:
                                 if (gInfo.ModuleInfo.New4in1.ConfigSelLight&0x02)
                                 {
+                                    HMI_New_Dec_Step(0x02);
                                     HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight&0xFD);
                                 }
                                 else
                                 {
+                                    HMI_New_Add_Step(0x02);
                                     HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x02);
                                 }
                                 break;
                             case 0xA:
                                 if (gInfo.ModuleInfo.New4in1.ConfigSelLight&0x04)
                                 {
+                                    HMI_New_Dec_Step(0x04);
                                     HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight&0xFB);
                                 }
                                 else
                                 {
+                                    HMI_New_Add_Step(0x04);
                                     HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x04);
                                 }
                                 break;
                             case 0xB:
                                 if (gInfo.ModuleInfo.New4in1.ConfigSelLight&0x08)
                                 {
+                                    HMI_New_Dec_Step(0x08);
                                     HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight&0xF7);
                                 }
                                 else
                                 {
+                                    HMI_New_Add_Step(0x08);
                                     HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x08);
                                 }
                                 break;
@@ -668,7 +682,7 @@ void HMI_Process()
                             case 0x11:
                             case 0x12:
                             case 0x13:
-                                if (gInfo.ModuleInfo.New4in1.LightStep[gInfo.ModuleInfo.New4in1.LightGroup].StepMode==1)
+                                if (gInfo.ModuleInfo.New4in1.TempStep.StepMode==1)
                                 {
                                     HMI_New_Sel(eHMICode_WorktimeParallel);
                                 }
@@ -685,20 +699,23 @@ void HMI_Process()
                                 HMI_New_Dec();
                                 break;
                             case 0x16:      // 同步/顺序模式切换
-                                gInfo.ModuleInfo.New4in1.LightStep[gInfo.ModuleInfo.New4in1.LightGroup].StepMode=   
-                                    !gInfo.ModuleInfo.New4in1.LightStep[gInfo.ModuleInfo.New4in1.LightGroup].StepMode;
+                                gInfo.ModuleInfo.New4in1.TempStep.StepMode=!gInfo.ModuleInfo.New4in1.TempStep.StepMode;
+
                                 if(gInfo.ModuleInfo.New4in1.EditMode==0)
                                 {
-                                    HMI_Cut_Pic(0x71,gConfig.LANG*100+45+gInfo.ModuleInfo.New4in1.LightStep[gInfo.ModuleInfo.New4in1.LightGroup].StepMode
+                                    HMI_Cut_Pic(0x71,gConfig.LANG*100+45+gInfo.ModuleInfo.New4in1.TempStep.StepMode
                                         , 655, 366, 655+94, 366+111);      //切换顺序/同步按钮状态
                                 }
                                 else
                                 {
-                                    HMI_Cut_Pic(0x71,gConfig.LANG*100+47+gInfo.ModuleInfo.New4in1.LightStep[gInfo.ModuleInfo.New4in1.LightGroup].StepMode
+                                    HMI_Cut_Pic(0x71,gConfig.LANG*100+47+gInfo.ModuleInfo.New4in1.TempStep.StepMode
                                         , 660, 420, 660+94, 420+103);      //切换顺序/同步按钮状态
                                 }
-                                gInfo.ModuleInfo.New4in1.LightStep[gInfo.ModuleInfo.New4in1.LightGroup].StepNum=0;
-                                memset(gInfo.ModuleInfo.New4in1.LightStep[gInfo.ModuleInfo.New4in1.LightGroup].Data,0,12);
+                                gInfo.ModuleInfo.New4in1.TempStep.StepNum=0;
+                                memset(gInfo.ModuleInfo.New4in1.TempStep.Data,0,12);
+                                HMI_New_ShowList();
+                                gInfo.ModuleInfo.New4in1.ConfigSelLight=0;
+                                HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x80);
                                 switch (gInfo.ModuleInfo.New4in1.ConfigSel)
                                 {
                                     case eHMICode_PowerLevel1:
@@ -712,14 +729,16 @@ void HMI_Process()
                                 }
                                 break;
                             case 0x01:      //开始/暂停
-                            {
-                                uint8_t light_group=gInfo.ModuleInfo.New4in1.LightGroup;
+                                if (light_group==0) //专家模式运行前保存
+                                {
+                                    HMI_New_SaveLightStep();
+                                }
+                                else
+                                {
+                                    ;//do nothing
+                                }
                                 if (gInfo.ModuleInfo.New4in1.LightStep[light_group].StepNum>0)
                                 {
-                                    if (light_group==0) //专家模式
-                                    {
-                                        HMI_NEW_SaveLightStep();
-                                    }
                                     if(Pause_Flag==0)
                                     {
                                         gInfo.ModuleInfo.New4in1.LocStep=0;     //从工步0开始
@@ -738,7 +757,6 @@ void HMI_Process()
                                 {
                                     BeepEx(3,1);
                                 }
-                            }
                                 break;
                             case 0x02:      //停止
                                 Pause_Flag=0;
@@ -746,34 +764,65 @@ void HMI_Process()
                                 break;
                             case 0x03:      //智能专家模式切换
                                 Pause_Flag=0;   //清暂停状态
-                                if (gInfo.ModuleInfo.New4in1.LightGroup>0)
+                                gInfo.ModuleInfo.New4in1.ConfigSelLight=0;//请选择光
+                                if (light_group>0)
                                 {
-                                    gInfo.ModuleInfo.New4in1.LastSelGroup=gInfo.ModuleInfo.New4in1.LightGroup;
-                                        gInfo.ModuleInfo.New4in1.LightGroup=0;
+                                    gInfo.ModuleInfo.New4in1.LastSelGroup=light_group;
+                                    gInfo.ModuleInfo.New4in1.LightGroup=0;
+                                    
+                                    HMI_New_LoadLightStep();
                                 }
                                 else
                                 {
-                                    gInfo.ModuleInfo.New4in1.LightGroup=gInfo.ModuleInfo.New4in1.LastSelGroup;
+                                    memset(&gInfo.ModuleInfo.New4in1.TempStep,0,13);//清临时工步数据
+                                    if(gInfo.ModuleInfo.New4in1.LastSelGroup!=0)
+                                    {
+                                        gInfo.ModuleInfo.New4in1.LightGroup=gInfo.ModuleInfo.New4in1.LastSelGroup;
+                                    }
+                                    else
+                                    {
+                                        gInfo.ModuleInfo.New4in1.LightGroup=0xFF;
+                                    }
                                 }
                                 HMI_Scene_Recovery();
+                                break;
+                            case 0x17:      //列表复位
+                                gInfo.ModuleInfo.New4in1.ConfigSelLight=0;
+                                HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x80);
+                                memset(&gInfo.ModuleInfo.New4in1.TempStep,0,13);
+                                HMI_New_ShowList();
+                                break;
+                            case 0x18:      //列表框 点击了就是删工步
+                            case 0x19:
+                            case 0x1A:
+                            case 0x1B:
+                                if (gInfo.ModuleInfo.New4in1.TempStep.StepNum>(gCom.HMIArg2-0x18))    //0-3
+                                {
+                                    uint8_t sel=gInfo.ModuleInfo.New4in1.TempStep.Data[(gCom.HMIArg2-0x18)*3];
+                                    Beep(1);
+                                    HMI_New_Dec_Step(sel);
+                                    //LOG_E("%02X",(uint16_t)gInfo.ModuleInfo.New4in1.ConfigSelLight);
+                                    //LOG_E(" %02X",(uint16_t)~sel);
+                                    gInfo.ModuleInfo.New4in1.ConfigSelLight&=~sel;
+                                    //LOG_E(" %02X",(uint16_t)gInfo.ModuleInfo.New4in1.ConfigSelLight);
+                                    HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x80);
+                                }
+                                break;
+                            case 0x1C:      //保存配置
+                                HMI_New_SaveLightStep();
                                 break;
                             case 0x1D:      //设置按钮
                                 Pause_Flag=0;   //清暂停状态
                                 HMI_Goto_LocPage(49);
                                 break;
                             case 0x1E:      //智能模式编辑
-                            {
-                                uint8_t i=0;
                                 Pause_Flag=0;   //清暂停状态
                                 gInfo.ModuleInfo.New4in1.EditMode=1;
                                 HMI_Goto_LocPage(47);
+                                HMI_New_LoadLightStep();
+                                HMI_New_ShowEditMode();
                                 HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x80);
-                                for (i = 0xc; i <= 0x13; i++)
-                                {
-                                    gInfo.ModuleInfo.New4in1.ConfigSel=i;
-                                    HMI_New_ShowStr(0);
-                                }
-                            }
+                                HMI_New_ShowList();
                                 break;
                             case 0x1F:      //工程模式(密码)
                                 gCom.HMI_LastScene=gCom.HMI_Scene;
@@ -788,14 +837,22 @@ void HMI_Process()
                                 {
                                     case eScene_Module_WiraUsedtime:
                                     case eScene_Module_4in1Usedtime:
-                                    case eScene_Module_WiraSetup:
-                                    case eScene_Module_4in1Setup:
                                         HMI_Goto_LocPage(49);
                                         break;
                                     case eScene_Module_Wira:
                                     case eScene_Module_4in1:
                                         gCom.HMI_LastScene=gCom.HMI_Scene;
-                                        gInfo.ModuleInfo.New4in1.EditMode=0;
+                                        if (gInfo.ModuleInfo.New4in1.EditMode==1)
+                                        {
+                                            gInfo.ModuleInfo.New4in1.LightGroup=gInfo.ModuleInfo.New4in1.LastSelGroup;
+                                            gInfo.ModuleInfo.New4in1.EditMode=0;
+                                            HMI_Goto_LocPage(49);
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            ;//do nothing
+                                        }
                                     default:
                                         HMI_Scene_Recovery();
                                         break;
@@ -1340,6 +1397,7 @@ void HMI_Scene_Recovery()
                 case 0:
                     HMI_Goto_LocPage(45);       //进专家模式
                     HMI_Cut_PicEx(0x71,61,0,11+i,399,96+i,0,0);     //左上角名称
+                    HMI_New_LoadLightStep();
                     HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x80);
                     for (i = 0xc; i <= 0x13; i++)
                     {
@@ -1349,6 +1407,7 @@ void HMI_Scene_Recovery()
                     HMI_Cut_Pic(0x71,gConfig.LANG*100+45+gInfo.ModuleInfo.New4in1.LightStep[0].StepMode
                                     , 655, 366, 655+94, 366+111);      //切换顺序/同步按钮状态
                     gInfo.ModuleInfo.New4in1.ConfigSel=0;
+                    HMI_New_ShowList();
                     break;
                 case 1:
                 case 2:

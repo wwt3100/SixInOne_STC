@@ -1761,7 +1761,7 @@ void HMI_New_ShowDetail(uint8_t countdown)       //显示选择后的详细信息 countdow
     uint8_t light_group,step_num,light,power;
     uint16_t time;
     uint16_t x;
-    uint8_t i,j;
+    uint8_t i;
     uint8_t xdata power_str[]=" 00mW/cm\xB2";
     uint8_t xdata time_str[]=" 0min";
     uint8_t xdata remain_time_str[]=" 0min00s";
@@ -1906,15 +1906,473 @@ void HMI_New_ShowDetail(uint8_t countdown)       //显示选择后的详细信息 countdow
     }
 }
 
-void HMI_NEW_SaveLightStep()        //保存设置的工步
+void HMI_New_ShowEditMode() //刷新智能编辑模式
 {
+    uint8_t i=0;
+    uint8_t light_group=gInfo.ModuleInfo.New4in1.LightGroup;
+    uint16_t y;
+    gInfo.ModuleInfo.New4in1.LastSelGroup=light_group;
+    switch (light_group)    //根据不同选择,显示不同tab
+    {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            y=118+(light_group)*97;
+            if (light_group==3)     //修正图片偏差
+            {
+                y+=2;
+            }
+            else if(light_group==4)
+            {
+                y++;
+            }
+            LL_HMI_Send("\x71\x3D",2);      //剪切指令 页面0x3D 61
+            LL_HMI_SendXY(0,y);
+            LL_HMI_SendXY(800,y+75);
+            LL_HMI_SendXY(0,92);  //tab元素显示位置
+            LL_HMI_SendEnd();
+            break;
+        default:
+            light_group=1;  //强制选择光1
+            //没有break
+    }
+    HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x80);
+    for (i = 0xc; i <= 0x13; i++)
+    {
+        gInfo.ModuleInfo.New4in1.ConfigSel=i;
+        HMI_New_ShowStr(0);
+    }
+}
 
-}
-void HMI_NEW_Add_Step(uint8_t st)   //增加工步/光
+void HMI_New_LoadLightStep() //加载工步信息
 {
+    uint8_t i=0;
+    uint8_t light_group=gInfo.ModuleInfo.New4in1.LightGroup;
+    uint8_t max_time=(gCom.ModuleType==M_Type_Wira)?30:10;
+    uint8_t step_num=gInfo.ModuleInfo.New4in1.LightStep[light_group].StepNum;
+    uint8_t step_mode=gInfo.ModuleInfo.New4in1.LightStep[light_group].StepMode;
+    gInfo.ModuleInfo.New4in1.ConfigSelLight=0;
+    if(light_group==0 || gInfo.ModuleInfo.New4in1.EditMode==1)
+    {
+        memcpy(&gInfo.ModuleInfo.New4in1.TempStep,&gInfo.ModuleInfo.New4in1.LightStep[light_group],13);
+        for(i=0;i<4;i++)        //设置默认的光能量
+        {
+            gInfo.ModuleInfo.New4in1.PowerLevel[i]=gInfo.ModuleInfo.New4in1.PowerMax[i];
+        }
+        for (i = 0; i <=5; i++) //设置默认的时间
+        {
+            gInfo.ModuleInfo.New4in1.WorkTime[i]=max_time;
+        }
+        if (step_mode==STEP_MODE_Serial)
+        {
+            for (i = 0; i < step_num; i++)
+            {
+                gInfo.ModuleInfo.New4in1.ConfigSelLight |= gInfo.ModuleInfo.New4in1.TempStep.Data[i*3];
+                switch (gInfo.ModuleInfo.New4in1.TempStep.Data[i*3])
+                {
+                    case 0x01:
+                        gInfo.ModuleInfo.New4in1.PowerLevel[0]=gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1];
+                        gInfo.ModuleInfo.New4in1.WorkTime[1]=gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2];
+                        break;
+                    case 0x02:
+                        gInfo.ModuleInfo.New4in1.PowerLevel[1]=gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1];
+                        gInfo.ModuleInfo.New4in1.WorkTime[2]=gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2];
+                        break;
+                    case 0x04:
+                        gInfo.ModuleInfo.New4in1.PowerLevel[2]=gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1];
+                        gInfo.ModuleInfo.New4in1.WorkTime[3]=gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2];
+                        break;
+                    case 0x08:
+                        gInfo.ModuleInfo.New4in1.PowerLevel[3]=gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1];
+                        gInfo.ModuleInfo.New4in1.WorkTime[4]=gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2];
+                        break;
+                }
+            }
+        }
+        else
+        {
+            gInfo.ModuleInfo.New4in1.WorkTime[0]=gInfo.ModuleInfo.New4in1.TempStep.Data[2];
+            for (i = 0; i < step_num; i++)
+            {
+                gInfo.ModuleInfo.New4in1.ConfigSelLight |= gInfo.ModuleInfo.New4in1.TempStep.Data[i*3];
+                
+                switch (gInfo.ModuleInfo.New4in1.TempStep.Data[i*3])
+                {
+                    case 0x01:
+                        gInfo.ModuleInfo.New4in1.PowerLevel[0]=gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1];
+                        break;
+                    case 0x02:
+                        gInfo.ModuleInfo.New4in1.PowerLevel[1]=gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1];
+                        break;
+                    case 0x04:
+                        gInfo.ModuleInfo.New4in1.PowerLevel[2]=gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1];
+                        break;
+                    case 0x08:
+                        gInfo.ModuleInfo.New4in1.PowerLevel[3]=gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1];
+                        break;
+                }
+            }
+        }
+        
+    }
+}
+
+void HMI_New_SaveLightStep()        //保存设置的工步
+{
+    uint8_t light_group=gInfo.ModuleInfo.New4in1.LightGroup;
+    //TODO:能量时间更新
     
+    memcpy(&gInfo.ModuleInfo.New4in1.LightStep[light_group],&gInfo.ModuleInfo.New4in1.TempStep,13);
 }
-void HMI_NEW_Dec_Step(uint8_t st)   //减工步/光
+
+void HMI_New_ShowList() //刷新列表
 {
+    uint8_t step_num=gInfo.ModuleInfo.New4in1.TempStep.StepNum;
+    uint8_t i;
+    if (gInfo.ModuleInfo.New4in1.EditMode==0)
+    {
+        HMI_Cut_Pic(0x71,45, 48, 378, 48+493, 378+72); //恢复背景
+        if (gCom.HMI_Scene==eScene_Module_4in1)
+        {
+            for (i = 0; i < step_num; i++)
+            {
+                switch (gInfo.ModuleInfo.New4in1.TempStep.Data[i*3])
+                {
+                    case 0x01:
+                        LL_HMI_Send("\x71\x2E",2);      //剪切指令 页面0x3D 46
+                        LL_HMI_SendXY(52,382);
+                        LL_HMI_SendXY(52+113,382+62);
+                        LL_HMI_SendXY(52+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(65+i*119, 399);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEW4IN1_L1WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    case 0x02:
+                        LL_HMI_Send("\x71\x2E",2);      //剪切指令 页面0x3D 46
+                        LL_HMI_SendXY(171,382);
+                        LL_HMI_SendXY(171+113,382+62);
+                        LL_HMI_SendXY(52+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(65+i*119, 399);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEW4IN1_L2WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    case 0x04:
+                        LL_HMI_Send("\x71\x2E",2);      //剪切指令 页面0x3D 46
+                        LL_HMI_SendXY(290,382);
+                        LL_HMI_SendXY(290+113,382+62);
+                        LL_HMI_SendXY(52+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(65+i*119, 399);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEW4IN1_L3WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    case 0x08:
+                        LL_HMI_Send("\x71\x2E",2);      //剪切指令 页面0x3D 46
+                        LL_HMI_SendXY(409,382);
+                        LL_HMI_SendXY(409+113,382+62);
+                        LL_HMI_SendXY(52+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(65+i*119, 399);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEW4IN1_L4WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        else
+        {
+            for (i = 0; i < step_num; i++)
+            {
+                switch (gInfo.ModuleInfo.New4in1.TempStep.Data[i*3])
+                {
+                    case 0x01:
+                        LL_HMI_Send("\x71\x2E",2);      //剪切指令 页面0x3D 46
+                        LL_HMI_SendXY(52,382);
+                        LL_HMI_SendXY(52+113,382+62);
+                        LL_HMI_SendXY(52+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(65+i*119, 399);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEWWIRA_L1WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    case 0x02:
+                        LL_HMI_Send("\x71\x2E",2);      //剪切指令 页面0x3D 46
+                        LL_HMI_SendXY(171,382);
+                        LL_HMI_SendXY(171+113,382+62);
+                        LL_HMI_SendXY(52+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(65+i*119, 399);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEWWIRA_L2WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    case 0x04:
+                        LL_HMI_Send("\x71\x2E",2);      //剪切指令 页面0x3D 46
+                        LL_HMI_SendXY(290,382);
+                        LL_HMI_SendXY(290+113,382+62);
+                        LL_HMI_SendXY(52+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(65+i*119, 399);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEWWIRA_L3WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    case 0x08:
+                        LL_HMI_Send("\x71\x2E",2);      //剪切指令 页面0x3D 46
+                        LL_HMI_SendXY(409,382);
+                        LL_HMI_SendXY(409+113,382+62);
+                        LL_HMI_SendXY(52+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(65+i*119, 399);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEWWIRA_L4WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        
+    }
+    else
+    {
+        HMI_Cut_Pic(0x71,47, 57, 434, 57+477, 434+69); //恢复背景
+        if (gCom.HMI_Scene==eScene_Module_4in1)
+        {
+            for (i = 0; i < step_num; i++)
+            {
+                switch (gInfo.ModuleInfo.New4in1.TempStep.Data[i*3])
+                {
+                    case 0x01:
+                        LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
+                        LL_HMI_SendXY(61,438);
+                        LL_HMI_SendXY(61+113,438+62);
+                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(70+i*119, 449);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEW4IN1_L1WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    case 0x02:
+                        LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
+                        LL_HMI_SendXY(180,438);
+                        LL_HMI_SendXY(180+113,438+62);
+                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(70+i*119, 449);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEW4IN1_L2WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    case 0x04:
+                        LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
+                        LL_HMI_SendXY(299,438);
+                        LL_HMI_SendXY(299+113,438+62);
+                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(70+i*119, 449);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEW4IN1_L3WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    case 0x08:
+                        LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
+                        LL_HMI_SendXY(418,438);
+                        LL_HMI_SendXY(418+113,438+62);
+                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(70+i*119, 449);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEW4IN1_L4WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        else
+        {
+            for (i = 0; i < step_num; i++)
+            {
+                switch (gInfo.ModuleInfo.New4in1.TempStep.Data[i*3])
+                {
+                    case 0x01:
+                        LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
+                        LL_HMI_SendXY(61,438);
+                        LL_HMI_SendXY(61+113,438+62);
+                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(70+i*119, 449);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEWWIRA_L1WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    case 0x02:
+                        LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
+                        LL_HMI_SendXY(180,438);
+                        LL_HMI_SendXY(180+113,438+62);
+                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(70+i*119, 449);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEWWIRA_L2WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    case 0x04:
+                        LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
+                        LL_HMI_SendXY(299,438);
+                        LL_HMI_SendXY(299+113,438+62);
+                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(70+i*119, 449);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEWWIRA_L3WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    case 0x08:
+                        LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
+                        LL_HMI_SendXY(418,438);
+                        LL_HMI_SendXY(418+113,438+62);
+                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendEnd();
+                        LL_HMI_Send("\x98",1);
+                        LL_HMI_SendXY(70+i*119, 449);
+                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure(STR_NEWWIRA_L4WL);
+                        LL_HMI_SendEnd();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+}
+
+void HMI_New_Add_Step(uint8_t l)   //增加工步/光             0-3
+{
+    uint8_t step_num=gInfo.ModuleInfo.New4in1.TempStep.StepNum;
+    bit step_mode=gInfo.ModuleInfo.New4in1.TempStep.StepMode;
+    if (step_num <= 4)
+    {
+        switch (l)
+        {
+            case 0x01:
+                gInfo.ModuleInfo.New4in1.TempStep.StepNum++;
+                gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3]=0x01;
+                gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3+1]=gInfo.ModuleInfo.New4in1.PowerLevel[0];
+                if (step_mode==STEP_MODE_Serial)
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3+2]=gInfo.ModuleInfo.New4in1.WorkTime[1];
+                }
+                else
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3+2]=gInfo.ModuleInfo.New4in1.WorkTime[0];
+                }
+                break;
+            case 0x02:
+                gInfo.ModuleInfo.New4in1.TempStep.StepNum++;
+                gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3]=0x02;
+                gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3+1]=gInfo.ModuleInfo.New4in1.PowerLevel[1];
+                if (step_mode==STEP_MODE_Serial)
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3+2]=gInfo.ModuleInfo.New4in1.WorkTime[2];
+                }
+                else
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3+2]=gInfo.ModuleInfo.New4in1.WorkTime[0];
+                }
+                break;
+            case 0x04:
+                gInfo.ModuleInfo.New4in1.TempStep.StepNum++;
+                gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3]=0x04;
+                gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3+1]=gInfo.ModuleInfo.New4in1.PowerLevel[2];
+                if (step_mode==STEP_MODE_Serial)
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3+2]=gInfo.ModuleInfo.New4in1.WorkTime[3];
+                }
+                else
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3+2]=gInfo.ModuleInfo.New4in1.WorkTime[0];
+                }
+                break;
+            case 0x08:
+                gInfo.ModuleInfo.New4in1.TempStep.StepNum++;
+                gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3]=0x08;
+                gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3+1]=gInfo.ModuleInfo.New4in1.PowerLevel[3];
+                if (step_mode==STEP_MODE_Serial)
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3+2]=gInfo.ModuleInfo.New4in1.WorkTime[4];
+                }
+                else
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[step_num*3+2]=gInfo.ModuleInfo.New4in1.WorkTime[0];
+                }
+                break;
+             default:
+                break;
+        }
+        HMI_New_ShowList();
+    }
+    else
+    {
+        ;//do nothing
+    }
+}
+
+void HMI_New_Dec_Step(uint8_t l)   //减工步/光           0-3
+{
+    uint8_t step_num=gInfo.ModuleInfo.New4in1.TempStep.StepNum;
+    bit step_mode=gInfo.ModuleInfo.New4in1.TempStep.StepMode;
+    uint8_t i=0;
+    if (step_num<=4)
+    {
+        for (i = 0; i < step_num; i++)
+        {
+            if(gInfo.ModuleInfo.New4in1.TempStep.Data[i*3]==l)
+            {
+                gInfo.ModuleInfo.New4in1.TempStep.StepNum--;
+                gInfo.ModuleInfo.New4in1.TempStep.Data[i*3]=0;
+                gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1]=0;
+                gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2]=0;
+                memcpy(&gInfo.ModuleInfo.New4in1.TempStep.Data[i*3],&gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+3],(step_num-i-1)*3);
+                break;
+            }
+        }
+        HMI_New_ShowList();
+    }
+    else
+    {
+        ;//do nothing
+    }
+    
 }
 

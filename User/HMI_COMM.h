@@ -85,9 +85,12 @@ void HMI_New_ShowStr(uint8_t sel);
 void HMI_New_Show_LightName(uint8_t sellight);
 void HMI_New_ShowLite();
 void HMI_New_ShowDetail(uint8_t countdown);
-
-
-void HMI_NEW_SaveLightStep();
+void HMI_New_ShowEditMode();
+void HMI_New_LoadLightStep(); //加载工步信息
+void HMI_New_SaveLightStep();
+void HMI_New_Add_Step(uint8_t st);
+void HMI_New_Dec_Step(uint8_t st);   //减工步/光           0-3
+void HMI_New_ShowList();
 
 
 
