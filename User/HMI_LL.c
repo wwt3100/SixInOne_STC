@@ -88,24 +88,25 @@ void HMI_Goto_LocPage(uint8_t pic)
 }
 void HMI_Cut_Pic(uint8_t cmd,uint8_t PicID,uint16_t xs,uint16_t ys,uint16_t xe,uint16_t ye)
 {
-    uint8_t xdata buf[16]={0};
-    uint8_t i=0;
-    buf[i++]=cmd;
-    buf[i++]=PicID;
-    buf[i++]=xs>>8;
-    buf[i++]=xs&0x00ff;
-    buf[i++]=ys>>8;
-    buf[i++]=ys&0x00ff;
-    buf[i++]=xe>>8;
-    buf[i++]=xe&0x00ff;
-    buf[i++]=ye>>8;
-    buf[i++]=ye&0x00ff;
-    buf[i++]=xs>>8;
-    buf[i++]=xs&0x00ff;
-    buf[i++]=ys>>8;
-    buf[i++]=ys&0x00ff;
-    LL_HMI_Send(buf,i);
-    LL_HMI_SendEnd();
+//    uint8_t xdata buf[16]={0};
+//    uint8_t i=0;
+//    buf[i++]=cmd;
+//    buf[i++]=PicID;
+//    buf[i++]=xs>>8;
+//    buf[i++]=xs&0x00ff;
+//    buf[i++]=ys>>8;
+//    buf[i++]=ys&0x00ff;
+//    buf[i++]=xe>>8;
+//    buf[i++]=xe&0x00ff;
+//    buf[i++]=ye>>8;
+//    buf[i++]=ye&0x00ff;
+//    buf[i++]=xs>>8;
+//    buf[i++]=xs&0x00ff;
+//    buf[i++]=ys>>8;
+//    buf[i++]=ys&0x00ff;
+//    LL_HMI_Send(buf,i);
+//    LL_HMI_SendEnd();
+    HMI_Cut_PicEx(cmd,PicID,xs,ys,xe,ye,xs,ys);
 }
 
 void HMI_Cut_PicEx(uint8_t cmd,uint8_t PicID,uint16_t xs,uint16_t ys,uint16_t xe,uint16_t ye,uint16_t x,uint16_t y)

@@ -761,7 +761,9 @@ void HMI_308Set_Duty()
     LL_HMI_Send_Pure(duty_str,2);
     LL_HMI_SendEnd();
 }
-
+void HMI_New_Show_LightNameBase(const void* str,uint8_t str_len)
+{
+}
 void HMI_New_Show_LightName(uint8_t sellight)
 {
     uint8_t edit_mode;
@@ -1537,7 +1539,6 @@ void HMI_New_Dec()
                 gInfo.ModuleInfo.New4in1.WorkTime[0]--;
             }
             break;
-            break; 
         default:
             return;
     }
@@ -1757,7 +1758,7 @@ void HMI_New_ShowLite()         //显示智能编辑模式选项下面的模式
 }
 void HMI_New_ShowDetail(uint8_t countdown)       //显示选择后的详细信息 countdown==1 倒计时模式
 {
-    bit step_mode;
+    uint8_t step_mode;
     uint8_t light_group,step_num,light,power;
     uint16_t time;
     uint16_t x;
@@ -1779,14 +1780,14 @@ void HMI_New_ShowDetail(uint8_t countdown)       //显示选择后的详细信息 countdow
         case 3:
         case 4:
             LL_HMI_Send("\x71\x3D",2);      //剪切指令
-            x=450+90*step_mode+140*gConfig.LANG; //计算剪切元素
+            x=450+70*step_mode+140*gConfig.LANG; //计算剪切元素
             LL_HMI_SendXY(x,0);
             LL_HMI_SendXY(x+47,47);
             LL_HMI_SendXY(94+(light_group-1)*188,275);  //同步顺序模式元素显示位置
             LL_HMI_SendEnd();
             break;
         case 0:
-        default:    // 专家模式或未选择模式直接返回
+        default:    // 专家模式或未选择模式 直接返回
             return;
     }
     HMI_Cut_Pic(0x71,41, 0, 370, 800, 480); //恢复背景
@@ -1911,7 +1912,6 @@ void HMI_New_ShowEditMode() //刷新智能编辑模式
     uint8_t i=0;
     uint8_t light_group=gInfo.ModuleInfo.New4in1.LightGroup;
     uint16_t y;
-    gInfo.ModuleInfo.New4in1.LastSelGroup=light_group;
     switch (light_group)    //根据不同选择,显示不同tab
     {
         case 1:
@@ -2047,7 +2047,7 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(65+i*119, 399);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEW4IN1_L1WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2059,7 +2059,7 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(65+i*119, 399);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEW4IN1_L2WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2071,7 +2071,7 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(65+i*119, 399);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEW4IN1_L3WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2083,7 +2083,7 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(65+i*119, 399);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEW4IN1_L4WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2106,7 +2106,7 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(65+i*119, 399);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEWWIRA_L1WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2118,7 +2118,7 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(65+i*119, 399);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEWWIRA_L2WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2130,7 +2130,7 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(65+i*119, 399);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEWWIRA_L3WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2142,7 +2142,7 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(65+i*119, 399);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEWWIRA_L4WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2153,7 +2153,7 @@ void HMI_New_ShowList() //刷新列表
         }
         
     }
-    else
+    else    //if EditMode==1
     {
         HMI_Cut_Pic(0x71,47, 57, 434, 57+477, 434+69); //恢复背景
         if (gCom.HMI_Scene==eScene_Module_4in1)
@@ -2166,11 +2166,11 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
                         LL_HMI_SendXY(61,438);
                         LL_HMI_SendXY(61+113,438+62);
-                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendXY(61+i*119,438);  //元素显示位置
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(70+i*119, 449);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEW4IN1_L1WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2178,11 +2178,11 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
                         LL_HMI_SendXY(180,438);
                         LL_HMI_SendXY(180+113,438+62);
-                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendXY(61+i*119,438);  //元素显示位置
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(70+i*119, 449);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEW4IN1_L2WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2190,11 +2190,11 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
                         LL_HMI_SendXY(299,438);
                         LL_HMI_SendXY(299+113,438+62);
-                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendXY(61+i*119,438);  //元素显示位置
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(70+i*119, 449);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEW4IN1_L3WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2202,11 +2202,11 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
                         LL_HMI_SendXY(418,438);
                         LL_HMI_SendXY(418+113,438+62);
-                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendXY(61+i*119,438);  //元素显示位置
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(70+i*119, 449);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEW4IN1_L4WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2225,11 +2225,11 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
                         LL_HMI_SendXY(61,438);
                         LL_HMI_SendXY(61+113,438+62);
-                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendXY(61+i*119,438);  //元素显示位置
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(70+i*119, 449);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEWWIRA_L1WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2237,11 +2237,11 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
                         LL_HMI_SendXY(180,438);
                         LL_HMI_SendXY(180+113,438+62);
-                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendXY(61+i*119,438);  //元素显示位置
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(70+i*119, 449);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEWWIRA_L2WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2249,11 +2249,11 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
                         LL_HMI_SendXY(299,438);
                         LL_HMI_SendXY(299+113,438+62);
-                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendXY(61+i*119,438);  //元素显示位置
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(70+i*119, 449);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEWWIRA_L3WL);
                         LL_HMI_SendEnd();
                         break;
@@ -2261,11 +2261,11 @@ void HMI_New_ShowList() //刷新列表
                         LL_HMI_Send("\x71\x30",2);      //剪切指令 页面0x3D 48
                         LL_HMI_SendXY(418,438);
                         LL_HMI_SendXY(418+113,438+62);
-                        LL_HMI_SendXY(61+i*119,382);  //元素显示位置
+                        LL_HMI_SendXY(61+i*119,438);  //元素显示位置
                         LL_HMI_SendEnd();
                         LL_HMI_Send("\x98",1);
                         LL_HMI_SendXY(70+i*119, 449);
-                        LL_HMI_Send_Pure("\x6\x80\x05\xFF\xFF\x00\x1F",7); 
+                        LL_HMI_Send_Pure("\x4\x80\x04\xFF\xFF\x00\x1F",7); 
                         LL_HMI_Send_Pure(STR_NEWWIRA_L4WL);
                         LL_HMI_SendEnd();
                         break;

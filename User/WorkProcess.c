@@ -107,31 +107,34 @@ void Work_Process()
                         if(gInfo.ModuleInfo.New4in1.RemainTime>1)
                         {
                             gInfo.ModuleInfo.New4in1.RemainTime--;
+                            HMI_New_ShowDetail(1);
                         }
                         else    //timeout
                         {
-                            if (gInfo.ModuleInfo.New4in1.LightStep[light_group].StepMode==0)    //顺序
+                            if (gInfo.ModuleInfo.New4in1.LightStep[light_group].StepMode==STEP_MODE_Serial)    //顺序
                             {
                                 gInfo.ModuleInfo.New4in1.LocStep++;
+                                if (gInfo.ModuleInfo.New4in1.LocStep >= gInfo.ModuleInfo.New4in1.LightStep[light_group].StepNum)
+                                {
+                                    BeepEx(3,3);
+                                    WP_Stop(1);     //Timeout Stop
+                                }
+                                else
+                                {
+                                    gInfo.ModuleInfo.New4in1.RemainTime=
+                                        gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[gInfo.ModuleInfo.New4in1.LocStep*3+2] MIN2S;
+                                    BeepEx(2,2);
+                                    WP_Start();
+                                }
                             }
-                            else
-                            {
-                                gInfo.ModuleInfo.New4in1.LocStep+=4;    //
-                            }
-                            if (gInfo.ModuleInfo.New4in1.LocStep >= gInfo.ModuleInfo.New4in1.LightStep[light_group].StepNum)
+                            else    //同步模式只有一步
                             {
                                 BeepEx(3,3);
                                 WP_Stop(1);     //Timeout Stop
                             }
-                            else
-                            {
-                                gInfo.ModuleInfo.New4in1.RemainTime=
-                                    gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[gInfo.ModuleInfo.New4in1.LocStep*3+2] MIN2S;
-                                BeepEx(2,2);
-                                WP_Start();
-                            }
+                            
                         }
-                        HMI_New_ShowDetail(1);
+                        
                     }
                         break;
                     default:

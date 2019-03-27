@@ -77,13 +77,11 @@ void DS18B20_StartCovert()
 }
 uint8_t DS18B20_GetTemp(int16_t *temp)
 {
-    uint8_t tt;
     uint8_t xdata t_data[9]={0};
-    uint8_t i;
-    uint8_t TL,TH;
     *temp=0;
     if (DS18B20_Reset())
     {
+        uint8_t i;
         DS18B20_Write_Byte(0xcc);	// skip rom
         DS18B20_Write_Byte(0xbe);	// read temp	    
     	for(i=0;i<9;i++)
@@ -95,21 +93,19 @@ uint8_t DS18B20_GetTemp(int16_t *temp)
         DS18B20_Write_Byte(0x44);	// convert
         if(calculate_CRC8(t_data,9)==0)
         {
-            TL=t_data[0];
-            TH=t_data[1];
-            if(TH>7)
+            if(t_data[1]>7)
             {
-                TH=~TH;
-                TL=~TL; 
-                tt=0;					//温度为负  
+                t_data[1]=~t_data[1];
+                t_data[0]=~t_data[0]; 
+                i=0;					//温度为负  
             }
             else 
-            {   tt=1;    }			//温度为正	  	  
-            *temp=TH; 					//获得高八位
+            {   i=1;    }			//温度为正	  	  
+            *temp=t_data[1]; 					//获得高八位
             *temp<<=8;    
-            *temp+=TL;					//获得低八位
+            *temp+=t_data[0];					//获得低八位
             *temp=((float)(*temp))*0.625;		//转换     
-            if(tt == 0)
+            if(i == 0)
             {
                  *temp=-(*temp); 		//负温度值
             }

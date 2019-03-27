@@ -699,6 +699,8 @@ void HMI_Process()
                                 HMI_New_Dec();
                                 break;
                             case 0x16:      // 同步/顺序模式切换
+                            {
+                                uint8_t i=0;
                                 gInfo.ModuleInfo.New4in1.TempStep.StepMode=!gInfo.ModuleInfo.New4in1.TempStep.StepMode;
 
                                 if(gInfo.ModuleInfo.New4in1.EditMode==0)
@@ -716,6 +718,19 @@ void HMI_Process()
                                 HMI_New_ShowList();
                                 gInfo.ModuleInfo.New4in1.ConfigSelLight=0;
                                 HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x80);
+                                if (gInfo.ModuleInfo.New4in1.TempStep.StepMode==STEP_MODE_Serial)
+                                {
+                                    for (i = 0x10; i <= 0x13; i++)
+                                    {
+                                        gInfo.ModuleInfo.New4in1.ConfigSel=i;
+                                        HMI_New_ShowStr(0);
+                                    }
+                                }
+                                else
+                                {
+                                    gInfo.ModuleInfo.New4in1.ConfigSel=eHMICode_WorktimeParallel;
+                                    HMI_New_ShowStr(0);
+                                }
                                 switch (gInfo.ModuleInfo.New4in1.ConfigSel)
                                 {
                                     case eHMICode_PowerLevel1:
@@ -727,6 +742,7 @@ void HMI_Process()
                                         HMI_New_Sel(0);     //切换模式的时候重新选择
                                         break;
                                 }
+                            }
                                 break;
                             case 0x01:      //开始/暂停
                                 if (light_group==0) //专家模式运行前保存
@@ -789,7 +805,8 @@ void HMI_Process()
                             case 0x17:      //列表复位
                                 gInfo.ModuleInfo.New4in1.ConfigSelLight=0;
                                 HMI_New_Show_LightName(gInfo.ModuleInfo.New4in1.ConfigSelLight|0x80);
-                                memset(&gInfo.ModuleInfo.New4in1.TempStep,0,13);
+                                gInfo.ModuleInfo.New4in1.TempStep.StepNum=0;    //不复位模式
+                                memset(&gInfo.ModuleInfo.New4in1.TempStep.Data,0,12);
                                 HMI_New_ShowList();
                                 break;
                             case 0x18:      //列表框 点击了就是删工步
@@ -818,6 +835,8 @@ void HMI_Process()
                             case 0x1E:      //智能模式编辑
                                 Pause_Flag=0;   //清暂停状态
                                 gInfo.ModuleInfo.New4in1.EditMode=1;
+                                gInfo.ModuleInfo.New4in1.LastSelGroup=gInfo.ModuleInfo.New4in1.LightGroup;
+                                gInfo.ModuleInfo.New4in1.LightGroup=1;
                                 HMI_Goto_LocPage(47);
                                 HMI_New_LoadLightStep();
                                 HMI_New_ShowEditMode();
@@ -1413,11 +1432,11 @@ void HMI_Scene_Recovery()
                 case 2:
                 case 3:
                 case 4:
-                    HMI_Goto_LocPage(40 + gInfo.ModuleInfo.New4in1.LightGroup + gConfig.LANG*100);
+                    HMI_Goto_LocPage(40 + gInfo.ModuleInfo.New4in1.LightGroup);
                     HMI_Cut_PicEx(0x71,61,0,11+i,399,96+i,0,0);     //左上角名称
                     break;
                 default:
-                    HMI_Goto_LocPage(40 + gConfig.LANG*100);
+                    HMI_Goto_LocPage(40);
                     HMI_Cut_PicEx(0x71,61,0,11+i,399,96+i,0,0);     //左上角名称
                     break;
             }

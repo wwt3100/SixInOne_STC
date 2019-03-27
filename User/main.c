@@ -233,7 +233,7 @@ void LOG_E(void*str,...)
 
 void Save_Config()
 {
-    uint8_t c;
+    //uint8_t c;
     Sector_Erase(0);    //必须擦扇区,否则写不进
     
     IAP_CONTR = 0x83;         //打开 IAP 功能, 设置Flash 操作等待时间
@@ -243,8 +243,8 @@ void Save_Config()
     EA=0;
     for(IAP_ADDRL=0;IAP_ADDRL<sizeof(_Golbal_Config);IAP_ADDRL++)
     {
-        c=*(((char *)&gConfig)+IAP_ADDRL);
-        IAP_DATA = c ;                  //要编程的数据先送进IAP_DATA 寄存器
+        //c=*(((char *)&gConfig)+IAP_ADDRL);
+        IAP_DATA = *(((char *)&gConfig)+IAP_ADDRL) ;                  //要编程的数据先送进IAP_DATA 寄存器
         IAP_TRIG = 0x5A;   //先送 5Ah,再送A5h 到ISP/IAP 触发寄存器,每次都需如此
         IAP_TRIG = 0xA5;   //送完A5h 后，ISP/IAP 命令立即被触发起动
         _nop_();
