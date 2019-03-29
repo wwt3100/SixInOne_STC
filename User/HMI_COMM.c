@@ -1353,7 +1353,7 @@ void HMI_New_Add()
         case eHMICode_PowerLevel1:
             if (gInfo.ModuleInfo.New4in1.PowerLevel[0]>=gInfo.ModuleInfo.New4in1.PowerMax[0])
             {
-                gInfo.ModuleInfo.New4in1.PowerLevel[0]=gInfo.ModuleInfo.New4in1.PowerMix[0];
+                gInfo.ModuleInfo.New4in1.PowerLevel[0]=gInfo.ModuleInfo.New4in1.PowerMin[0];
             }
             else
             {
@@ -1363,7 +1363,7 @@ void HMI_New_Add()
         case eHMICode_PowerLevel2:
             if (gInfo.ModuleInfo.New4in1.PowerLevel[1]>=gInfo.ModuleInfo.New4in1.PowerMax[1])
             {
-                gInfo.ModuleInfo.New4in1.PowerLevel[1]=gInfo.ModuleInfo.New4in1.PowerMix[1];
+                gInfo.ModuleInfo.New4in1.PowerLevel[1]=gInfo.ModuleInfo.New4in1.PowerMin[1];
             }
             else
             {
@@ -1373,7 +1373,7 @@ void HMI_New_Add()
         case eHMICode_PowerLevel3:
             if (gInfo.ModuleInfo.New4in1.PowerLevel[2]>=gInfo.ModuleInfo.New4in1.PowerMax[2])
             {
-                gInfo.ModuleInfo.New4in1.PowerLevel[2]=gInfo.ModuleInfo.New4in1.PowerMix[2];
+                gInfo.ModuleInfo.New4in1.PowerLevel[2]=gInfo.ModuleInfo.New4in1.PowerMin[2];
             }
             else
             {
@@ -1383,7 +1383,7 @@ void HMI_New_Add()
         case eHMICode_PowerLevel4:
             if (gInfo.ModuleInfo.New4in1.PowerLevel[3]>=gInfo.ModuleInfo.New4in1.PowerMax[3])
             {
-                gInfo.ModuleInfo.New4in1.PowerLevel[3]=gInfo.ModuleInfo.New4in1.PowerMix[3];
+                gInfo.ModuleInfo.New4in1.PowerLevel[3]=gInfo.ModuleInfo.New4in1.PowerMin[3];
             }
             else
             {
@@ -1450,7 +1450,7 @@ void HMI_New_Dec()
     switch (gInfo.ModuleInfo.New4in1.ConfigSel)
     {
         case eHMICode_PowerLevel1:
-            if (gInfo.ModuleInfo.New4in1.PowerLevel[0]<=gInfo.ModuleInfo.New4in1.PowerMix[0])
+            if (gInfo.ModuleInfo.New4in1.PowerLevel[0]<=gInfo.ModuleInfo.New4in1.PowerMin[0])
             {
                 gInfo.ModuleInfo.New4in1.PowerLevel[0]=gInfo.ModuleInfo.New4in1.PowerMax[0];
             }
@@ -1460,7 +1460,7 @@ void HMI_New_Dec()
             }
             break;
         case eHMICode_PowerLevel2:
-            if (gInfo.ModuleInfo.New4in1.PowerLevel[1]<=gInfo.ModuleInfo.New4in1.PowerMix[1])
+            if (gInfo.ModuleInfo.New4in1.PowerLevel[1]<=gInfo.ModuleInfo.New4in1.PowerMin[1])
             {
                 gInfo.ModuleInfo.New4in1.PowerLevel[1]=gInfo.ModuleInfo.New4in1.PowerMax[1];
             }
@@ -1470,7 +1470,7 @@ void HMI_New_Dec()
             }
             break;
         case eHMICode_PowerLevel3:
-            if (gInfo.ModuleInfo.New4in1.PowerLevel[2]<=gInfo.ModuleInfo.New4in1.PowerMix[2])
+            if (gInfo.ModuleInfo.New4in1.PowerLevel[2]<=gInfo.ModuleInfo.New4in1.PowerMin[2])
             {
                 gInfo.ModuleInfo.New4in1.PowerLevel[2]=gInfo.ModuleInfo.New4in1.PowerMax[2];
             }
@@ -1480,7 +1480,7 @@ void HMI_New_Dec()
             }
             break;
         case eHMICode_PowerLevel4:
-            if (gInfo.ModuleInfo.New4in1.PowerLevel[3]<=gInfo.ModuleInfo.New4in1.PowerMix[3])
+            if (gInfo.ModuleInfo.New4in1.PowerLevel[3]<=gInfo.ModuleInfo.New4in1.PowerMin[3])
             {
                 gInfo.ModuleInfo.New4in1.PowerLevel[3]=gInfo.ModuleInfo.New4in1.PowerMax[3];
             }
@@ -2020,9 +2020,67 @@ void HMI_New_LoadLightStep() //加载工步信息
 
 void HMI_New_SaveLightStep()        //保存设置的工步
 {
+    uint8_t i;
     uint8_t light_group=gInfo.ModuleInfo.New4in1.LightGroup;
-    //TODO:能量时间更新
-    
+    uint8_t light_stepnum=gInfo.ModuleInfo.New4in1.TempStep.StepNum;
+    bit     light_mode=gInfo.ModuleInfo.New4in1.TempStep.StepMode;
+    uint8_t light_parallel_time=gInfo.ModuleInfo.New4in1.WorkTime[0];
+    for (i = 0; i < light_stepnum; i++)     //能量时间更新
+    {
+        switch (gInfo.ModuleInfo.New4in1.TempStep.Data[i*3])
+        {
+            case 0x01:
+                gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1]=gInfo.ModuleInfo.New4in1.PowerLevel[0];
+                if (light_mode==STEP_MODE_Serial)
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2]=gInfo.ModuleInfo.New4in1.WorkTime[1];
+                }
+                else
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2]=light_parallel_time;
+                }
+                break;
+            case 0x02:
+                gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1]=gInfo.ModuleInfo.New4in1.PowerLevel[1];
+                if (light_mode==STEP_MODE_Serial)
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2]=gInfo.ModuleInfo.New4in1.WorkTime[2];
+                }
+                else
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2]=light_parallel_time;
+                }
+                break;
+            case 0x04:
+                gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1]=gInfo.ModuleInfo.New4in1.PowerLevel[2];
+                if (light_mode==STEP_MODE_Serial)
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2]=gInfo.ModuleInfo.New4in1.WorkTime[3];
+                }
+                else
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2]=light_parallel_time;
+                }
+                break;
+            case 0x08:
+                gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1]=gInfo.ModuleInfo.New4in1.PowerLevel[3];
+                if (light_mode==STEP_MODE_Serial)
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2]=gInfo.ModuleInfo.New4in1.WorkTime[4];
+                }
+                else
+                {
+                    gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+2]=light_parallel_time;
+                }
+                break;
+            default:
+                break;
+        }
+        if (gCom.ModuleType==M_Type_Wira && gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1]==100)
+        {
+            gInfo.ModuleInfo.New4in1.TempStep.Data[i*3+1]=99;
+        }
+    }
     memcpy(&gInfo.ModuleInfo.New4in1.LightStep[light_group],&gInfo.ModuleInfo.New4in1.TempStep,13);
 }
 

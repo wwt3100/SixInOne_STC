@@ -314,31 +314,87 @@ void WP_Start()
             break;
         case eScene_Module_Wira:
         {
-            LL_Module_Send("\x39\x31\xff\x0",4);    //先关闭
-            if (gInfo.ModuleInfo.New4in1.ConfigSelLight&0x01)
+            uint8_t light_group=gInfo.ModuleInfo.New4in1.LightGroup;
+            bit step_mode=gInfo.ModuleInfo.New4in1.LightStep[light_group].StepMode;
+            uint8_t xdata cmd[]={"\x39\x31\x2\x5"};
+            if (step_mode==STEP_MODE_Serial)   //顺序模式
             {
-                uint8_t xdata m_cmd[]={"\x39\x31\x1\x5"};
-                m_cmd[3]=gInfo.ModuleInfo.New4in1.PowerLevel[0];
-                LL_Module_Send(m_cmd,4);     //打开
+                uint8_t loc_step=gInfo.ModuleInfo.New4in1.LocStep;
+                uint8_t light=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[loc_step*3];
+                uint8_t power=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[loc_step*3+1];   
+                if (power==100)
+                {
+                    power=99;
+                }
+                //TODO:根据PowerMaxMin计算0-100%的能量再发送
+                LL_Module_Send("\x39\x31\xff\x0",4);    //先关闭
+                if (light&0x01)
+                {
+                    cmd[2]=1;
+                    cmd[3]=power;
+                    LL_Module_Send(cmd,4);     //再打开
+                }
+                else if (light&0x02)
+                {
+                    cmd[2]=2;
+                    cmd[3]=power;
+                    LL_Module_Send(cmd,4);     //再打开
+                }
+                else if (light&0x04)
+                {
+                    cmd[2]=3;
+                    cmd[3]=power;
+                    LL_Module_Send(cmd,4);  
+                }
+                else if (light&0x08)
+                {
+                    cmd[2]=4;
+                    cmd[3]=power;
+                    LL_Module_Send(cmd,4);  
+                }
             }
-            if (gInfo.ModuleInfo.New4in1.ConfigSelLight&0x02)
+            else    //同步模式
             {
-                uint8_t xdata m_cmd[]={"\x39\x31\x2\x5"};
-                m_cmd[3]=gInfo.ModuleInfo.New4in1.PowerLevel[0];
-                LL_Module_Send(m_cmd,4);     //打开
+                uint8_t i;
+                uint8_t light_num=gInfo.ModuleInfo.New4in1.LightStep[light_group].StepNum;
+                LL_Module_Send("\x39\x31\xff\x0",4);    //先关闭
+                for (i = 0; i < light_num; i++)
+                {
+                    uint8_t light=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[i*3];
+                    uint8_t power=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[i*3+1];   
+                    //TODO:根据PowerMaxMin计算0-100%的能量再发送
+                    if (power==100)
+                    {
+                        power=99;
+                    }
+                    if (light&0x01)
+                    {
+                        cmd[2]=1;
+                        cmd[3]=power;
+                        LL_Module_Send(cmd,4);     //再打开
+                    }
+                    else if (light&0x02)
+                    {
+                        cmd[2]=2;
+                        cmd[3]=power;
+                        LL_Module_Send(cmd,4);     //再打开
+                    }
+                    else if (light&0x04)
+                    {
+                        cmd[2]=3;
+                        cmd[3]=power;
+                        LL_Module_Send(cmd,4);  
+                    }
+                    else if (light&0x08)
+                    {
+                        cmd[2]=4;
+                        cmd[3]=power;
+                        LL_Module_Send(cmd,4);  
+                    }
+                }
             }
-            if (gInfo.ModuleInfo.New4in1.ConfigSelLight&0x04)
-            {
-                uint8_t xdata m_cmd[]={"\x39\x31\x3\x5"};
-                m_cmd[3]=gInfo.ModuleInfo.New4in1.PowerLevel[0];
-                LL_Module_Send(m_cmd,4);     //打开
-            }
-            if (gInfo.ModuleInfo.New4in1.ConfigSelLight&0x08)
-            {
-                uint8_t xdata m_cmd[]={"\x39\x31\x4\x5"};
-                m_cmd[3]=gInfo.ModuleInfo.New4in1.PowerLevel[0];
-                LL_Module_Send(m_cmd,4);     //打开
-            }
+            
+            
             PowerCtr_Main=POWER_ON;
             PowerCtr_Light1=POWER_ON; 
             Delay10ms();
@@ -347,47 +403,45 @@ void WP_Start()
             break;
         case eScene_Module_4in1:
         {
-            
             uint8_t light_group=gInfo.ModuleInfo.New4in1.LightGroup;
             bit step_mode=gInfo.ModuleInfo.New4in1.LightStep[light_group].StepMode;
+            uint8_t xdata cmd[]={"\x39\x31\xff\x1\x5"};
             if (step_mode==STEP_MODE_Serial)   //顺序模式
             {
                 uint8_t loc_step=gInfo.ModuleInfo.New4in1.LocStep;
                 uint8_t light=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[loc_step*3];
                 uint8_t power=gInfo.ModuleInfo.New4in1.LightStep[light_group].Data[loc_step*3+1];   
                 //TODO:根据PowerMaxMin计算0-100%的能量再发送
-                uint8_t xdata m_cmd[]={"\x39\x31\xff\x1\x5"};
                 LL_Module_Send("\x39\x31\xff\xff\x0",5);    //先关闭
                 if (light&0x01)
                 {
-                    m_cmd[3]=1;
-                    m_cmd[4]=power;
-                    LL_Module_Send(m_cmd,5);     //再打开
+                    cmd[3]=1;
+                    cmd[4]=power;
+                    LL_Module_Send(cmd,5);     //再打开
                 }
                 else if (light&0x02)
                 {
-                    m_cmd[3]=2;
-                    m_cmd[4]=power;
-                    LL_Module_Send(m_cmd,5);     //再打开
+                    cmd[3]=2;
+                    cmd[4]=power;
+                    LL_Module_Send(cmd,5);     //再打开
                 }
                 else if (light&0x04)
                 {
-                    m_cmd[3]=3;
-                    m_cmd[4]=power;
-                    LL_Module_Send(m_cmd,5);     //再打开
+                    cmd[3]=3;
+                    cmd[4]=power;
+                    LL_Module_Send(cmd,5);  
                 }
                 else if (light&0x08)
                 {
-                    m_cmd[3]=4;
-                    m_cmd[4]=power;
-                    LL_Module_Send(m_cmd,5);     //再打开
+                    cmd[3]=4;
+                    cmd[4]=power;
+                    LL_Module_Send(cmd,5);  
                 }
             }
             else    //同步模式
             {
                 uint8_t i;
                 uint8_t light_num=gInfo.ModuleInfo.New4in1.LightStep[light_group].StepNum;
-                uint8_t xdata m_cmd[]={"\x39\x31\xff\x1\x5"};
                 LL_Module_Send("\x39\x31\xff\xff\x0",5);    //先关闭
                 for (i = 0; i < light_num; i++)
                 {
@@ -397,27 +451,27 @@ void WP_Start()
                     
                     if (light&0x01)
                     {
-                        m_cmd[3]=1;
-                        m_cmd[4]=power;
-                        LL_Module_Send(m_cmd,5);     //再打开
+                        cmd[3]=1;
+                        cmd[4]=power;
+                        LL_Module_Send(cmd,5);     //再打开
                     }
                     else if (light&0x02)
                     {
-                        m_cmd[3]=2;
-                        m_cmd[4]=power;
-                        LL_Module_Send(m_cmd,5);     //再打开
+                        cmd[3]=2;
+                        cmd[4]=power;
+                        LL_Module_Send(cmd,5);     //再打开
                     }
                     else if (light&0x04)
                     {
-                        m_cmd[3]=3;
-                        m_cmd[4]=power;
-                        LL_Module_Send(m_cmd,5);     //再打开
+                        cmd[3]=3;
+                        cmd[4]=power;
+                        LL_Module_Send(cmd,5);  
                     }
                     else if (light&0x08)
                     {
-                        m_cmd[3]=4;
-                        m_cmd[4]=power;
-                        LL_Module_Send(m_cmd,5);     //再打开
+                        cmd[3]=4;
+                        cmd[4]=power;
+                        LL_Module_Send(cmd,5);  
                     }
                 }
             }

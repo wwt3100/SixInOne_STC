@@ -70,7 +70,7 @@
 #define STEP_MODE_Parallel      (1)     /*同步*/
 
 
-#if 1
+#if 0
 #define MIN2S 
 #else
 #define MIN2S *60
@@ -134,7 +134,7 @@ typedef struct Golbal_Info{
                                                  //设置的工步先保存到TempStep中,当保存或启动时再存入LightStep再保存
 //            uint8_t Str_LightWavelength[4][7]; //4种光的波长 协议为2byte,转字符串为了加速显示//暂未用
             uint8_t PowerMax[4];        //最大能量
-            uint8_t PowerMix[4];        //最小能量
+            uint8_t PowerMin[4];        //最小能量
             uint8_t PowerLevel[4];      //设置用的能量
             uint8_t WorkTime[5];        //设置用的时间,单位min             [0]同步模式时间 [1-4]顺序模式4光
             uint16_t RemainTime;     //剩余时间,单位s

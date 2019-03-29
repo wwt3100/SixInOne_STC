@@ -114,12 +114,58 @@ void Module_COMM()
                                 gInfo.ModuleInfo.New4in1.PowerMax[1]=100;
                                 gInfo.ModuleInfo.New4in1.PowerMax[2]=100;
                                 gInfo.ModuleInfo.New4in1.PowerMax[3]=100;
+                                gInfo.ModuleInfo.New4in1.PowerMin[0]=1;
+                                gInfo.ModuleInfo.New4in1.PowerMin[1]=1;
+                                gInfo.ModuleInfo.New4in1.PowerMin[2]=1;
+                                gInfo.ModuleInfo.New4in1.PowerMin[3]=1;
                                 gInfo.ModuleInfo.New4in1.WorkTime[0]=30;
                                 gInfo.ModuleInfo.New4in1.WorkTime[1]=30;
                                 gInfo.ModuleInfo.New4in1.WorkTime[2]=30;
                                 gInfo.ModuleInfo.New4in1.WorkTime[3]=30;
                                 gInfo.ModuleInfo.New4in1.WorkTime[4]=30;
                                 gInfo.ModuleInfo.New4in1.LightGroup=0xFF;
+
+                                gInfo.ModuleInfo.New4in1.LightStep[1].StepNum=1;        //顺序模式1 30min
+                                gInfo.ModuleInfo.New4in1.LightStep[1].Data[0]=0x02;
+                                gInfo.ModuleInfo.New4in1.LightStep[1].Data[1]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[1].Data[2]=30;
+
+                                gInfo.ModuleInfo.New4in1.LightStep[2].StepMode=STEP_MODE_Parallel;
+                                gInfo.ModuleInfo.New4in1.LightStep[2].StepNum=2;        //顺序模式1+2 30min
+                                gInfo.ModuleInfo.New4in1.LightStep[2].Data[0]=0x01;
+                                gInfo.ModuleInfo.New4in1.LightStep[2].Data[1]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[2].Data[2]=30;
+                                gInfo.ModuleInfo.New4in1.LightStep[2].Data[3]=0x02;
+                                gInfo.ModuleInfo.New4in1.LightStep[2].Data[4]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[2].Data[5]=30;
+
+                                gInfo.ModuleInfo.New4in1.LightStep[3].StepMode=STEP_MODE_Parallel;
+                                gInfo.ModuleInfo.New4in1.LightStep[3].StepNum=3;        //同步 1+2+3 30min
+                                gInfo.ModuleInfo.New4in1.LightStep[3].Data[0]=0x02;
+                                gInfo.ModuleInfo.New4in1.LightStep[3].Data[1]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[3].Data[2]=30;
+                                gInfo.ModuleInfo.New4in1.LightStep[3].Data[3]=0x04;
+                                gInfo.ModuleInfo.New4in1.LightStep[3].Data[4]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[3].Data[5]=30;
+                                gInfo.ModuleInfo.New4in1.LightStep[3].Data[6]=0x08;
+                                gInfo.ModuleInfo.New4in1.LightStep[3].Data[7]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[3].Data[8]=30;
+
+                                gInfo.ModuleInfo.New4in1.LightStep[4].StepMode=STEP_MODE_Parallel;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].StepNum=4;        //顺序模式2 20min
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[0]=0x01;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[1]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[2]=30;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[3]=0x02;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[4]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[5]=30;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[6]=0x04;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[7]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[8]=30;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[9]=0x08;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[10]=100;
+                                gInfo.ModuleInfo.New4in1.LightStep[4].Data[11]=30;
+                                
                                 break;
                             case M_Type_4in1:
                                 gCom.WorkStat=eWS_Standby;
@@ -132,6 +178,10 @@ void Module_COMM()
                                 gInfo.ModuleInfo.New4in1.PowerMax[1]=100;
                                 gInfo.ModuleInfo.New4in1.PowerMax[2]=100;
                                 gInfo.ModuleInfo.New4in1.PowerMax[3]=100;
+                                gInfo.ModuleInfo.New4in1.PowerMin[0]=1;
+                                gInfo.ModuleInfo.New4in1.PowerMin[1]=1;
+                                gInfo.ModuleInfo.New4in1.PowerMin[2]=1;
+                                gInfo.ModuleInfo.New4in1.PowerMin[3]=1;
                                 gInfo.ModuleInfo.New4in1.WorkTime[0]=10;
                                 gInfo.ModuleInfo.New4in1.WorkTime[1]=10;
                                 gInfo.ModuleInfo.New4in1.WorkTime[2]=10;
